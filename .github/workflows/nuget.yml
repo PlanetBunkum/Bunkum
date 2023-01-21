@@ -3,9 +3,8 @@ name: Upload package to NuGet
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
   build:
