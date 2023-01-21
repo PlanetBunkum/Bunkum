@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Refresh.Analyzers", "Refresh.Analyzers\Refresh.Analyzers.csproj", "{8B15D529-F17F-4E91-A80C-FF55ED414732}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bunkum.Analyzers", "Bunkum.Analyzers\Bunkum.Analyzers.csproj", "{8B15D529-F17F-4E91-A80C-FF55ED414732}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Refresh.HttpServer", "Refresh.HttpServer\Refresh.HttpServer.csproj", "{0F68F01A-DF71-4E6B-9EAE-5AEBE9863E2A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bunkum.HttpServer", "Bunkum.HttpServer\Bunkum.HttpServer.csproj", "{0F68F01A-DF71-4E6B-9EAE-5AEBE9863E2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefreshTests.HttpServer", "RefreshTests.HttpServer\RefreshTests.HttpServer.csproj", "{E06CABEF-AC5F-43A5-93EE-C8525630D596}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BunkumTests.HttpServer", "BunkumTests.HttpServer\BunkumTests.HttpServer.csproj", "{E06CABEF-AC5F-43A5-93EE-C8525630D596}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefreshTests.HttpServerManual", "RefreshTests.HttpServerManual\RefreshTests.HttpServerManual.csproj", "{B3667C3A-FB7A-43A2-A447-1B6F27BCC8C0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BunkumTests.HttpServerManual", "BunkumTests.HttpServerManual\BunkumTests.HttpServerManual.csproj", "{B3667C3A-FB7A-43A2-A447-1B6F27BCC8C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
