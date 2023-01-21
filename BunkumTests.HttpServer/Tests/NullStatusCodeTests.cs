@@ -9,7 +9,7 @@ public class NullStatusCodeTests : ServerDependentTest
     [Test]
     public async Task ReturnsCorrectResponseWhenNull()
     {
-        (RefreshHttpServer server, HttpClient client) = this.Setup();
+        (BunkumHttpServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<NullEndpoints>();
 
         HttpResponseMessage resp = await client.GetAsync("/null?null=true");
@@ -19,7 +19,7 @@ public class NullStatusCodeTests : ServerDependentTest
     [Test]
     public async Task ReturnsCorrectResponseWhenNotNull()
     {
-        (RefreshHttpServer server, HttpClient client) = this.Setup();
+        (BunkumHttpServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<NullEndpoints>();
 
         HttpResponseMessage resp = await client.GetAsync("/null?null=false");

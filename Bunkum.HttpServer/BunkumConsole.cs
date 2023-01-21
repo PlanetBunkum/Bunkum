@@ -8,7 +8,7 @@ namespace Bunkum.HttpServer;
 /// <summary>
 /// Helper class for dealing with the console.
 /// </summary>
-public static partial class RefreshConsole
+public static partial class BunkumConsole
 {
     [LibraryImport("kernel32.dll", EntryPoint = "AllocConsole")]
     private static partial int AllocConsole();
@@ -63,7 +63,7 @@ public static partial class RefreshConsole
             // When exiting from an exception, the default Refresh behavior on Windows is to pause before exiting if
             // the console session is going to be destroyed. Setting this to true will override this behavior.
             // Turn this on if you are hosting from inside a utility like screen/tmux and are having issues.
-            overridePause = Convert.ToBoolean(Environment.GetEnvironmentVariable("REFRESH_OVERRIDE_PAUSE_ON_INTERRUPTION"));
+            overridePause = Convert.ToBoolean(Environment.GetEnvironmentVariable("BUNKUM_OVERRIDE_PAUSE_ON_INTERRUPTION"));
         }
         catch
         {

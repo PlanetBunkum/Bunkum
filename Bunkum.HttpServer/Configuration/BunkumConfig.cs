@@ -1,6 +1,6 @@
 namespace Bunkum.HttpServer.Configuration;
 
-public class RefreshConfig : Config
+public class BunkumConfig : Config
 {
     public override int CurrentConfigVersion => 1;
     public override int Version { get; set; }

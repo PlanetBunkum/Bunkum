@@ -10,7 +10,7 @@ public class AuthenticationTests : ServerDependentTest
     [Test]
     public async Task WorksWhenAuthenticated()
     {
-        (RefreshHttpServer server, HttpClient client) = this.Setup();
+        (BunkumHttpServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<AuthenticationEndpoints>();
         
         HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/auth"));
@@ -25,7 +25,7 @@ public class AuthenticationTests : ServerDependentTest
     [Test]
     public async Task FailsWhenNotAuthenticated()
     {
-        (RefreshHttpServer server, HttpClient client) = this.Setup();
+        (BunkumHttpServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<AuthenticationEndpoints>();
         
         client.DefaultRequestHeaders.Add("dummy-skip-auth", "true");
@@ -38,7 +38,7 @@ public class AuthenticationTests : ServerDependentTest
     [Timeout(2000)] // ms
     public async Task CanSwitchAuthenticationProviders()
     {
-        (RefreshHttpServer? server, HttpClient? client) = this.Setup(false);
+        (BunkumHttpServer? server, HttpClient? client) = this.Setup(false);
         // Pass test when authentication provider is called
         server.UseAuthenticationProvider(new CallbackAuthenticationProvider(Assert.Pass));
         server.AddEndpointGroup<AuthenticationEndpoints>();

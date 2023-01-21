@@ -21,7 +21,7 @@ public class ServerDependentTest
     });
 
     [Pure]
-    private protected (RefreshHttpServer, HttpClient) Setup(bool start = true)
+    private protected (BunkumHttpServer, HttpClient) Setup(bool start = true)
     {
         Uri uri;
         
@@ -40,7 +40,7 @@ public class ServerDependentTest
             _lowestPort++;
         }
 
-        RefreshHttpServer server = new(uri.ToString());
+        BunkumHttpServer server = new(uri.ToString());
         if(start) server.Start();
 
         HttpClient client = new();

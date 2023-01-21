@@ -7,6 +7,6 @@ namespace Bunkum.HttpServer;
 public struct RequestContext
 {
     public HttpListenerRequest Request;
-    public LoggerContainer<RefreshContext> Logger;
+    public LoggerContainer<BunkumContext> Logger;
     public IDataStore DataStore;
 }

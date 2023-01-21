@@ -3,9 +3,9 @@ using System.Xml;
 
 namespace Bunkum.HttpServer.Serialization;
 
-public class RefreshXmlTextWriter : XmlTextWriter
+public class BunkumXmlTextWriter : XmlTextWriter
 {
-    public RefreshXmlTextWriter(Stream stream) : base(stream, Encoding.UTF8)
+    public BunkumXmlTextWriter(Stream stream) : base(stream, Encoding.UTF8)
     { }
 
     public override void WriteEndElement()

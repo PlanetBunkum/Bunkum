@@ -9,7 +9,7 @@ public class EndpointTests : ServerDependentTest
     [Test]
     public void ReturnsEndpoint()
     {
-        (RefreshHttpServer server, HttpClient client) = this.Setup();
+        (BunkumHttpServer server, HttpClient client) = this.Setup();
         
         HttpResponseMessage msg = client.Send(new HttpRequestMessage(HttpMethod.Get, "/"));
         Assert.That(msg.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
@@ -27,7 +27,7 @@ public class EndpointTests : ServerDependentTest
     [Test]
     public void ReturnsNotFound()
     {
-        (RefreshHttpServer? _, HttpClient? client) = this.Setup();
+        (BunkumHttpServer? _, HttpClient? client) = this.Setup();
         
         HttpResponseMessage msg = client.Send(new HttpRequestMessage(HttpMethod.Get, "/"));
         Assert.Multiple(async () =>
@@ -40,7 +40,7 @@ public class EndpointTests : ServerDependentTest
     [Test]
     public void MultipleEndpointAttributesWork()
     {
-        (RefreshHttpServer server, HttpClient client) = this.Setup();
+        (BunkumHttpServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<MultipleEndpoints>();
         
         HttpResponseMessage msg = client.Send(new HttpRequestMessage(HttpMethod.Get, "/a"));

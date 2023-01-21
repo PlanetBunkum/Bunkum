@@ -1,6 +1,6 @@
 namespace Bunkum.HttpServer;
 
-public enum RefreshContext
+public enum BunkumContext
 {
     Startup,
     Request,

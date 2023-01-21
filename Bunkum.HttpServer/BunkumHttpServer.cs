@@ -19,11 +19,11 @@ using NotEnoughLogs.Loggers;
 
 namespace Bunkum.HttpServer;
 
-public class RefreshHttpServer
+public class BunkumHttpServer
 {
     private readonly HttpListener _listener;
     private readonly List<EndpointGroup> _endpoints = new();
-    private readonly LoggerContainer<RefreshContext> _logger;
+    private readonly LoggerContainer<BunkumContext> _logger;
 
     private IAuthenticationProvider<IUser> _authenticationProvider = new DummyAuthenticationProvider();
     private IDatabaseProvider<IDatabaseContext> _databaseProvider = new DummyDatabaseProvider();
@@ -31,26 +31,26 @@ public class RefreshHttpServer
     
     private Config? _config;
     private Type? _configType;
-    private RefreshConfig _refreshConfig;
+    private BunkumConfig _bunkumConfig;
 
     public EventHandler<HttpListenerContext>? NotFound;
 
     public bool AssumeAuthenticationRequired = false;
 
-    public RefreshHttpServer(params string[] listenEndpoints)
+    public BunkumHttpServer(params string[] listenEndpoints)
     {
-        this._logger = new LoggerContainer<RefreshContext>();
+        this._logger = new LoggerContainer<BunkumContext>();
         this._logger.RegisterLogger(new ConsoleLogger());
         
         this._listener = new HttpListener();
         this._listener.IgnoreWriteExceptions = true;
         foreach (string endpoint in listenEndpoints)
         {
-            this._logger.LogInfo(RefreshContext.Startup, "Listening at URI " + endpoint);
+            this._logger.LogInfo(BunkumContext.Startup, "Listening at URI " + endpoint);
             this._listener.Prefixes.Add(endpoint);
         }
 
-        this._refreshConfig = Config.LoadFromFile<RefreshConfig>("bunkum.json", this._logger);
+        this._bunkumConfig = Config.LoadFromFile<BunkumConfig>("bunkum.json", this._logger);
     }
 
     public void Start()
@@ -70,33 +70,33 @@ public class RefreshHttpServer
         Stopwatch stopwatch = new();
         stopwatch.Start();
         
-        this._logger.LogInfo(RefreshContext.Startup, "Starting up...");
+        this._logger.LogInfo(BunkumContext.Startup, "Starting up...");
         if (this._authenticationProvider is DummyAuthenticationProvider)
         {
-            this._logger.LogWarning(RefreshContext.Startup, "The server was started with a dummy authentication provider. " +
+            this._logger.LogWarning(BunkumContext.Startup, "The server was started with a dummy authentication provider. " +
                                                             "If your endpoints rely on authentication, users will always have full access.");
         }
         
-        this._logger.LogDebug(RefreshContext.Startup, "Initializing database provider...");
+        this._logger.LogDebug(BunkumContext.Startup, "Initializing database provider...");
         this._databaseProvider.Initialize();
         
-        this._logger.LogDebug(RefreshContext.Startup, "Starting listener...");
+        this._logger.LogDebug(BunkumContext.Startup, "Starting listener...");
         try
         {
             this._listener.Start();
         }
         catch(Exception e)
         {
-            this._logger.LogCritical(RefreshContext.Startup, $"An exception occured while trying to start the listener: \n{e}");
-            this._logger.LogCritical(RefreshContext.Startup, "Visit this page to view troubleshooting steps: " +
+            this._logger.LogCritical(BunkumContext.Startup, $"An exception occured while trying to start the listener: \n{e}");
+            this._logger.LogCritical(BunkumContext.Startup, "Visit this page to view troubleshooting steps: " +
                                                              "https://littlebigrefresh.github.io/Docs/refresh-troubleshooting");
             
             this._logger.Dispose();
-            RefreshConsole.WaitForInputAndExit(1);
+            BunkumConsole.WaitForInputAndExit(1);
         }
 
         stopwatch.Stop();
-        this._logger.LogInfo(RefreshContext.Startup, $"Ready to go! Startup tasks took {stopwatch.ElapsedMilliseconds}ms.");
+        this._logger.LogInfo(BunkumContext.Startup, $"Ready to go! Startup tasks took {stopwatch.ElapsedMilliseconds}ms.");
     }
 
     private async Task Block()
@@ -138,7 +138,7 @@ public class RefreshHttpServer
                         continue;
                     }
                     
-                    this._logger.LogTrace(RefreshContext.Request, $"Handling request with {group.GetType().Name}.{method.Name}");
+                    this._logger.LogTrace(BunkumContext.Request, $"Handling request with {group.GetType().Name}.{method.Name}");
 
                     IUser? user = null;
                     if (method.GetCustomAttribute<AuthenticationAttribute>()?.Required ?? this.AssumeAuthenticationRequired)
@@ -192,7 +192,7 @@ public class RefreshHttpServer
                                 }
                                 catch (Exception e)
                                 {
-                                    this._logger.LogError(RefreshContext.UserContent, $"Failed to parse object data: {e}\n\nXML: {body}");
+                                    this._logger.LogError(BunkumContext.UserContent, $"Failed to parse object data: {e}\n\nXML: {body}");
                                     return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
                                 }
                             }
@@ -220,7 +220,7 @@ public class RefreshHttpServer
                             
                             invokeList.Add(this._config);
                         }
-                        else if (paramType.IsAssignableTo(typeof(RefreshConfig)))
+                        else if (paramType.IsAssignableTo(typeof(BunkumConfig)))
                         {
                             invokeList.Add(this._config);
                         }
@@ -257,7 +257,7 @@ public class RefreshHttpServer
 
         try
         {
-            context.Response.AddHeader("Server", "Refresh");
+            context.Response.AddHeader("Server", "Bunkum");
 
             string path = context.Request.Url!.AbsolutePath;
 
@@ -304,7 +304,7 @@ public class RefreshHttpServer
             {
                 requestStopwatch.Stop();
 
-                this._logger.LogInfo(RefreshContext.Request, $"Served request to {context.Request.RemoteEndPoint}: " +
+                this._logger.LogInfo(BunkumContext.Request, $"Served request to {context.Request.RemoteEndPoint}: " +
                                                           $"{context.Response.StatusCode} on " +
                                                           $"{context.Request.HttpMethod} '{context.Request.Url?.PathAndQuery}' " +
                                                           $"({requestStopwatch.ElapsedMilliseconds}ms)");

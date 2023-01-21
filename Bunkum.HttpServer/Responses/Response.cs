@@ -50,7 +50,7 @@ public struct Response
                 throw new InvalidOperationException();
             case ContentType.Xml:
             {
-                using RefreshXmlTextWriter writer = new(stream);
+                using BunkumXmlTextWriter writer = new(stream);
 
                 XmlSerializer serializer = new(data.GetType());
                 serializer.Serialize(writer, data, Namespaces);

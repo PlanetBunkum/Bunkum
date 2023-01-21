@@ -56,7 +56,7 @@ public abstract class Config
         File.WriteAllText(this._filename, json);
     }
 
-    internal static TConfig LoadFromFile<TConfig>(string filename, LoggerContainer<RefreshContext>? logger = null) where TConfig : Config, new()
+    internal static TConfig LoadFromFile<TConfig>(string filename, LoggerContainer<BunkumContext>? logger = null) where TConfig : Config, new()
     {
         TConfig? config;
         string? file = null;
@@ -68,7 +68,7 @@ public abstract class Config
         }
         else
         {
-            logger?.LogInfo(RefreshContext.Configuration, $"A new {typeof(TConfig).Name} is being created at {Path.GetFullPath(filename)}.");
+            logger?.LogInfo(BunkumContext.Configuration, $"A new {typeof(TConfig).Name} is being created at {Path.GetFullPath(filename)}.");
             config = new TConfig();
         }
         
