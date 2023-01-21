@@ -21,9 +21,9 @@ jobs:
       - name: Set VERSION variable from tag
         run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
       - name: Build
-        run: dotnet build -c Release --no-restore /p:Version=${VERSION}
+        run: dotnet build -c Release --no-restore /p:Version=${VERSION} /p:PackageVersion=${VERSION}
       - name: Test
-        run: dotnet test -c Release --no-restore --no-build /p:Version=${VERSION}
+        run: dotnet test -c Release --no-restore --no-build
       - name: Upload Package
         run: dotnet nuget push Bunkum.HttpServer/bin/Release/net7.0/Bunkum.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json
         env:

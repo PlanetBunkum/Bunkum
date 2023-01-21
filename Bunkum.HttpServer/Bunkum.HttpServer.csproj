@@ -16,13 +16,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>LittleBigRefresh</Authors>
     <Title>Bunkum</Title>
     <PackageId>Bunkum</PackageId>
     <Description>An open-source HTTP server for custom game servers built with flexibility in mind.</Description>
-    <Version>1.0.0</Version>
-    <PackageVersion>1.0.0</PackageVersion>
     <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum</PackageProjectUrl>
