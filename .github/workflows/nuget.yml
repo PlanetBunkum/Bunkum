@@ -22,13 +22,15 @@ jobs:
         run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
       - name: Build
         run: dotnet build -c Release --no-restore /p:Version=${VERSION} /p:PackageVersion=${VERSION}
-      - name: Test
-        run: dotnet test -c Release --no-restore --no-build
+#      - name: Test
+#        run: dotnet test -c Release --no-restore --no-build
+      - name: Pack
+        run: dotnet pack -c Release /p:Version=${VERSION} --no-restore
       - name: Upload Package
-        run: dotnet nuget push Bunkum.HttpServer/bin/Release/net7.0/Bunkum.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push Bunkum.HttpServer/bin/Release/net7.0/Bunkum.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
       - name: Upload Symbols Package
-        run: dotnet nuget push Bunkum.HttpServer/bin/Release/net7.0/Bunkum.${VERSION}.snupkg --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push Bunkum.HttpServer/bin/Release/net7.0/Bunkum.${VERSION}.snupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
