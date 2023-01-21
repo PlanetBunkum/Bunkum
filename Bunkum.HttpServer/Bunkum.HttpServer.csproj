@@ -9,12 +9,6 @@
     <RootNamespace>Bunkum.HttpServer</RootNamespace>
   </PropertyGroup>
 
-  <!--Disable .pdb files on release builds-->
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
-      <DebugSymbols>False</DebugSymbols>
-      <DebugType>None</DebugType>
-  </PropertyGroup>
-
   <PropertyGroup>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>LittleBigRefresh</Authors>

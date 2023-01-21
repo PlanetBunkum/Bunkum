@@ -30,7 +30,3 @@ jobs:
         run: dotnet nuget push Bunkum.HttpServer/bin/Release/Bunkum.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
-      - name: Upload Symbols Package
-        run: dotnet nuget push Bunkum.HttpServer/bin/Release/Bunkum.${VERSION}.snupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
-        env:
-          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
