@@ -1,0 +1,35 @@
+# https://acraven.medium.com/a-nuget-package-workflow-using-github-actions-7da8c6557863
+name: Upload package to NuGet
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Upload package to NuGet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Restore
+        run: dotnet restore
+      - name: Set VERSION variable from tag
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+      - name: Build
+        run: dotnet build -c Release --no-restore /p:Version=${VERSION}
+      - name: Test
+        run: dotnet test -c Release --no-restore --no-build /p:Version=${VERSION}
+      - name: Upload Package
+        run: dotnet nuget push Bunkum.HttpServer/bin/Release/net7.0/Bunkum.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json
+        env:
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      - name: Upload Symbols Package
+        run: dotnet nuget push Bunkum.HttpServer/bin/Release/net7.0/Bunkum.${VERSION}.snupkg --source https://api.nuget.org/v3/index.json
+        env:
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
