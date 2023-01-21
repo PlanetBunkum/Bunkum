@@ -1,7 +1,9 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
 using Bunkum.HttpServer.Authentication;
@@ -31,11 +33,24 @@ public class BunkumHttpServer
     
     private Config? _config;
     private Type? _configType;
-    private BunkumConfig _bunkumConfig;
+    private readonly BunkumConfig _bunkumConfig;
 
+    // ReSharper disable UnassignedField.Global
+    // ReSharper disable ConvertToConstant.Global
+    // ReSharper disable MemberCanBePrivate.Global
+    // ReSharper disable FieldCanBeMadeReadOnly.Global
     public EventHandler<HttpListenerContext>? NotFound;
 
     public bool AssumeAuthenticationRequired = false;
+    public bool UseDigestSystem = false;
+    // ReSharper restore ConvertToConstant.Global
+    // ReSharper restore ConvertToConstant.Global
+    // ReSharper restore MemberCanBePrivate.Global
+    // ReSharper restore FieldCanBeMadeReadOnly.Global
+
+    // Should be 19 characters (or less maybe?)
+    // Length was taken from PS3 and PS4 digest keys
+    public const string DigestKey = "CustomServerDigest";
 
     public BunkumHttpServer(params string[] listenEndpoints)
     {
@@ -46,7 +61,7 @@ public class BunkumHttpServer
         this._listener.IgnoreWriteExceptions = true;
         foreach (string endpoint in listenEndpoints)
         {
-            this._logger.LogInfo(BunkumContext.Startup, "Listening at URI " + endpoint);
+            this._logger.LogInfo(BunkumContext.Startup, "Listening at URL " + endpoint);
             this._listener.Prefixes.Add(endpoint);
         }
 
@@ -99,6 +114,7 @@ public class BunkumHttpServer
         this._logger.LogInfo(BunkumContext.Startup, $"Ready to go! Startup tasks took {stopwatch.ElapsedMilliseconds}ms.");
     }
 
+    [DoesNotReturn]
     private async Task Block()
     {
         while (true)
@@ -107,15 +123,17 @@ public class BunkumHttpServer
 
             await Task.Factory.StartNew(() =>
             {
-                //Create a new lazy to get a database context, if the value is never accessed, a database instance is never passed
-                Lazy<IDatabaseContext> database = new Lazy<IDatabaseContext>(this._databaseProvider.GetContext());
-                //Handle the request
+                // Create a new lazy to get a database context, if the value is never accessed, a database instance is never passed
+                Lazy<IDatabaseContext> database = new(this._databaseProvider.GetContext());
+                
+                // Handle the request
                 this.HandleRequest(context, database);
                 
                 if(database.IsValueCreated)
                     database.Value.Dispose();
             });
         }
+        // ReSharper disable once FunctionNeverReturns
     }
 
     [Pure]
@@ -222,7 +240,7 @@ public class BunkumHttpServer
                         }
                         else if (paramType.IsAssignableTo(typeof(BunkumConfig)))
                         {
-                            invokeList.Add(this._config);
+                            invokeList.Add(this._bunkumConfig);
                         }
                         else if (paramType == typeof(string))
                         {
@@ -257,9 +275,25 @@ public class BunkumHttpServer
 
         try
         {
-            context.Response.AddHeader("Server", "Bunkum");
-
             string path = context.Request.Url!.AbsolutePath;
+            
+            // HACK: Allow reading stream multiple times via seeking by setting the request's input stream to our own
+            // Shouldn't cause problems unless Microsoft changes this API
+            using MemoryStream clientMs = new();
+            context.Request.InputStream.CopyTo(clientMs); // Read from the original stream
+            
+            // Set the stream in the request object via reflection
+            context.Request.GetType()
+                .GetField("_inputStream", BindingFlags.NonPublic | BindingFlags.Instance)!
+                .SetValue(context.Request, clientMs);
+
+            // Seek our stream backwards
+            clientMs.Seek(0, SeekOrigin.Begin);
+
+            // We now have a stream in the request that supports seeking.
+
+            context.Response.AddHeader("Server", "Bunkum");
+            if (this.UseDigestSystem) this._logger.LogTrace(BunkumContext.Digest, $"Digest verified: {this.VerifyDigestRequest(context)}");
 
             Response? resp = this.InvokeEndpointByRequest(context, database);
 
@@ -275,12 +309,14 @@ public class BunkumHttpServer
             {
                 context.Response.AddHeader("Content-Type", resp.Value.ContentType.GetName());
                 context.Response.StatusCode = (int)resp.Value.StatusCode;
+                
+                if(this.UseDigestSystem) this.SetDigestResponse(context, new MemoryStream(resp.Value.Data));
                 context.Response.OutputStream.Write(resp.Value.Data);
             }
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            this._logger.LogError(BunkumContext.Request, e.ToString());
 
             try
             {
@@ -316,6 +352,68 @@ public class BunkumHttpServer
                 // ignored
             }
         }
+    }
+
+    // Referenced from Project Lighthouse
+    // https://github.com/LBPUnion/ProjectLighthouse/blob/d16132f67f82555ef636c0dabab5aabf36f57556/ProjectLighthouse.Servers.GameServer/Middlewares/DigestMiddleware.cs
+    // https://github.com/LBPUnion/ProjectLighthouse/blob/19ea44e0e2ff5f2ebae8d9dfbaf0f979720bd7d9/ProjectLighthouse/Helpers/CryptoHelper.cs#L35
+    // TODO: make this non-lbp specific, or implement middlewares and move to game server
+    private bool VerifyDigestRequest(HttpListenerContext context)
+    {
+        Debug.Assert(this.UseDigestSystem, "Tried to verify digest request when digest system is disabled");
+        
+        string url = context.Request.Url!.AbsolutePath;
+        string auth = $"{context.Request.Cookies["MM_AUTH"]?.Value ?? string.Empty}";
+
+        string digestResponse = this.CalculateDigest(url, context.Request.InputStream, auth);
+
+        string digestHeader = !url.StartsWith("/lbp/upload/") ? "X-Digest-A" : "X-Digest-B";
+        string clientDigest = context.Request.Headers[digestHeader] ?? string.Empty;
+        
+        context.Response.AddHeader("X-Digest-B", digestResponse);
+        if (clientDigest != digestResponse)
+        {
+            this._logger.LogTrace(BunkumContext.Digest, $"Digest failed: {clientDigest} != {digestResponse}");
+            return false;
+        }
+        
+        this._logger.LogTrace(BunkumContext.Digest, $"Digest succeeded: {digestResponse}");
+        return true;
+    }
+
+    private void SetDigestResponse(HttpListenerContext context, Stream body)
+    {
+        Debug.Assert(this.UseDigestSystem, "Tried to set digest response when digest system is disabled");
+        
+        string url = context.Request.Url!.AbsolutePath;
+        string auth = $"{context.Request.Cookies["MM_AUTH"]?.Value ?? string.Empty}";
+
+        string digestResponse = this.CalculateDigest(url, body, auth);
+        
+        context.Response.AddHeader("X-Digest-A", digestResponse);
+    }
+
+    private string CalculateDigest(string url, Stream body, string auth)
+    {
+        using MemoryStream ms = new();
+
+        // FIXME: Directly referencing LBP in Bunkum
+        if (!url.StartsWith("/lbp/upload/"))
+        {
+            // get request body
+            body.CopyTo(ms);
+            body.Seek(0, SeekOrigin.Begin);
+        }
+        
+        ms.WriteString(auth);
+        ms.WriteString(url);
+        ms.WriteString(DigestKey);
+        
+        ms.Position = 0;
+        using SHA1 sha = SHA1.Create();
+        string digestResponse = Convert.ToHexString(sha.ComputeHash(ms)).ToLower();
+
+        return digestResponse;
     }
     
     private void AddEndpointGroup(Type type)

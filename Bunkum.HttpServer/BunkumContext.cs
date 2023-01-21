@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Bunkum.HttpServer;
 
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 public enum BunkumContext
 {
     Startup,
@@ -8,4 +11,5 @@ public enum BunkumContext
     UserContent,
     Filter,
     Configuration,
+    Digest,
 }
