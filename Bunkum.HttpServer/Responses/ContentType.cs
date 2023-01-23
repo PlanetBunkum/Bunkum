@@ -10,7 +10,7 @@ public enum ContentType
     [ContentType("text/html", false)] Html,
     [ContentType("text/plain", false)] Plaintext,
     [ContentType("text/xml", true)] Xml,
-    [ContentType("text/json", true)] Json,
+    [ContentType("application/json", true)] Json,
     [ContentType("application/octet-stream", false)] BinaryData,
 }
 
