@@ -47,6 +47,7 @@ public struct Response
         {
             case ContentType.Html:
             case ContentType.Plaintext:
+            case ContentType.BinaryData:
                 throw new InvalidOperationException();
             case ContentType.Xml:
             {
