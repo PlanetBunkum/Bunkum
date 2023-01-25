@@ -11,7 +11,7 @@ public class NullEndpoints : EndpointGroup
     [NullStatusCode(HttpStatusCode.BadRequest)]
     public object? Null(RequestContext context)
     {
-        if (context.Request.QueryString["null"] == "true") return null;
+        if (context.QueryString["null"] == "true") return null;
         return new object();
     }
 }

@@ -137,7 +137,7 @@ public class BunkumHttpServer
     }
 
     [Pure]
-    private Response? InvokeEndpointByRequest(HttpListenerContext context, Lazy<IDatabaseContext> database)
+    private Response? InvokeEndpointByRequest(HttpListenerContext context, Lazy<IDatabaseContext> database, MemoryStream body)
     {
         foreach (EndpointGroup group in this._endpoints)
         {
@@ -173,7 +173,9 @@ public class BunkumHttpServer
                     List<object?> invokeList = new() { 
                         new RequestContext // 1st argument is always the request context. This is fact, and is backed by an analyzer.
                         {
-                            Request = context.Request,
+                            RequestStream = body,
+                            QueryString = context.Request.QueryString,
+                            Url = context.Request.Url!,
                             Logger = this._logger,
                             DataStore = this._dataStore,
                         },
@@ -192,10 +194,6 @@ public class BunkumHttpServer
                             if (!context.Request.HasEntityBody)
                                 return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
 
-                            MemoryStream body = new((int)context.Request.ContentLength64);
-                            context.Request.InputStream.CopyTo(body);
-                            body.Position = 0;
-                            
                             if(paramType == typeof(Stream)) invokeList.Add(body);
                             else if(paramType == typeof(string)) invokeList.Add(Encoding.Default.GetString(body.GetBuffer()));
                             else if(paramType == typeof(byte[])) invokeList.Add(body.GetBuffer());
@@ -216,6 +214,8 @@ public class BunkumHttpServer
                             }
                             // We can't find a valid type to send or deserialization failed
                             else return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
+
+                            body.Seek(0, SeekOrigin.Begin);
 
                             continue;
                         }
@@ -276,26 +276,22 @@ public class BunkumHttpServer
         try
         {
             string path = context.Request.Url!.AbsolutePath;
-            
-            // HACK: Allow reading stream multiple times via seeking by setting the request's input stream to our own
-            // Shouldn't cause problems unless Microsoft changes this API
-            using MemoryStream clientMs = new();
-            context.Request.InputStream.CopyTo(clientMs); // Read from the original stream
-            
-            // Set the stream in the request object via reflection
-            context.Request.GetType()
-                .GetField("_inputStream", BindingFlags.NonPublic | BindingFlags.Instance)!
-                .SetValue(context.Request, clientMs);
 
-            // Seek our stream backwards
+            // Allow reading stream multiple times via seeking by creating our own MemoryStream
+            // Do not context.Request.InputStream after this point
+            using MemoryStream clientMs = new((int)context.Request.ContentLength64);
+            context.Request.InputStream.CopyTo(clientMs);
             clientMs.Seek(0, SeekOrigin.Begin);
 
             // We now have a stream in the request that supports seeking.
 
             context.Response.AddHeader("Server", "Bunkum");
-            if (this.UseDigestSystem) this._logger.LogTrace(BunkumContext.Digest, $"Digest verified: {this.VerifyDigestRequest(context)}");
+            if (this.UseDigestSystem) this._logger.LogTrace(BunkumContext.Digest, $"Digest verified: {this.VerifyDigestRequest(context, clientMs)}");
+            
+            Debug.Assert(clientMs.Position == 0); // should be at position 0 before we pass to the application's endpoints
 
-            Response? resp = this.InvokeEndpointByRequest(context, database);
+            // Find a endpoint using the request context, pass in database and our MemoryStream
+            Response? resp = this.InvokeEndpointByRequest(context, database, clientMs);
 
             if (resp == null)
             {
@@ -358,14 +354,14 @@ public class BunkumHttpServer
     // https://github.com/LBPUnion/ProjectLighthouse/blob/d16132f67f82555ef636c0dabab5aabf36f57556/ProjectLighthouse.Servers.GameServer/Middlewares/DigestMiddleware.cs
     // https://github.com/LBPUnion/ProjectLighthouse/blob/19ea44e0e2ff5f2ebae8d9dfbaf0f979720bd7d9/ProjectLighthouse/Helpers/CryptoHelper.cs#L35
     // TODO: make this non-lbp specific, or implement middlewares and move to game server
-    private bool VerifyDigestRequest(HttpListenerContext context)
+    private bool VerifyDigestRequest(HttpListenerContext context, Stream body)
     {
         Debug.Assert(this.UseDigestSystem, "Tried to verify digest request when digest system is disabled");
         
         string url = context.Request.Url!.AbsolutePath;
         string auth = $"{context.Request.Cookies["MM_AUTH"]?.Value ?? string.Empty}";
 
-        string digestResponse = this.CalculateDigest(url, context.Request.InputStream, auth);
+        string digestResponse = this.CalculateDigest(url, body, auth);
 
         string digestHeader = !url.StartsWith("/lbp/upload/") ? "X-Digest-A" : "X-Digest-B";
         string clientDigest = context.Request.Headers[digestHeader] ?? string.Empty;
