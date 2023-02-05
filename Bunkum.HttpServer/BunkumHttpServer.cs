@@ -286,7 +286,7 @@ public class BunkumHttpServer
             // We now have a stream in the request that supports seeking.
 
             context.Response.AddHeader("Server", "Bunkum");
-            if (this.UseDigestSystem) this._logger.LogTrace(BunkumContext.Digest, $"Digest verified: {this.VerifyDigestRequest(context, clientMs)}");
+            if (this.UseDigestSystem) this.VerifyDigestRequest(context, clientMs);
             
             Debug.Assert(clientMs.Position == 0); // should be at position 0 before we pass to the application's endpoints
 
@@ -367,14 +367,10 @@ public class BunkumHttpServer
         string clientDigest = context.Request.Headers[digestHeader] ?? string.Empty;
         
         context.Response.AddHeader("X-Digest-B", digestResponse);
-        if (clientDigest != digestResponse)
-        {
-            this._logger.LogTrace(BunkumContext.Digest, $"Digest failed: {clientDigest} != {digestResponse}");
-            return false;
-        }
+        if (clientDigest == digestResponse) return true;
         
-        this._logger.LogTrace(BunkumContext.Digest, $"Digest succeeded: {digestResponse}");
-        return true;
+        this._logger.LogWarning(BunkumContext.Digest, $"Digest failed: {clientDigest} != {digestResponse}");
+        return false;
     }
 
     private void SetDigestResponse(HttpListenerContext context, Stream body)
