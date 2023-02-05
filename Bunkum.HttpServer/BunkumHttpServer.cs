@@ -247,6 +247,12 @@ public class BunkumHttpServer
                             // Attempt to pass in a route parameter based on the method parameter's name
                             invokeList.Add(parameters!.GetValueOrDefault(param.Name));
                         }
+                        else
+                        {
+                            // We don't know what this param is or what to do with it, so pass in null.
+                            // Better than not calling the endpoint and throwing an exception.
+                            invokeList.Add(null);
+                        }
                     }
 
                     object? val = method.Invoke(group, invokeList.ToArray());
