@@ -2,7 +2,7 @@ namespace Bunkum.HttpServer.Storage;
 
 public class FileSystemDataStore : IDataStore
 {
-    private static readonly string DataStoreDirectory = "dataStore" + Path.DirectorySeparatorChar;
+    private static readonly string DataStoreDirectory = Path.Combine(BunkumFileSystem.DataDirectory, "dataStore" + Path.DirectorySeparatorChar);
 
     public FileSystemDataStore()
     {

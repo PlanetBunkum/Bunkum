@@ -60,6 +60,8 @@ public abstract class Config
     {
         TConfig? config;
         string? file = null;
+
+        filename = Path.Combine(BunkumFileSystem.DataDirectory, filename);
         
         if (File.Exists(filename))
         {

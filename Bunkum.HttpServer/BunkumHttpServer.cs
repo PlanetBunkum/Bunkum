@@ -66,6 +66,12 @@ public class BunkumHttpServer
         }
         
         this._logger.LogDebug(BunkumContext.Startup, "Do not use the above URLs to patch!");
+        
+        this._logger.LogInfo(BunkumContext.Startup, $"Bunkum is storing its data at {BunkumFileSystem.DataDirectory}.");
+        if (!BunkumFileSystem.UsingCustomDirectory)
+        {
+            this._logger.LogInfo(BunkumContext.Startup, "You can override where data is stored using the BUNKUM_DATA_FOLDER environment variable.");
+        }
 
         this._bunkumConfig = Config.LoadFromFile<BunkumConfig>("bunkum.json", this._logger);
     }
