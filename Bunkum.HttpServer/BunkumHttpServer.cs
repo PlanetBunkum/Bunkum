@@ -61,9 +61,11 @@ public class BunkumHttpServer
         this._listener.IgnoreWriteExceptions = true;
         foreach (string endpoint in listenEndpoints)
         {
-            this._logger.LogInfo(BunkumContext.Startup, "Listening at URL " + endpoint);
+            this._logger.LogDebug(BunkumContext.Startup, "Internal server is listening at URL " + endpoint);
             this._listener.Prefixes.Add(endpoint);
         }
+        
+        this._logger.LogDebug(BunkumContext.Startup, "Do not use the above URLs to patch!");
 
         this._bunkumConfig = Config.LoadFromFile<BunkumConfig>("bunkum.json", this._logger);
     }
