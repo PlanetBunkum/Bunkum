@@ -42,12 +42,16 @@ public class BunkumHttpListener : IDisposable
         this._logger.LogInfo(HttpLogContext.Startup, "Listening...");
     }
 
-    public async Task<ListenerContext> WaitForConnectionAsync()
+    public async Task WaitForConnectionAsync(Action<ListenerContext> action)
     {
         while (true)
         {
             ListenerContext? request = await this.WaitForConnectionAsyncInternal();
-            if (request != null) return request;
+            if (request == null) continue;
+            
+            action.Invoke(request);
+            if(!request.SocketClosed) await request.SendResponse(HttpStatusCode.NotFound);
+            return;
         }
     }
 
@@ -58,10 +62,10 @@ public class BunkumHttpListener : IDisposable
         
         this._logger.LogTrace(HttpLogContext.Request, "Waiting for connection...");
 
-        using Socket client = await this._socket.AcceptAsync();
+        Socket client = await this._socket.AcceptAsync();
         this._logger.LogDebug(HttpLogContext.Request, "Client connected from " + client.RemoteEndPoint);
 
-        await using NetworkStream stream = new(client);
+        NetworkStream stream = new(client);
         byte[] requestLineBytes = new byte[RequestLineLimit];
 
         int readByte;
@@ -79,7 +83,7 @@ public class BunkumHttpListener : IDisposable
         string path = requestLineSplit[1];
         string version = requestLineSplit[2].TrimEnd('\0').TrimEnd('\r');
 
-        ListenerContext context = new(client)
+        ListenerContext context = new(client, stream)
         {
             ResponseHeaders =
             {

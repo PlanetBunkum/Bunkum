@@ -6,5 +6,8 @@ listener.StartListening();
 
 while (true)
 {
-    await listener.WaitForConnectionAsync();
+    await listener.WaitForConnectionAsync((context) =>
+    {
+        
+    });
 }
