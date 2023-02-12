@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
+using Bunkum.CustomHttpListener;
 using Bunkum.HttpServer.Authentication;
 using Bunkum.HttpServer.Authentication.Dummy;
 using Bunkum.HttpServer.Configuration;
@@ -23,7 +24,7 @@ namespace Bunkum.HttpServer;
 
 public class BunkumHttpServer
 {
-    private readonly HttpListener _listener;
+    private readonly BunkumHttpListener _listener;
     private readonly List<EndpointGroup> _endpoints = new();
     private readonly LoggerContainer<BunkumContext> _logger;
 
@@ -57,16 +58,8 @@ public class BunkumHttpServer
         this._logger = new LoggerContainer<BunkumContext>();
         this._logger.RegisterLogger(new ConsoleLogger());
         
-        this._listener = new HttpListener();
-        this._listener.IgnoreWriteExceptions = true;
-        foreach (string endpoint in listenEndpoints)
-        {
-            this._logger.LogDebug(BunkumContext.Startup, "Internal server is listening at URL " + endpoint);
-            this._listener.Prefixes.Add(endpoint);
-        }
-        
-        this._logger.LogDebug(BunkumContext.Startup, "Do not use the above URLs to patch!");
-        
+        this._listener = new BunkumHttpListener(listenEndpoints);
+
         this._logger.LogInfo(BunkumContext.Startup, $"Bunkum is storing its data at {BunkumFileSystem.DataDirectory}.");
         if (!BunkumFileSystem.UsingCustomDirectory)
         {
@@ -106,7 +99,7 @@ public class BunkumHttpServer
         this._logger.LogDebug(BunkumContext.Startup, "Starting listener...");
         try
         {
-            this._listener.Start();
+            this._listener.StartListening();
         }
         catch(Exception e)
         {
@@ -127,7 +120,7 @@ public class BunkumHttpServer
     {
         while (true)
         {
-            HttpListenerContext context = await this._listener.GetContextAsync();
+            HttpListenerContext context = await this._listener.WaitForConnectionAsync();
 
             await Task.Factory.StartNew(() =>
             {

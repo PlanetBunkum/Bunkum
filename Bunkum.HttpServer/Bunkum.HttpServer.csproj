@@ -39,6 +39,7 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <OutputItemType>Analyzer</OutputItemType>
     </ProjectReference>
+    <ProjectReference Include="..\Bunkum.CustomHttpListener\Bunkum.CustomHttpListener.csproj" />
   </ItemGroup>
 
 </Project>
