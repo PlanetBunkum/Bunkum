@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace Bunkum.HttpServer.Responses;
+namespace Bunkum.CustomHttpListener.Parsing;
 
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 public enum ContentType

@@ -7,6 +7,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
 using Bunkum.CustomHttpListener;
+using Bunkum.CustomHttpListener.Parsing;
+using Bunkum.CustomHttpListener.Request;
 using Bunkum.HttpServer.Authentication;
 using Bunkum.HttpServer.Authentication.Dummy;
 using Bunkum.HttpServer.Configuration;
@@ -40,7 +42,7 @@ public class BunkumHttpServer
     // ReSharper disable ConvertToConstant.Global
     // ReSharper disable MemberCanBePrivate.Global
     // ReSharper disable FieldCanBeMadeReadOnly.Global
-    public EventHandler<HttpListenerContext>? NotFound;
+    public EventHandler<ListenerContext> NotFound;
 
     public bool AssumeAuthenticationRequired = false;
     public bool UseDigestSystem = false;
@@ -53,12 +55,12 @@ public class BunkumHttpServer
     // Length was taken from PS3 and PS4 digest keys
     public const string DigestKey = "CustomServerDigest";
 
-    public BunkumHttpServer(params string[] listenEndpoints)
+    public BunkumHttpServer(Uri listenEndpoint)
     {
         this._logger = new LoggerContainer<BunkumContext>();
         this._logger.RegisterLogger(new ConsoleLogger());
         
-        this._listener = new BunkumHttpListener(listenEndpoints);
+        this._listener = new BunkumHttpListener(listenEndpoint);
 
         this._logger.LogInfo(BunkumContext.Startup, $"Bunkum is storing its data at {BunkumFileSystem.DataDirectory}.");
         if (!BunkumFileSystem.UsingCustomDirectory)
@@ -120,7 +122,7 @@ public class BunkumHttpServer
     {
         while (true)
         {
-            HttpListenerContext context = await this._listener.WaitForConnectionAsync();
+            ListenerContext context = await this._listener.WaitForConnectionAsync();
 
             await Task.Factory.StartNew(() =>
             {
@@ -138,7 +140,7 @@ public class BunkumHttpServer
     }
 
     [Pure]
-    private Response? InvokeEndpointByRequest(HttpListenerContext context, Lazy<IDatabaseContext> database, MemoryStream body)
+    private Response? InvokeEndpointByRequest(ListenerContext context, Lazy<IDatabaseContext> database, MemoryStream body)
     {
         foreach (EndpointGroup group in this._endpoints)
         {
@@ -275,7 +277,7 @@ public class BunkumHttpServer
         return null;
     }
 
-    private void HandleRequest(HttpListenerContext context, Lazy<IDatabaseContext> database)
+    private void HandleRequest(ListenerContext context, Lazy<IDatabaseContext> database)
     {
         Stopwatch requestStopwatch = new();
         requestStopwatch.Start();
@@ -361,7 +363,7 @@ public class BunkumHttpServer
     // https://github.com/LBPUnion/ProjectLighthouse/blob/d16132f67f82555ef636c0dabab5aabf36f57556/ProjectLighthouse.Servers.GameServer/Middlewares/DigestMiddleware.cs
     // https://github.com/LBPUnion/ProjectLighthouse/blob/19ea44e0e2ff5f2ebae8d9dfbaf0f979720bd7d9/ProjectLighthouse/Helpers/CryptoHelper.cs#L35
     // TODO: make this non-lbp specific, or implement middlewares and move to game server
-    private bool VerifyDigestRequest(HttpListenerContext context, Stream body)
+    private bool VerifyDigestRequest(ListenerContext context, Stream body)
     {
         Debug.Assert(this.UseDigestSystem, "Tried to verify digest request when digest system is disabled");
         
@@ -380,7 +382,7 @@ public class BunkumHttpServer
         return false;
     }
 
-    private void SetDigestResponse(HttpListenerContext context, Stream body)
+    private void SetDigestResponse(ListenerContext context, Stream body)
     {
         Debug.Assert(this.UseDigestSystem, "Tried to set digest response when digest system is disabled");
         

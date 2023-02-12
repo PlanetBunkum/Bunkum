@@ -1,7 +1,8 @@
-namespace Bunkum.HttpServer.Responses;
+namespace Bunkum.CustomHttpListener.Parsing;
 
 public enum Method
 {
+    Invalid,
     Get,
     Put,
     Post,

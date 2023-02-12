@@ -40,7 +40,7 @@ public class ServerDependentTest
             _lowestPort++;
         }
 
-        BunkumHttpServer server = new(uri.ToString());
+        BunkumHttpServer server = new(uri);
         if(start) server.Start();
 
         HttpClient client = new();
