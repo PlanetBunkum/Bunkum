@@ -79,11 +79,18 @@ public class BunkumHttpListener : IDisposable
         string path = requestLineSplit[1];
         string version = requestLineSplit[2].TrimEnd('\0').TrimEnd('\r');
 
-        ListenerContext context = new(client);
+        ListenerContext context = new(client)
+        {
+            ResponseHeaders =
+            {
+                ["Server"] = "Bunkum",
+                ["Connection"] = "close",
+            },
+        };
 
         if (version != "HTTP/1.1")
         {
-            await context.SendFailResponse(HttpStatusCode.HttpVersionNotSupported);
+            await context.SendResponse(HttpStatusCode.HttpVersionNotSupported);
             return null;
         }
         
@@ -92,7 +99,7 @@ public class BunkumHttpListener : IDisposable
         Method parsedMethod = MethodUtils.FromString(method);
         if (parsedMethod == Method.Invalid)
         {
-            await context.SendFailResponse(HttpStatusCode.BadRequest);
+            await context.SendResponse(HttpStatusCode.BadRequest);
             return null;
         }
 

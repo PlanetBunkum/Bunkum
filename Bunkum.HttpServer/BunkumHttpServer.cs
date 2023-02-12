@@ -152,8 +152,8 @@ public class BunkumHttpServer
                 foreach (EndpointAttribute attribute in attributes)
                 {
                     if (!attribute.UriMatchesRoute(
-                            context.Request.Url,
-                            MethodUtils.FromString(context.Request.HttpMethod),
+                            context.Uri,
+                            context.Method,
                             out Dictionary<string, string> parameters))
                     {
                         continue;
@@ -178,7 +178,7 @@ public class BunkumHttpServer
                         {
                             RequestStream = body,
                             QueryString = context.Request.QueryString,
-                            Url = context.Request.Url!,
+                            Url = context.Uri,
                             Logger = this._logger,
                             DataStore = this._dataStore,
                         },
@@ -284,7 +284,7 @@ public class BunkumHttpServer
 
         try
         {
-            string path = context.Request.Url!.AbsolutePath;
+            string path = context.Uri.AbsolutePath;
 
             // Allow reading stream multiple times via seeking by creating our own MemoryStream
             // Do not context.Request.InputStream after this point
@@ -367,7 +367,7 @@ public class BunkumHttpServer
     {
         Debug.Assert(this.UseDigestSystem, "Tried to verify digest request when digest system is disabled");
         
-        string url = context.Request.Url!.AbsolutePath;
+        string url = context.Uri.AbsolutePath;
         string auth = $"{context.Request.Cookies["MM_AUTH"]?.Value ?? string.Empty}";
 
         string digestResponse = this.CalculateDigest(url, body, auth);

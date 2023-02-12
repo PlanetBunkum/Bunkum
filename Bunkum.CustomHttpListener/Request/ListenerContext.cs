@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
@@ -14,14 +15,27 @@ public class ListenerContext
     public Method Method { get; internal set; }
     public Uri Uri { get; internal set; } = null!;
 
+    public readonly Dictionary<string, string> RequestHeaders = new();
+    public readonly Dictionary<string, string> ResponseHeaders = new();
+
     public ListenerContext(Socket socket)
     {
         this._socket = socket;
     }
 
-    internal async Task SendFailResponse(HttpStatusCode code)
+    internal async Task SendResponse(HttpStatusCode code)
     {
-        await this.SendBufferSafe($"HTTP/1.1 {(int)code} {code.ToString()}\r\n\r\n");
+        List<string> response = new() { $"HTTP/1.1 {(int)code} {code.ToString()}" };
+        foreach ((string? key, string? value) in this.ResponseHeaders)
+        {
+            Debug.Assert(key != null);
+            Debug.Assert(value != null);
+            
+            response.Add($"{key}: {value}");
+        }
+        response.Add("\r\n");
+
+        await this.SendBufferSafe(string.Join("\r\n", response));
         this.CloseSocket();
     }
 
