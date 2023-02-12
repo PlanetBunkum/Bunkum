@@ -92,7 +92,7 @@ public class BunkumHttpListener : IDisposable
         Method parsedMethod = MethodUtils.FromString(method);
         if (parsedMethod == Method.Invalid)
         {
-            await context.SendFailResponse(HttpStatusCode.MethodNotAllowed);
+            await context.SendFailResponse(HttpStatusCode.BadRequest);
             return null;
         }
 
