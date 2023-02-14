@@ -122,20 +122,17 @@ public class BunkumHttpServer
     {
         while (true)
         {
-            await this._listener.WaitForConnectionAsync(context =>
+            await this._listener.WaitForConnectionAsync(async context => await Task.Factory.StartNew(() =>
             {
-                Task.Factory.StartNew(() =>
-                {
-                    // Create a new lazy to get a database context, if the value is never accessed, a database instance is never passed
-                    Lazy<IDatabaseContext> database = new(this._databaseProvider.GetContext());
+                // Create a new lazy to get a database context, if the value is never accessed, a database instance is never passed
+                Lazy<IDatabaseContext> database = new(this._databaseProvider.GetContext());
                 
-                    // Handle the request
-                    this.HandleRequest(context, database);
+                // Handle the request
+                this.HandleRequest(context, database);
                 
-                    if(database.IsValueCreated)
-                        database.Value.Dispose();
-                });
-            });
+                if(database.IsValueCreated)
+                    database.Value.Dispose();
+            }));
         }
         // ReSharper disable once FunctionNeverReturns
     }
@@ -165,7 +162,7 @@ public class BunkumHttpServer
                     IUser? user = null;
                     if (method.GetCustomAttribute<AuthenticationAttribute>()?.Required ?? this.AssumeAuthenticationRequired)
                     {
-                        user = this._authenticationProvider.AuthenticateUser(context.Request, database.Value);
+                        user = this._authenticationProvider.AuthenticateUser(context, database.Value);
                         if (user == null)
                             return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.Forbidden);
                     }
@@ -178,7 +175,7 @@ public class BunkumHttpServer
                         new RequestContext // 1st argument is always the request context. This is fact, and is backed by an analyzer.
                         {
                             RequestStream = body,
-                            QueryString = context.Request.QueryString,
+                            QueryString = context.QueryString,
                             Url = context.Uri,
                             Logger = this._logger,
                             DataStore = this._dataStore,
@@ -195,7 +192,7 @@ public class BunkumHttpServer
                         {
                             // If the request has no body and we have a body parameter, then it's probably safe to assume it's required.
                             // Fire a bad request back if this is the case.
-                            if (!context.Request.HasEntityBody)
+                            if (!context.HasBody)
                                 return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
 
                             if(paramType == typeof(Stream)) invokeList.Add(body);
@@ -289,13 +286,12 @@ public class BunkumHttpServer
 
             // Allow reading stream multiple times via seeking by creating our own MemoryStream
             // Do not context.Request.InputStream after this point
-            using MemoryStream clientMs = new((int)context.Request.ContentLength64);
+            using MemoryStream clientMs = new((int)context.ContentLength);
             context.Request.InputStream.CopyTo(clientMs);
             clientMs.Seek(0, SeekOrigin.Begin);
 
             // We now have a stream in the request that supports seeking.
-
-            context.Response.AddHeader("Server", "Bunkum");
+            
             if (this.UseDigestSystem) this.VerifyDigestRequest(context, clientMs);
             
             Debug.Assert(clientMs.Position == 0); // should be at position 0 before we pass to the application's endpoints

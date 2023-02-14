@@ -27,7 +27,7 @@ internal class ContentTypeAttribute : Attribute
     }
 }
 
-internal static class ContentTypeExtensions
+public static class ContentTypeExtensions
 {
     private static ContentTypeAttribute GetAttribute(ContentType contentType)
     {
@@ -47,7 +47,7 @@ internal static class ContentTypeExtensions
         return GetAttribute(contentType).Name;
     }
     
-    internal static bool IsSerializable(this ContentType contentType)
+    public static bool IsSerializable(this ContentType contentType)
     {
         return GetAttribute(contentType).IsSerializable;
     }

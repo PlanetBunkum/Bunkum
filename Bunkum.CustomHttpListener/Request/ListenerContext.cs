@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Bunkum.CustomHttpListener.Extensions;
 using Bunkum.CustomHttpListener.Parsing;
 
 namespace Bunkum.CustomHttpListener.Request;
@@ -21,6 +22,27 @@ public class ListenerContext
 
     private bool _socketClosed;
     internal bool SocketClosed => this._socketClosed || !this._socket.Connected;
+
+    public long ContentLength
+    {
+        get
+        {
+            string? lengthStr = this.RequestHeaders.GetValueOrDefault("Content-Length");
+            long.TryParse(lengthStr, out long length);
+            return length;
+        }
+    }
+
+    public bool HasBody
+    {
+        get
+        {
+            string? lengthStr = this.RequestHeaders.GetValueOrDefault("Content-Length");
+            if (lengthStr is null or "0") return false;
+
+            return true;
+        }
+    }
 
     public ListenerContext(Socket socket, NetworkStream inputStream)
     {
