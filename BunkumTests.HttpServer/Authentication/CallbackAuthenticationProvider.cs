@@ -1,4 +1,5 @@
 using System.Net;
+using Bunkum.CustomHttpListener.Request;
 using Bunkum.HttpServer.Authentication.Dummy;
 using Bunkum.HttpServer.Database;
 
@@ -13,7 +14,7 @@ public class CallbackAuthenticationProvider : DummyAuthenticationProvider
         this._action = action;
     }
 
-    public override DummyUser? AuthenticateUser(HttpListenerRequest request, IDatabaseContext database)
+    public override DummyUser? AuthenticateUser(ListenerContext request, IDatabaseContext database)
     {
         this._action.Invoke();
         return base.AuthenticateUser(request, database);

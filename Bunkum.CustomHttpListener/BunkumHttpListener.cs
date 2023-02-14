@@ -75,13 +75,14 @@ public class BunkumHttpListener : IDisposable
         string path = requestLineSplit[1];
         string version = requestLineSplit[2].TrimEnd('\0').TrimEnd('\r');
 
-        ListenerContext context = new(client, stream)
+        ListenerContext context = new(client)
         {
             ResponseHeaders =
             {
                 ["Server"] = "Bunkum",
                 ["Connection"] = "close",
             },
+            RemoteEndpoint = client.RemoteEndPoint!,
         };
 
         if (version != "HTTP/1.1")
@@ -107,15 +108,48 @@ public class BunkumHttpListener : IDisposable
             context.RequestHeaders.Add(key, value);
         }
 
-        if (!context.RequestHeaders.ContainsKey("Host"))
+        if (context.RequestHeaders["Host"] == null)
         {
             await context.SendResponse(HttpStatusCode.BadRequest);
             return null;
         }
         
         context.Uri = new Uri($"http://{context.RequestHeaders["Host"]}{path}", UriKind.Absolute);
+        
+        if (context.RequestHeaders["Cookie"] != null)
+        {
+            foreach ((string? key, string? value) in ReadCookies(context.RequestHeaders["Cookie"]!))
+            {
+                Debug.Assert(key != null);
+                Debug.Assert(value != null);
+                
+                context.Cookies.Add(key, value);
+            }
+        }
+
+        MemoryStream inputStream = new((int)context.ContentLength);
+        await stream.CopyToAsync(inputStream);
+        inputStream.Seek(0, SeekOrigin.Begin);
+        context.InputStream = inputStream;
 
         return context;
+    }
+
+    private static IEnumerable<(string, string)> ReadCookies(string header)
+    {
+        if (string.IsNullOrEmpty(header)) yield break;
+
+        string[] pairs = header.Split(';');
+        foreach (string pair in pairs)
+        {
+            int index = pair.IndexOf('=');
+            if (index < 0) continue; // Pair is split by =, if we cant find it then this is obviously bad data
+
+            string key = pair.Substring(0, index).TrimStart();
+            string value = pair.Substring(index + 1).TrimEnd();
+
+            yield return (key, value);
+        }
     }
 
     private static string[] ReadRequestLine(Stream stream)

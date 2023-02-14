@@ -1,9 +1,9 @@
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Bunkum.CustomHttpListener.Extensions;
 using Bunkum.CustomHttpListener.Parsing;
 
 namespace Bunkum.CustomHttpListener.Request;
@@ -12,22 +12,26 @@ namespace Bunkum.CustomHttpListener.Request;
 public class ListenerContext
 {
     private readonly Socket _socket;
-    private readonly NetworkStream _inputStream;
+    public MemoryStream InputStream { get; internal set; }
 
     public Method Method { get; internal set; }
     public Uri Uri { get; internal set; } = null!;
 
-    public readonly Dictionary<string, string> RequestHeaders = new();
+    public readonly NameValueCollection RequestHeaders = new();
     public readonly Dictionary<string, string> ResponseHeaders = new();
+
+    public readonly NameValueCollection Cookies = new();
 
     private bool _socketClosed;
     internal bool SocketClosed => this._socketClosed || !this._socket.Connected;
+
+    public EndPoint RemoteEndpoint;
 
     public long ContentLength
     {
         get
         {
-            string? lengthStr = this.RequestHeaders.GetValueOrDefault("Content-Length");
+            string? lengthStr = this.RequestHeaders["Content-Length"];
             long.TryParse(lengthStr, out long length);
             return length;
         }
@@ -37,20 +41,44 @@ public class ListenerContext
     {
         get
         {
-            string? lengthStr = this.RequestHeaders.GetValueOrDefault("Content-Length");
+            string? lengthStr = this.RequestHeaders["Content-Length"];
             if (lengthStr is null or "0") return false;
 
             return true;
         }
     }
+    
+    // Response
+    public HttpStatusCode ResponseCode = HttpStatusCode.OK;
+    public ContentType? ResponseType;
 
-    public ListenerContext(Socket socket, NetworkStream inputStream)
+    private readonly MemoryStream _responseData = new();
+    private int _responseLength;
+
+    public void Write(string str) => this.Write(Encoding.UTF8.GetBytes(str));
+    public void Write(byte[] buffer)
+    {
+        this._responseData.Write(buffer);
+        this._responseLength += buffer.Length;
+    }
+    
+    public ListenerContext(Socket socket)
     {
         this._socket = socket;
-        this._inputStream = inputStream;
     }
 
-    internal async Task SendResponse(HttpStatusCode code)
+    public async Task FlushResponseAndClose()
+    {
+        if (this.ResponseType != null)
+            this.ResponseHeaders.Add("Content-Type", this.ResponseType.Value.GetName());
+        
+        if(this._responseLength != 0)
+            this.ResponseHeaders.Add("Content-Length", this._responseLength.ToString());
+
+        await this.SendResponse(this.ResponseCode, this._responseData.GetBuffer());
+    }
+
+    internal async Task SendResponse(HttpStatusCode code, byte[]? data = null)
     {
         List<string> response = new() { $"HTTP/1.1 {(int)code} {code.ToString()}" };
         foreach ((string? key, string? value) in this.ResponseHeaders)
@@ -63,6 +91,8 @@ public class ListenerContext
         response.Add("\r\n");
 
         await this.SendBufferSafe(string.Join("\r\n", response));
+        if (data != null) await this.SendBufferSafe(data);
+        
         this.CloseSocket();
     }
 

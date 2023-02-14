@@ -122,13 +122,13 @@ public class BunkumHttpServer
     {
         while (true)
         {
-            await this._listener.WaitForConnectionAsync(async context => await Task.Factory.StartNew(() =>
+            await this._listener.WaitForConnectionAsync(async context => await Task.Factory.StartNew(async () =>
             {
                 // Create a new lazy to get a database context, if the value is never accessed, a database instance is never passed
                 Lazy<IDatabaseContext> database = new(this._databaseProvider.GetContext());
                 
                 // Handle the request
-                this.HandleRequest(context, database);
+                await this.HandleRequest(context, database);
                 
                 if(database.IsValueCreated)
                     database.Value.Dispose();
@@ -275,7 +275,7 @@ public class BunkumHttpServer
         return null;
     }
 
-    private void HandleRequest(ListenerContext context, Lazy<IDatabaseContext> database)
+    private async Task HandleRequest(ListenerContext context, Lazy<IDatabaseContext> database)
     {
         Stopwatch requestStopwatch = new();
         requestStopwatch.Start();
@@ -284,36 +284,27 @@ public class BunkumHttpServer
         {
             string path = context.Uri.AbsolutePath;
 
-            // Allow reading stream multiple times via seeking by creating our own MemoryStream
-            // Do not context.Request.InputStream after this point
-            using MemoryStream clientMs = new((int)context.ContentLength);
-            context.Request.InputStream.CopyTo(clientMs);
-            clientMs.Seek(0, SeekOrigin.Begin);
-
-            // We now have a stream in the request that supports seeking.
-            
-            if (this.UseDigestSystem) this.VerifyDigestRequest(context, clientMs);
-            
-            Debug.Assert(clientMs.Position == 0); // should be at position 0 before we pass to the application's endpoints
+            if (this.UseDigestSystem) this.VerifyDigestRequest(context, context.InputStream);
+            Debug.Assert(context.InputStream.Position == 0); // should be at position 0 before we pass to the application's endpoints
 
             // Find a endpoint using the request context, pass in database and our MemoryStream
-            Response? resp = this.InvokeEndpointByRequest(context, database, clientMs);
+            Response? resp = this.InvokeEndpointByRequest(context, database, context.InputStream);
 
             if (resp == null)
             {
-                context.Response.AddHeader("Content-Type", ContentType.Plaintext.GetName());
-                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                context.Response.WriteString("Not found: " + path);
+                context.ResponseType = ContentType.Plaintext;
+                context.ResponseCode = HttpStatusCode.NotFound;
+                context.Write("Not found: " + path);
                 
                 this.NotFound?.Invoke(this, context);
             }
             else
             {
-                context.Response.AddHeader("Content-Type", resp.Value.ContentType.GetName());
-                context.Response.StatusCode = (int)resp.Value.StatusCode;
+                context.ResponseType = resp.Value.ContentType;
+                context.ResponseCode = resp.Value.StatusCode;
                 
                 if(this.UseDigestSystem) this.SetDigestResponse(context, new MemoryStream(resp.Value.Data));
-                context.Response.OutputStream.Write(resp.Value.Data);
+                context.Write(resp.Value.Data);
             }
         }
         catch (Exception e)
@@ -322,13 +313,13 @@ public class BunkumHttpServer
 
             try
             {
-                context.Response.AddHeader("Content-Type", ContentType.Plaintext.GetName());
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                context.ResponseType = ContentType.Plaintext;
+                context.ResponseCode = HttpStatusCode.InternalServerError;
 
 #if DEBUG
-                context.Response.WriteString(e.ToString());
+                context.Write(e.ToString());
 #else
-                context.Response.WriteString("Internal Server Error");
+                context.Write("Internal Server Error");
 #endif
             }
             catch
@@ -342,12 +333,12 @@ public class BunkumHttpServer
             {
                 requestStopwatch.Stop();
 
-                this._logger.LogInfo(BunkumContext.Request, $"Served request to {context.Request.RemoteEndPoint}: " +
-                                                          $"{context.Response.StatusCode} on " +
-                                                          $"{context.Request.HttpMethod} '{context.Request.Url?.PathAndQuery}' " +
+                this._logger.LogInfo(BunkumContext.Request, $"Served request to {context.RemoteEndpoint}: " +
+                                                          $"{context.ResponseCode} on " +
+                                                          $"{context.Method} '{context.Uri.PathAndQuery}' " +
                                                           $"({requestStopwatch.ElapsedMilliseconds}ms)");
 
-                context.Response.Close();
+                await context.FlushResponseAndClose();
             }
             catch
             {
@@ -365,14 +356,14 @@ public class BunkumHttpServer
         Debug.Assert(this.UseDigestSystem, "Tried to verify digest request when digest system is disabled");
         
         string url = context.Uri.AbsolutePath;
-        string auth = $"{context.Request.Cookies["MM_AUTH"]?.Value ?? string.Empty}";
+        string auth = $"{context.Cookies["MM_AUTH"] ?? string.Empty}";
 
         string digestResponse = this.CalculateDigest(url, body, auth);
 
         string digestHeader = !url.StartsWith("/lbp/upload/") ? "X-Digest-A" : "X-Digest-B";
-        string clientDigest = context.Request.Headers[digestHeader] ?? string.Empty;
+        string clientDigest = context.RequestHeaders[digestHeader] ?? string.Empty;
         
-        context.Response.AddHeader("X-Digest-B", digestResponse);
+        context.ResponseHeaders["X-Digest-B"] = digestResponse;
         if (clientDigest == digestResponse) return true;
         
         this._logger.LogWarning(BunkumContext.Digest, $"Digest failed: {clientDigest} != {digestResponse}");
@@ -383,12 +374,12 @@ public class BunkumHttpServer
     {
         Debug.Assert(this.UseDigestSystem, "Tried to set digest response when digest system is disabled");
         
-        string url = context.Request.Url!.AbsolutePath;
-        string auth = $"{context.Request.Cookies["MM_AUTH"]?.Value ?? string.Empty}";
+        string url = context.Uri.AbsolutePath;
+        string auth = $"{context.Cookies["MM_AUTH"] ?? string.Empty}";
 
         string digestResponse = this.CalculateDigest(url, body, auth);
         
-        context.Response.AddHeader("X-Digest-A", digestResponse);
+        context.ResponseHeaders["X-Digest-A"] = digestResponse;
     }
 
     private string CalculateDigest(string url, Stream body, string auth)
