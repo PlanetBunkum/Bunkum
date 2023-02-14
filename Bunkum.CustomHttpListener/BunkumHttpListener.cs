@@ -1,6 +1,9 @@
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
+using Bunkum.CustomHttpListener.Extensions;
 using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.CustomHttpListener.Request;
 using NotEnoughLogs;
@@ -14,7 +17,7 @@ public class BunkumHttpListener : IDisposable
     private readonly LoggerContainer<HttpLogContext> _logger;
     private Socket? _socket;
 
-    private const int HeaderLimit = 1024 * 8; // 8KB of header data
+    private const int HeaderLineLimit = 1024; // 1KB per header
     private const int RequestLineLimit = 256; // 256 bytes
     
     public BunkumHttpListener(Uri listenEndpoint)
@@ -42,14 +45,14 @@ public class BunkumHttpListener : IDisposable
         this._logger.LogInfo(HttpLogContext.Startup, "Listening...");
     }
 
-    public async Task WaitForConnectionAsync(Action<ListenerContext> action)
+    public async Task WaitForConnectionAsync(Func<ListenerContext, Task> action)
     {
         while (true)
         {
             ListenerContext? request = await this.WaitForConnectionAsyncInternal();
             if (request == null) continue;
             
-            action.Invoke(request);
+            await action.Invoke(request);
             if(!request.SocketClosed) await request.SendResponse(HttpStatusCode.NotFound);
             return;
         }
@@ -66,19 +69,8 @@ public class BunkumHttpListener : IDisposable
         this._logger.LogDebug(HttpLogContext.Request, "Client connected from " + client.RemoteEndPoint);
 
         NetworkStream stream = new(client);
-        byte[] requestLineBytes = new byte[RequestLineLimit];
 
-        int readByte;
-        int i = 0;
-        while ((readByte = stream.ReadByte()) != -1)
-        {
-            if ((char)readByte == '\n') break;
-
-            requestLineBytes[i] = (byte)readByte;
-            i++;
-        }
-
-        string[] requestLineSplit = Encoding.ASCII.GetString(requestLineBytes).Split(' ');
+        string[] requestLineSplit = ReadRequestLine(stream);
         string method = requestLineSplit[0];
         string path = requestLineSplit[1];
         string version = requestLineSplit[2].TrimEnd('\0').TrimEnd('\r');
@@ -97,8 +89,6 @@ public class BunkumHttpListener : IDisposable
             await context.SendResponse(HttpStatusCode.HttpVersionNotSupported);
             return null;
         }
-        
-        context.Uri = new Uri(path, UriKind.Absolute);
 
         Method parsedMethod = MethodUtils.FromString(method);
         if (parsedMethod == Method.Invalid)
@@ -109,7 +99,50 @@ public class BunkumHttpListener : IDisposable
 
         context.Method = parsedMethod;
 
+        foreach ((string? key, string? value) in ReadHeaders(stream))
+        {
+            Debug.Assert(key != null);
+            Debug.Assert(value != null);
+            
+            context.RequestHeaders.Add(key, value);
+        }
+
+        if (!context.RequestHeaders.ContainsKey("Host"))
+        {
+            await context.SendResponse(HttpStatusCode.BadRequest);
+            return null;
+        }
+        
+        context.Uri = new Uri($"http://{context.RequestHeaders["Host"]}{path}", UriKind.Absolute);
+
         return context;
+    }
+
+    private static string[] ReadRequestLine(Stream stream)
+    {
+        byte[] requestLineBytes = new byte[RequestLineLimit];
+        // Probably breaks spec to just look for \n instead of \r\n but who cares
+        stream.ReadIntoBufferUntilChar('\n', requestLineBytes);
+        
+        return Encoding.ASCII.GetString(requestLineBytes).Split(' ');
+    }
+
+    private static IEnumerable<(string, string)> ReadHeaders(Stream stream)
+    {
+        while (true)
+        {
+            byte[] headerLineBytes = new byte[HeaderLineLimit];
+            int count = stream.ReadIntoBufferUntilChar('\n', headerLineBytes);
+
+            string headerLine = Encoding.UTF8.GetString(headerLineBytes, 0, count);
+            int index = headerLine.IndexOf(": ", StringComparison.Ordinal);
+            if(index == -1) break; // no more headers
+
+            string key = headerLine.Substring(0, index);
+            string value = headerLine.Substring(index + 2).TrimEnd('\r');
+
+            yield return (key, value);
+        }
     }
 
     public void Dispose()

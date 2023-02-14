@@ -122,18 +122,19 @@ public class BunkumHttpServer
     {
         while (true)
         {
-            ListenerContext context = await this._listener.WaitForConnectionAsync();
-
-            await Task.Factory.StartNew(() =>
+            await this._listener.WaitForConnectionAsync(context =>
             {
-                // Create a new lazy to get a database context, if the value is never accessed, a database instance is never passed
-                Lazy<IDatabaseContext> database = new(this._databaseProvider.GetContext());
+                Task.Factory.StartNew(() =>
+                {
+                    // Create a new lazy to get a database context, if the value is never accessed, a database instance is never passed
+                    Lazy<IDatabaseContext> database = new(this._databaseProvider.GetContext());
                 
-                // Handle the request
-                this.HandleRequest(context, database);
+                    // Handle the request
+                    this.HandleRequest(context, database);
                 
-                if(database.IsValueCreated)
-                    database.Value.Dispose();
+                    if(database.IsValueCreated)
+                        database.Value.Dispose();
+                });
             });
         }
         // ReSharper disable once FunctionNeverReturns

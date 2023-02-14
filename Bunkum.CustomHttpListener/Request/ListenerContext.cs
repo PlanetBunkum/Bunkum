@@ -65,7 +65,7 @@ public class ListenerContext
     private Task SendBufferSafe(string str) => this.SendBufferSafe(Encoding.UTF8.GetBytes(str));
     private async Task SendBufferSafe(byte[] buffer)
     {
-        if (this._socket == null) return;
+        if (this.SocketClosed) return;
         
         try
         {
