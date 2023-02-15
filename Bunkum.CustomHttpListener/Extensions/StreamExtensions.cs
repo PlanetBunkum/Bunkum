@@ -16,4 +16,18 @@ internal static class StreamExtensions
 
         return i;
     }
+
+    internal static int ReadIntoStream(this Stream stream, Stream otherStream, int count)
+    {
+        int i = 0;
+        while(i < count)
+        {
+            int readByte = stream.ReadByte();
+
+            otherStream.WriteByte((byte)readByte);
+            i++;
+        }
+
+        return i; 
+    }
 }

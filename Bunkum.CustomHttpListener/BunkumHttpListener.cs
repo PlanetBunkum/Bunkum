@@ -133,7 +133,7 @@ public class BunkumHttpListener : IDisposable
         MemoryStream inputStream = new((int)context.ContentLength);
         if (context.ContentLength > 0)
         {
-            await stream.CopyToAsync(inputStream);
+            stream.ReadIntoStream(inputStream, (int)context.ContentLength);
             inputStream.Seek(0, SeekOrigin.Begin);
         }
         context.InputStream = inputStream;
