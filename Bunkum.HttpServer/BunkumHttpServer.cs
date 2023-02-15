@@ -334,8 +334,8 @@ public class BunkumHttpServer
                 requestStopwatch.Stop();
 
                 this._logger.LogInfo(BunkumContext.Request, $"Served request to {context.RemoteEndpoint}: " +
-                                                          $"{context.ResponseCode} on " +
-                                                          $"{context.Method} '{context.Uri.PathAndQuery}' " +
+                                                          $"{(int)context.ResponseCode} {context.ResponseCode} on " +
+                                                          $"{context.Method.ToString().ToUpper()} '{context.Uri.PathAndQuery}' " +
                                                           $"({requestStopwatch.ElapsedMilliseconds}ms)");
 
                 await context.FlushResponseAndClose();

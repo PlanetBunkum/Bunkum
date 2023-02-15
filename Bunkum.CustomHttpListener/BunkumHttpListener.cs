@@ -63,12 +63,8 @@ public class BunkumHttpListener : IDisposable
     {
         if (this._socket == null)
             throw new InvalidOperationException("Cannot wait for a connection when we are not listening");
-        
-        this._logger.LogTrace(HttpLogContext.Request, "Waiting for connection...");
 
         Socket client = await this._socket.AcceptAsync();
-        this._logger.LogDebug(HttpLogContext.Request, "Client connected from " + client.RemoteEndPoint);
-
         NetworkStream stream = new(client);
 
         string[] requestLineSplit = ReadRequestLine(stream);
