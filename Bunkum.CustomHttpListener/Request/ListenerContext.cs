@@ -21,6 +21,7 @@ public class ListenerContext
     public readonly Dictionary<string, string> ResponseHeaders = new();
 
     public readonly NameValueCollection Cookies = new();
+    public NameValueCollection Query { get; internal set; }
 
     private bool _socketClosed;
     internal bool SocketClosed => this._socketClosed || !this._socket.Connected;

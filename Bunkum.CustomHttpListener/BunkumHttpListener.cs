@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Web;
 using Bunkum.CustomHttpListener.Extensions;
 using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.CustomHttpListener.Request;
@@ -127,9 +128,14 @@ public class BunkumHttpListener : IDisposable
             }
         }
 
+        context.Query = HttpUtility.ParseQueryString(context.Uri.Query);
+
         MemoryStream inputStream = new((int)context.ContentLength);
-        await stream.CopyToAsync(inputStream);
-        inputStream.Seek(0, SeekOrigin.Begin);
+        if (context.ContentLength > 0)
+        {
+            await stream.CopyToAsync(inputStream);
+            inputStream.Seek(0, SeekOrigin.Begin);
+        }
         context.InputStream = inputStream;
 
         return context;

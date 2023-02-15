@@ -175,7 +175,7 @@ public class BunkumHttpServer
                         new RequestContext // 1st argument is always the request context. This is fact, and is backed by an analyzer.
                         {
                             RequestStream = body,
-                            QueryString = context.QueryString,
+                            QueryString = context.Query,
                             Url = context.Uri,
                             Logger = this._logger,
                             DataStore = this._dataStore,
