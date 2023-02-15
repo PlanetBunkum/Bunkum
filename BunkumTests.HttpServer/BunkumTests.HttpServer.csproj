@@ -27,6 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Bunkum.CustomHttpListener\Bunkum.CustomHttpListener.csproj" />
       <ProjectReference Include="..\Bunkum.HttpServer\Bunkum.HttpServer.csproj" />
       <ProjectReference Include="..\Bunkum.Analyzers\Bunkum.Analyzers.csproj">
           <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
