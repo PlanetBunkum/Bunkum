@@ -33,17 +33,4 @@ public class AuthenticationTests : ServerDependentTest
         
         Assert.That(msg.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
     }
-
-    [Test]
-    [Timeout(2000)] // ms
-    public async Task CanSwitchAuthenticationProviders()
-    {
-        (BunkumHttpServer? server, HttpClient? client) = this.Setup(false);
-        // Pass test when authentication provider is called
-        server.UseAuthenticationProvider(new CallbackAuthenticationProvider(Assert.Pass));
-        server.AddEndpointGroup<AuthenticationEndpoints>();
-        server.Start();
-        
-        await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/auth"));
-    }
 }

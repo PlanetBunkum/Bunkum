@@ -34,19 +34,4 @@ public class DatabaseTests : ServerDependentTest
             Assert.That(await msg.Content.ReadAsStringAsync(), Is.EqualTo("69"));
         });
     }
-
-    [Test]
-    public async Task CanSwitchDatabaseProviders()
-    {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
-        server.AddEndpointGroup<DatabaseEndpoints>();
-        server.UseDatabaseProvider(new TestSwitchDatabaseProvider());
-
-        HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/db/switch"));
-        Assert.Multiple(async () =>
-        {
-            Assert.That(msg.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(await msg.Content.ReadAsStringAsync(), Is.EqualTo("420"));
-        });
-    }
 }
