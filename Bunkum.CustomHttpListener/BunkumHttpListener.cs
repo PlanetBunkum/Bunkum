@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 using Bunkum.CustomHttpListener.Extensions;
 using Bunkum.CustomHttpListener.Parsing;
@@ -35,10 +36,17 @@ public class BunkumHttpListener : IDisposable
     {
         if (this._socket != null) throw new InvalidOperationException("Cannot start listening when we are already doing so");
 
-        IPAddress host = Dns.GetHostEntry(this._listenEndpoint.Host, AddressFamily.InterNetwork).AddressList[0];
+        IPAddress host;
+        
+        // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
+        if (Regex.IsMatch(this._listenEndpoint.Host, @"^[a-zA-Z]+$")) // If host contains letters
+            host = Dns.GetHostEntry(this._listenEndpoint.Host, AddressFamily.InterNetwork).AddressList[0];
+        else
+            host = IPAddress.Parse(this._listenEndpoint.Host);
+
         IPEndPoint listenEndpoint = new(host, this._listenEndpoint.Port);
 
-        this._socket = new Socket(listenEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        this._socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         
         this._socket.Bind(listenEndpoint);
         this._socket.Listen(128);
