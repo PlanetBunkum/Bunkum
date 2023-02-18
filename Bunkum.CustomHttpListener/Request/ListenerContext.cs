@@ -56,7 +56,7 @@ public class ListenerContext
     private readonly MemoryStream _responseData = new();
     private int _responseLength;
 
-    public void Write(string str) => this.Write(Encoding.UTF8.GetBytes(str));
+    public void Write(string str) => this.Write(Encoding.Default.GetBytes(str));
     public void Write(byte[] buffer)
     {
         this._responseData.Write(buffer);

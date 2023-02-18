@@ -5,7 +5,7 @@ namespace Bunkum.HttpServer.Serialization;
 
 public class BunkumXmlTextWriter : XmlTextWriter
 {
-    public BunkumXmlTextWriter(Stream stream) : base(stream, Encoding.UTF8)
+    public BunkumXmlTextWriter(Stream stream) : base(stream, Encoding.Default)
     { }
 
     public override void WriteEndElement()
