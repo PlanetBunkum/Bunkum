@@ -42,7 +42,7 @@ public class BunkumHttpServer
     // ReSharper disable ConvertToConstant.Global
     // ReSharper disable MemberCanBePrivate.Global
     // ReSharper disable FieldCanBeMadeReadOnly.Global
-    public EventHandler<ListenerContext> NotFound;
+    public EventHandler<ListenerContext>? NotFound;
 
     public bool AssumeAuthenticationRequired = false;
     public bool UseDigestSystem = false;
@@ -55,13 +55,11 @@ public class BunkumHttpServer
     // Length was taken from PS3 and PS4 digest keys
     public const string DigestKey = "CustomServerDigest";
 
-    public BunkumHttpServer(Uri listenEndpoint)
+    public BunkumHttpServer(Uri? listenEndpoint = null)
     {
         this._logger = new LoggerContainer<BunkumContext>();
         this._logger.RegisterLogger(new ConsoleLogger());
         
-        this._listener = new BunkumHttpListener(listenEndpoint);
-
         this._logger.LogInfo(BunkumContext.Startup, $"Bunkum is storing its data at {BunkumFileSystem.DataDirectory}.");
         if (!BunkumFileSystem.UsingCustomDirectory)
         {
@@ -69,6 +67,17 @@ public class BunkumHttpServer
         }
 
         this._bunkumConfig = Config.LoadFromFile<BunkumConfig>("bunkum.json", this._logger);
+
+        if (listenEndpoint != null)
+        {
+            this._logger.LogDebug(BunkumContext.Startup, $"Using hardcoded listen endpoint {listenEndpoint}");
+        }
+        else
+        {
+            listenEndpoint = new Uri($"http://{this._bunkumConfig.ListenHost}:{this._bunkumConfig.ListenPort}");
+        }
+        
+        this._listener = new BunkumHttpListener(listenEndpoint);
     }
 
     public void Start()
@@ -89,10 +98,10 @@ public class BunkumHttpServer
         stopwatch.Start();
         
         this._logger.LogInfo(BunkumContext.Startup, "Starting up...");
-        if (this._authenticationProvider is DummyAuthenticationProvider)
+        if (this._authenticationProvider is DummyAuthenticationProvider && this.AssumeAuthenticationRequired)
         {
             this._logger.LogWarning(BunkumContext.Startup, "The server was started with a dummy authentication provider. " +
-                                                            "If your endpoints rely on authentication, users will always have full access.");
+                                                            "If your application relies on authentication, users will always have full access.");
         }
         
         this._logger.LogDebug(BunkumContext.Startup, "Initializing database provider...");
