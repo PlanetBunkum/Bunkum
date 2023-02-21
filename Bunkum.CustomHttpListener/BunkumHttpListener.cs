@@ -29,7 +29,8 @@ public class BunkumHttpListener : IDisposable
         this._logger.RegisterLogger(new ConsoleLogger());
         
         this._logger.LogInfo(HttpLogContext.Startup, "Internal server is listening at URL " + listenEndpoint);
-        this._logger.LogInfo(HttpLogContext.Startup, "Do not use the above URL to patch!");
+        this._logger.LogInfo(HttpLogContext.Startup, "The above URL is probably not the URL you should use to patch. " +
+                                                     "See https://littlebigrefresh.github.io/Docs/patch-url for more information.");
     }
 
     public void StartListening()
