@@ -199,9 +199,9 @@ public class BunkumHttpServer
                         // Pass in the request body as a parameter
                         if (param.Name == "body")
                         {
-                            // If the request has no body and we have a body parameter, then it's probably safe to assume it's required.
+                            // If the request has no body and we have a body parameter, then it's probably safe to assume it's required unless otherwise explicitly stated.
                             // Fire a bad request back if this is the case.
-                            if (!context.HasBody)
+                            if (!context.HasBody && !method.HasCustomAttribute<AllowNullAttribute>())
                                 return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
 
                             if(paramType == typeof(Stream)) invokeList.Add(body);
