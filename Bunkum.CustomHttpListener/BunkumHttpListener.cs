@@ -100,6 +100,7 @@ public class BunkumHttpListener : IDisposable
         Method parsedMethod = MethodUtils.FromString(method);
         if (parsedMethod == Method.Invalid)
         {
+            this._logger.LogWarning(HttpLogContext.Request, "Rejected request that sent invalid method " + method);
             await context.SendResponse(HttpStatusCode.BadRequest);
             return null;
         }
@@ -116,6 +117,7 @@ public class BunkumHttpListener : IDisposable
 
         if (context.RequestHeaders["Host"] == null)
         {
+            this._logger.LogWarning(HttpLogContext.Request, "Rejected request without Host header");
             await context.SendResponse(HttpStatusCode.BadRequest);
             return null;
         }

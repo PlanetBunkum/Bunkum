@@ -201,8 +201,11 @@ public class BunkumHttpServer
                         {
                             // If the request has no body and we have a body parameter, then it's probably safe to assume it's required unless otherwise explicitly stated.
                             // Fire a bad request back if this is the case.
-                            if (!context.HasBody && !method.HasCustomAttribute<AllowNullAttribute>())
+                            if (!context.HasBody && !method.HasCustomAttribute<AllowEmptyBodyAttribute>())
+                            {
+                                this._logger.LogWarning(BunkumContext.Request, "Rejecting request due to empty body");
                                 return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
+                            }
 
                             if(paramType == typeof(Stream)) invokeList.Add(body);
                             else if(paramType == typeof(string)) invokeList.Add(Encoding.Default.GetString(body.GetBuffer()));
@@ -223,7 +226,11 @@ public class BunkumHttpServer
                                 }
                             }
                             // We can't find a valid type to send or deserialization failed
-                            else return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
+                            else
+                            {
+                                this._logger.LogWarning(BunkumContext.Request, "Rejecting request, couldn't find a valid type to send");
+                                return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
+                            }
 
                             body.Seek(0, SeekOrigin.Begin);
 
