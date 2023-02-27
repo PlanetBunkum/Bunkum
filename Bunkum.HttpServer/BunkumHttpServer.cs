@@ -188,6 +188,9 @@ public class BunkumHttpServer
                             Url = context.Uri,
                             Logger = this._logger,
                             DataStore = this._dataStore,
+                            Cookies = context.Cookies,
+                            RemoteEndpoint = context.RemoteEndpoint,
+                            Method = context.Method,
                         },
                     };
 
