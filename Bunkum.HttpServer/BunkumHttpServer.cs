@@ -19,6 +19,7 @@ using Bunkum.HttpServer.Extensions;
 using Bunkum.HttpServer.Responses;
 using Bunkum.HttpServer.Storage;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using NotEnoughLogs;
 using NotEnoughLogs.Loggers;
 
@@ -228,10 +229,25 @@ public class BunkumHttpServer
                                     return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
                                 }
                             }
+                            else if (attribute.ContentType == ContentType.Json)
+                            {
+                                try
+                                {
+                                    string bodyStr = Encoding.Default.GetString(body.GetBuffer());
+                                    object? obj = JsonConvert.DeserializeObject(bodyStr, paramType);
+                                    if (obj == null) throw new Exception();
+                                    invokeList.Add(obj);
+                                }
+                                catch (Exception e)
+                                {
+                                    this._logger.LogError(BunkumContext.UserContent, $"Failed to parse object data: {e}\n\nJSON: {body}");
+                                    return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
+                                }
+                            }
                             // We can't find a valid type to send or deserialization failed
                             else
                             {
-                                this._logger.LogWarning(BunkumContext.Request, "Rejecting request, couldn't find a valid type to send");
+                                this._logger.LogWarning(BunkumContext.Request, "Rejecting request, couldn't find a valid type to deserialize with");
                                 return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
                             }
 
