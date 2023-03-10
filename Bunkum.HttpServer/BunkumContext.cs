@@ -6,10 +6,18 @@ namespace Bunkum.HttpServer;
 public enum BunkumContext
 {
     Startup,
-    Request,
     Authentication,
-    UserContent,
-    Filter,
     Configuration,
+    Filter,
     Digest,
+    
+    Request,
+    Api,
+    Game,
+    
+    UserContent,
+    UserPhotos,
+    UserLevels,
+    LevelCategories,
+    LevelScores,
 }
