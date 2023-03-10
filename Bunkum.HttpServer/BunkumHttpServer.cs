@@ -169,10 +169,9 @@ public class BunkumHttpServer
                     
                     this._logger.LogTrace(BunkumContext.Request, $"Handling request with {group.GetType().Name}.{method.Name}");
 
-                    IUser? user = null;
+                    IUser? user = this._authenticationProvider.AuthenticateUser(context, database.Value);
                     if (method.GetCustomAttribute<AuthenticationAttribute>()?.Required ?? this.AssumeAuthenticationRequired)
                     {
-                        user = this._authenticationProvider.AuthenticateUser(context, database.Value);
                         if (user == null)
                             return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.Forbidden);
                     }
@@ -258,8 +257,6 @@ public class BunkumHttpServer
                         
                         if (paramType.IsAssignableTo(typeof(IUser)))
                         {
-                            // Users will always be non-null at this point. Once again, this is backed by an analyzer.
-                            Debug.Assert(user != null);
                             invokeList.Add(user);
                         }
                         else if(paramType.IsAssignableTo(typeof(IDatabaseContext)))
