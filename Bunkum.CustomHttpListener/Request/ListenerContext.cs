@@ -12,7 +12,7 @@ namespace Bunkum.CustomHttpListener.Request;
 public class ListenerContext
 {
     private readonly Socket _socket;
-    public MemoryStream InputStream { get; internal set; }
+    public MemoryStream InputStream { get; internal set; } = null!;
 
     public Method Method { get; internal set; }
     public Uri Uri { get; internal set; } = null!;
@@ -21,12 +21,12 @@ public class ListenerContext
     public readonly Dictionary<string, string> ResponseHeaders = new();
 
     public readonly NameValueCollection Cookies = new();
-    public NameValueCollection Query { get; internal set; }
+    public NameValueCollection Query { get; internal set; } = null!;
 
     private bool _socketClosed;
     internal bool SocketClosed => this._socketClosed || !this._socket.Connected;
 
-    public EndPoint RemoteEndpoint;
+    public EndPoint RemoteEndpoint = null!;
 
     public long ContentLength
     {
@@ -48,22 +48,25 @@ public class ListenerContext
             return true;
         }
     }
-    
+
     // Response
     public HttpStatusCode ResponseCode = HttpStatusCode.OK;
     public ContentType? ResponseType;
 
-    private readonly MemoryStream _responseData = new();
     private int _responseLength;
 
+    // ReSharper disable once MemberCanBePrivate.Global
+    public MemoryStream ResponseStream { get; } = new();
+
     public void Write(string str) => this.Write(Encoding.Default.GetBytes(str));
+    
     public void Write(byte[] buffer)
     {
-        this._responseData.Write(buffer);
+        this.ResponseStream.Write(buffer);
         this._responseLength += buffer.Length;
     }
     
-    public ListenerContext(Socket socket)
+    internal ListenerContext(Socket socket)
     {
         this._socket = socket;
     }
@@ -76,7 +79,7 @@ public class ListenerContext
         if(this._responseLength != 0)
             this.ResponseHeaders.Add("Content-Length", this._responseLength.ToString());
 
-        await this.SendResponse(this.ResponseCode, this._responseData.GetBuffer());
+        await this.SendResponse(this.ResponseCode, this.ResponseStream.GetBuffer());
     }
 
     internal async Task SendResponse(HttpStatusCode code, byte[]? data = null)
@@ -97,7 +100,7 @@ public class ListenerContext
         this.CloseSocket();
     }
 
-    internal void CloseSocket()
+    private void CloseSocket()
     {
         if (this.SocketClosed) return;
 

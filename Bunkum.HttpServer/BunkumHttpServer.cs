@@ -1,11 +1,8 @@
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Reflection;
 using System.Security.Cryptography;
-using System.Text;
-using System.Xml.Serialization;
 using Bunkum.CustomHttpListener;
 using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.CustomHttpListener.Request;
@@ -15,11 +12,9 @@ using Bunkum.HttpServer.Configuration;
 using Bunkum.HttpServer.Database;
 using Bunkum.HttpServer.Database.Dummy;
 using Bunkum.HttpServer.Endpoints;
+using Bunkum.HttpServer.Endpoints.Middlewares;
 using Bunkum.HttpServer.Extensions;
-using Bunkum.HttpServer.Responses;
 using Bunkum.HttpServer.Storage;
-using JetBrains.Annotations;
-using Newtonsoft.Json;
 using NotEnoughLogs;
 using NotEnoughLogs.Loggers;
 
@@ -43,18 +38,13 @@ public class BunkumHttpServer
     // ReSharper disable ConvertToConstant.Global
     // ReSharper disable MemberCanBePrivate.Global
     // ReSharper disable FieldCanBeMadeReadOnly.Global
-    public EventHandler<ListenerContext>? NotFound;
-
     public bool AssumeAuthenticationRequired = false;
-    public bool UseDigestSystem = false;
     // ReSharper restore ConvertToConstant.Global
     // ReSharper restore ConvertToConstant.Global
     // ReSharper restore MemberCanBePrivate.Global
     // ReSharper restore FieldCanBeMadeReadOnly.Global
 
-    // Should be 19 characters (or less maybe?)
-    // Length was taken from PS3 and PS4 digest keys
-    public const string DigestKey = "CustomServerDigest";
+    private readonly List<IMiddleware> _middlewares = new();
 
     public BunkumHttpServer(Uri? listenEndpoint = null)
     {
@@ -147,166 +137,6 @@ public class BunkumHttpServer
         // ReSharper disable once FunctionNeverReturns
     }
 
-    [Pure]
-    private Response? InvokeEndpointByRequest(ListenerContext context, Lazy<IDatabaseContext> database, MemoryStream body)
-    {
-        foreach (EndpointGroup group in this._endpoints)
-        {
-            foreach (MethodInfo method in group.GetType().GetMethods())
-            {
-                ImmutableArray<EndpointAttribute> attributes = method.GetCustomAttributes<EndpointAttribute>().ToImmutableArray();
-                if(attributes.Length == 0) continue;
-
-                foreach (EndpointAttribute attribute in attributes)
-                {
-                    if (!attribute.UriMatchesRoute(
-                            context.Uri,
-                            context.Method,
-                            out Dictionary<string, string> parameters))
-                    {
-                        continue;
-                    }
-                    
-                    this._logger.LogTrace(BunkumContext.Request, $"Handling request with {group.GetType().Name}.{method.Name}");
-
-                    IUser? user = this._authenticationProvider.AuthenticateUser(context, database.Value);
-                    if (method.GetCustomAttribute<AuthenticationAttribute>()?.Required ?? this.AssumeAuthenticationRequired)
-                    {
-                        if (user == null)
-                            return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.Forbidden);
-                    }
-
-                    HttpStatusCode nullCode = method.GetCustomAttribute<NullStatusCodeAttribute>()?.StatusCode ??
-                                              HttpStatusCode.NotFound;
-
-                    // Build list to invoke endpoint method with
-                    List<object?> invokeList = new() { 
-                        new RequestContext // 1st argument is always the request context. This is fact, and is backed by an analyzer.
-                        {
-                            RequestStream = body,
-                            QueryString = context.Query,
-                            Url = context.Uri,
-                            Logger = this._logger,
-                            DataStore = this._dataStore,
-                            Cookies = context.Cookies,
-                            RemoteEndpoint = context.RemoteEndpoint,
-                            Method = context.Method,
-                        },
-                    };
-
-                    // Next, lets iterate through the method's arguments and add some based on what we find.
-                    foreach (ParameterInfo param in method.GetParameters().Skip(1))
-                    {
-                        Type paramType = param.ParameterType;
-
-                        // Pass in the request body as a parameter
-                        if (param.Name == "body")
-                        {
-                            // If the request has no body and we have a body parameter, then it's probably safe to assume it's required unless otherwise explicitly stated.
-                            // Fire a bad request back if this is the case.
-                            if (!context.HasBody && !method.HasCustomAttribute<AllowEmptyBodyAttribute>())
-                            {
-                                this._logger.LogWarning(BunkumContext.Request, "Rejecting request due to empty body");
-                                return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
-                            }
-
-                            if(paramType == typeof(Stream)) invokeList.Add(body);
-                            else if(paramType == typeof(string)) invokeList.Add(Encoding.Default.GetString(body.GetBuffer()));
-                            else if(paramType == typeof(byte[])) invokeList.Add(body.GetBuffer());
-                            else if(attribute.ContentType == ContentType.Xml)
-                            {
-                                XmlSerializer serializer = new(paramType);
-                                try
-                                {
-                                    object? obj = serializer.Deserialize(new StreamReader(body));
-                                    if (obj == null) throw new Exception();
-                                    invokeList.Add(obj);
-                                }
-                                catch (Exception e)
-                                {
-                                    this._logger.LogError(BunkumContext.UserContent, $"Failed to parse object data: {e}\n\nXML: {body}");
-                                    return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
-                                }
-                            }
-                            else if (attribute.ContentType == ContentType.Json)
-                            {
-                                try
-                                {
-                                    string bodyStr = Encoding.Default.GetString(body.GetBuffer());
-                                    object? obj = JsonConvert.DeserializeObject(bodyStr, paramType);
-                                    if (obj == null) throw new Exception();
-                                    invokeList.Add(obj);
-                                }
-                                catch (Exception e)
-                                {
-                                    this._logger.LogError(BunkumContext.UserContent, $"Failed to parse object data: {e}\n\nJSON: {body}");
-                                    return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
-                                }
-                            }
-                            // We can't find a valid type to send or deserialization failed
-                            else
-                            {
-                                this._logger.LogWarning(BunkumContext.Request, "Rejecting request, couldn't find a valid type to deserialize with");
-                                return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
-                            }
-
-                            body.Seek(0, SeekOrigin.Begin);
-
-                            continue;
-                        }
-                        
-                        if (paramType.IsAssignableTo(typeof(IUser)))
-                        {
-                            invokeList.Add(user);
-                        }
-                        else if(paramType.IsAssignableTo(typeof(IDatabaseContext)))
-                        {
-                            // Pass in a database context if the endpoint needs one.
-                            invokeList.Add(database.Value);
-                        }
-                        else if (paramType.IsAssignableTo(this._configType))
-                        {
-                            if (this._config == null)
-                                throw new InvalidOperationException("A config was attempted to be passed into an endpoint, but there was no config set on startup!");
-                            
-                            invokeList.Add(this._config);
-                        }
-                        else if (paramType.IsAssignableTo(typeof(BunkumConfig)))
-                        {
-                            invokeList.Add(this._bunkumConfig);
-                        }
-                        else if (paramType == typeof(string))
-                        {
-                            // Attempt to pass in a route parameter based on the method parameter's name
-                            invokeList.Add(parameters!.GetValueOrDefault(param.Name));
-                        }
-                        else
-                        {
-                            // We don't know what this param is or what to do with it, so pass in null.
-                            // Better than not calling the endpoint and throwing an exception.
-                            invokeList.Add(null);
-                        }
-                    }
-
-                    object? val = method.Invoke(group, invokeList.ToArray());
-
-                    // ReSharper disable once ConvertSwitchStatementToSwitchExpression
-                    switch (val)
-                    {
-                        case null:
-                            return new Response(Array.Empty<byte>(), attribute.ContentType, nullCode);
-                        case Response response:
-                            return response;
-                        default:
-                            return new Response(val, attribute.ContentType);
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
     private async Task HandleRequest(ListenerContext context, Lazy<IDatabaseContext> database)
     {
         Stopwatch requestStopwatch = new();
@@ -314,30 +144,43 @@ public class BunkumHttpServer
 
         try
         {
-            string path = context.Uri.AbsolutePath;
+            // if (this.UseDigestSystem) this.VerifyDigestRequest(context, context.InputStream);
+            Debug.Assert(context.InputStream.Position == 0); // should be at position 0 before we pass to the middleware chain
+            
+            // Setup a base middleware that calls Endpoints.
+            // Passing in these parameters is a little janky in my opinion, but it gets the job done. 
+            MainMiddleware mainMiddleware = new(this._endpoints,
+                this._logger,
+                this._authenticationProvider,
+                this._dataStore,
+                this._bunkumConfig,
+                this._config,
+                this._configType,
+                this.AssumeAuthenticationRequired);
 
-            if (this.UseDigestSystem) this.VerifyDigestRequest(context, context.InputStream);
-            Debug.Assert(context.InputStream.Position == 0); // should be at position 0 before we pass to the application's endpoints
-
-            // Find a endpoint using the request context, pass in database and our MemoryStream
-            Response? resp = this.InvokeEndpointByRequest(context, database, context.InputStream);
-
-            if (resp == null)
+            Action next = () => { mainMiddleware.HandleRequest(context, database, null!); };
+            
+            foreach (IMiddleware middleware in this._middlewares)
             {
-                context.ResponseType = ContentType.Plaintext;
-                context.ResponseCode = HttpStatusCode.NotFound;
-                context.Write("Not found: " + path);
+                // Without this copy, next won't be the same when we invoke next() in the middleware
+                // By creating the copy, we ensure the pipeline stays in order.
+                // https://www.jetbrains.com/help/rider/AccessToModifiedClosure.html
+                Action nextCopy = next;
                 
-                this.NotFound?.Invoke(this, context);
+                // Every middleware triggers the last when next() is called.
+                // For example:
+                //   server.AddMiddleware<MiddlewareA>();
+                //   server.AddMiddleware<MiddlewareB>();
+                // results in:
+                //   MiddlewareB -> MiddlewareA -> mainMiddleware
+                // since adding MiddlewareB encapsulates the previous middleware, MiddlewareA.
+                //
+                // It's important to note that middlewares can "halt" this chain by simply not calling next().
+                // This is by design.
+                next = () => { middleware.HandleRequest(context, database, nextCopy); };
             }
-            else
-            {
-                context.ResponseType = resp.Value.ContentType;
-                context.ResponseCode = resp.Value.StatusCode;
-                
-                if(this.UseDigestSystem) this.SetDigestResponse(context, new MemoryStream(resp.Value.Data));
-                context.Write(resp.Value.Data);
-            }
+
+            next(); // Trigger the pipeline
         }
         catch (Exception e)
         {
@@ -379,64 +222,6 @@ public class BunkumHttpServer
         }
     }
 
-    // Referenced from Project Lighthouse
-    // https://github.com/LBPUnion/ProjectLighthouse/blob/d16132f67f82555ef636c0dabab5aabf36f57556/ProjectLighthouse.Servers.GameServer/Middlewares/DigestMiddleware.cs
-    // https://github.com/LBPUnion/ProjectLighthouse/blob/19ea44e0e2ff5f2ebae8d9dfbaf0f979720bd7d9/ProjectLighthouse/Helpers/CryptoHelper.cs#L35
-    // TODO: make this non-lbp specific, or implement middlewares and move to game server
-    private bool VerifyDigestRequest(ListenerContext context, Stream body)
-    {
-        Debug.Assert(this.UseDigestSystem, "Tried to verify digest request when digest system is disabled");
-        
-        string url = context.Uri.AbsolutePath;
-        string auth = $"{context.Cookies["MM_AUTH"] ?? string.Empty}";
-
-        string digestResponse = this.CalculateDigest(url, body, auth);
-
-        string digestHeader = !url.StartsWith("/lbp/upload/") ? "X-Digest-A" : "X-Digest-B";
-        string clientDigest = context.RequestHeaders[digestHeader] ?? string.Empty;
-        
-        context.ResponseHeaders["X-Digest-B"] = digestResponse;
-        if (clientDigest == digestResponse) return true;
-        
-        this._logger.LogWarning(BunkumContext.Digest, $"Digest failed: {clientDigest} != {digestResponse}");
-        return false;
-    }
-
-    private void SetDigestResponse(ListenerContext context, Stream body)
-    {
-        Debug.Assert(this.UseDigestSystem, "Tried to set digest response when digest system is disabled");
-        
-        string url = context.Uri.AbsolutePath;
-        string auth = $"{context.Cookies["MM_AUTH"] ?? string.Empty}";
-
-        string digestResponse = this.CalculateDigest(url, body, auth);
-        
-        context.ResponseHeaders["X-Digest-A"] = digestResponse;
-    }
-
-    private string CalculateDigest(string url, Stream body, string auth)
-    {
-        using MemoryStream ms = new();
-
-        // FIXME: Directly referencing LBP in Bunkum
-        if (!url.StartsWith("/lbp/upload/"))
-        {
-            // get request body
-            body.CopyTo(ms);
-            body.Seek(0, SeekOrigin.Begin);
-        }
-        
-        ms.WriteString(auth);
-        ms.WriteString(url);
-        ms.WriteString(DigestKey);
-        
-        ms.Position = 0;
-        using SHA1 sha = SHA1.Create();
-        string digestResponse = Convert.ToHexString(sha.ComputeHash(ms)).ToLower();
-
-        return digestResponse;
-    }
-    
     private void AddEndpointGroup(Type type)
     {
         EndpointGroup? doc = (EndpointGroup?)Activator.CreateInstance(type);
@@ -457,6 +242,8 @@ public class BunkumHttpServer
         foreach (Type type in types) this.AddEndpointGroup(type);
     }
 
+    // ReSharper disable UnusedMember.Global
+    // ReSharper disable MemberCanBePrivate.Global
     public void UseAuthenticationProvider(IAuthenticationProvider<IUser> provider)
     {
         this._authenticationProvider = provider;
@@ -479,4 +266,7 @@ public class BunkumHttpServer
         this._config = Config.LoadFromFile<TConfig>(filename, this._logger);
         this._configType = typeof(TConfig);
     }
+
+    public void AddMiddleware<TMiddleware>() where TMiddleware : IMiddleware, new() => this.AddMiddleware(new TMiddleware());
+    public void AddMiddleware<TMiddleware>(TMiddleware middleware) where TMiddleware : IMiddleware => this._middlewares.Add(middleware);
 }
