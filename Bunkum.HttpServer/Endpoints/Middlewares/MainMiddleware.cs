@@ -216,6 +216,12 @@ internal class MainMiddleware : IMiddleware
                         }
                     }
 
+                    long? cacheSeconds;
+                    if ((cacheSeconds = method.GetCustomAttribute<ClientCacheResponseAttribute>()?.Seconds) != null)
+                    {
+                        context.ResponseHeaders.Add("Cache-Control", "max-age=" + cacheSeconds.Value);
+                    }
+
                     object? val = method.Invoke(group, invokeList.ToArray());
 
                     // ReSharper disable once ConvertSwitchStatementToSwitchExpression
