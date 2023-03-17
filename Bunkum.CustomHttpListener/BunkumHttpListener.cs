@@ -86,6 +86,7 @@ public class BunkumHttpListener : IDisposable
             {
                 ["Server"] = "Bunkum",
                 ["Connection"] = "close",
+                ["Date"] = DateTime.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'"),
             },
             RemoteEndpoint = client.RemoteEndPoint!,
         };
