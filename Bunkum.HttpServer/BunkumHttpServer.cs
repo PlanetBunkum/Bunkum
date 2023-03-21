@@ -121,19 +121,30 @@ public class BunkumHttpServer
     private async Task Block()
     {
         while (true)
-        {
             await this._listener.WaitForConnectionAsync(async context => await Task.Factory.StartNew(async () =>
             {
-                // Create a new lazy to get a database context, if the value is never accessed, a database instance is never passed
-                Lazy<IDatabaseContext> database = new(this._databaseProvider.GetContext());
-                
-                // Handle the request
-                await this.HandleRequest(context, database);
-                
-                if(database.IsValueCreated)
-                    database.Value.Dispose();
+                try
+                {
+                    // Create a new lazy to get a database context, if the value is never accessed, a database instance is never passed
+                    Lazy<IDatabaseContext> database = new(this._databaseProvider.GetContext());
+
+                    // Handle the request
+                    await this.HandleRequest(context, database);
+
+                    if (database.IsValueCreated)
+                        database.Value.Dispose();
+                }
+                catch (Exception e)
+                {
+                    this._logger.LogError(BunkumContext.Request, $"Failed to initialize request:\n{e}");
+                    context.ResponseCode = HttpStatusCode.InternalServerError;
+                    #if DEBUG
+                    context.Write(e.ToString());
+                    #else
+                    context.Write("Internal Server Error");
+                    #endif
+                }
             }));
-        }
         // ReSharper disable once FunctionNeverReturns
     }
 
