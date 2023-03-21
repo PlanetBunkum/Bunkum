@@ -38,8 +38,9 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="NotEnoughLogs" Version="1.0.3" />
     <ProjectReference Include="..\Bunkum.Analyzers\Bunkum.Analyzers.csproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
       <OutputItemType>Analyzer</OutputItemType>
+      <IncludeAssets>Bunkum.Analyzers.dll</IncludeAssets>
     </ProjectReference>
     <ProjectReference Include="..\Bunkum.CustomHttpListener\Bunkum.CustomHttpListener.csproj">
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
