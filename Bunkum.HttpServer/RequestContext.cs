@@ -21,4 +21,6 @@ public struct RequestContext
     
     public NameValueCollection QueryString;
     public NameValueCollection Cookies;
+    
+    public NameValueCollection RequestHeaders;
 }

@@ -119,6 +119,7 @@ internal class MainMiddleware : IMiddleware
                             Cookies = context.Cookies,
                             RemoteEndpoint = context.RemoteEndpoint,
                             Method = context.Method,
+                            RequestHeaders = context.RequestHeaders,
                         },
                     };
 
