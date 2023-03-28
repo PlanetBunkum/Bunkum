@@ -59,6 +59,7 @@ public class RoutingTests : ServerDependentTest
     [TestCase("{test}")]
     [TestCase("{input}")]
     [TestCase(";w'qas de'qed;'l.q';l3e2e")]
+    [TestCase("inline{input}")]
     // ReSharper restore StringLiteralTypo
     public async Task GetsRouteParameter(string text)
     {

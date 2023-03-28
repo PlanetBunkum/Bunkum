@@ -41,15 +41,45 @@ public class EndpointAttribute : Attribute
             string s = routeSplit[i];
             if (i != 0) fullRoute += '/';
             
-            if (s.StartsWith('{') && s.EndsWith('}'))
+            // if (s.StartsWith('{') && s.EndsWith('}'))
+            // {
+            //     this._parameterIndexes.Add(i, s.Substring(1, s.Length - 2));
+            //     fullRoute += '_';
+            // }
+            // else
+            // {
+            //     fullRoute += s;
+            // }
+
+            bool parsingParam = false;
+            string param = string.Empty;
+            
+            foreach (char c in s)
             {
-                this._parameterIndexes.Add(i, s.Substring(1, s.Length - 2));
-                fullRoute += '_';
+                if (parsingParam)
+                {
+                    if (c == '}')
+                    {
+                        this._parameterIndexes.Add(i, param);
+                        fullRoute += '_';
+                        parsingParam = false;
+                        continue;
+                    }
+                    
+                    param += c;
+                    continue;
+                }
+                
+                if (c == '{')
+                {
+                    parsingParam = true;
+                    continue;
+                }
+
+                fullRoute += c;
             }
-            else
-            {
-                fullRoute += s;
-            }
+
+            if (parsingParam) throw new ArgumentException("Route parameter was not closed");
         }
 
         this.FullRoute = fullRoute;
