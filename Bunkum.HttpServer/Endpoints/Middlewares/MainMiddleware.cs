@@ -106,6 +106,9 @@ internal class MainMiddleware : IMiddleware
 
                     HttpStatusCode nullCode = method.GetCustomAttribute<NullStatusCodeAttribute>()?.StatusCode ??
                                               HttpStatusCode.NotFound;
+                    
+                    HttpStatusCode okCode = method.GetCustomAttribute<SuccessStatusCodeAttribute>()?.StatusCode ??
+                                              HttpStatusCode.OK;
 
                     // Build list to invoke endpoint method with
                     List<object?> invokeList = new() { 
@@ -234,7 +237,7 @@ internal class MainMiddleware : IMiddleware
                         case Response response:
                             return response;
                         default:
-                            return new Response(val, attribute.ContentType);
+                            return new Response(val, attribute.ContentType, okCode);
                     }
                 }
             }
