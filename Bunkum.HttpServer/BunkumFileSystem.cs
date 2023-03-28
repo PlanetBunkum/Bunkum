@@ -1,8 +1,8 @@
 namespace Bunkum.HttpServer;
 
-internal static class BunkumFileSystem
+public static class BunkumFileSystem
 {
-    internal static readonly string DataDirectory;
+    public static readonly string DataDirectory;
     internal static readonly bool UsingCustomDirectory;
     
     static BunkumFileSystem()
