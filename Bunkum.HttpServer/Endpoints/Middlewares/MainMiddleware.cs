@@ -120,6 +120,7 @@ internal class MainMiddleware : IMiddleware
                             RemoteEndpoint = context.RemoteEndpoint,
                             Method = context.Method,
                             RequestHeaders = context.RequestHeaders,
+                            ResponseHeaders = context.ResponseHeaders,
                         },
                     };
 

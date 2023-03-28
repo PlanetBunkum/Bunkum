@@ -23,4 +23,5 @@ public struct RequestContext
     public NameValueCollection Cookies;
     
     public NameValueCollection RequestHeaders;
+    public Dictionary<string, string> ResponseHeaders;
 }
