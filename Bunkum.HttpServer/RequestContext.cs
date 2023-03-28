@@ -7,21 +7,21 @@ using NotEnoughLogs;
 
 namespace Bunkum.HttpServer;
 
-[SuppressMessage("ReSharper", "NotAccessedField.Global")] // fields are used by application
+[SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")] // props are used by application
 public struct RequestContext
 {
-    public EndPoint RemoteEndpoint;
-    public MemoryStream RequestStream;
+    public EndPoint RemoteEndpoint { get; internal set; }
+    public MemoryStream RequestStream { get; internal set; }
 
-    public Method Method;
-    public Uri Url;
+    public Method Method { get; internal set; }
+    public Uri Url { get; internal set; }
     
-    public LoggerContainer<BunkumContext> Logger;
-    public IDataStore DataStore;
+    public LoggerContainer<BunkumContext> Logger { get; internal set; }
+    public IDataStore DataStore { get; internal set; }
     
-    public NameValueCollection QueryString;
-    public NameValueCollection Cookies;
+    public NameValueCollection QueryString { get; internal set; }
+    public NameValueCollection Cookies { get; internal set; }
     
-    public NameValueCollection RequestHeaders;
-    public Dictionary<string, string> ResponseHeaders;
+    public NameValueCollection RequestHeaders { get; internal set; }
+    public Dictionary<string, string> ResponseHeaders { get; internal set; }
 }
