@@ -73,6 +73,8 @@ public struct Response
         this.Data = stream.ToArray();
     }
 
+    public static implicit operator Response(HttpStatusCode code) => new(code);
+
     public readonly HttpStatusCode StatusCode;
     public readonly ContentType ContentType;
     public readonly byte[] Data;
