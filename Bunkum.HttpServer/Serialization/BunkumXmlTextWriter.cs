@@ -3,6 +3,9 @@ using System.Xml;
 
 namespace Bunkum.HttpServer.Serialization;
 
+/// <summary>
+/// A custom XML text writer that strips namespaces and attributes from elements.
+/// </summary>
 public class BunkumXmlTextWriter : XmlTextWriter
 {
     public BunkumXmlTextWriter(Stream stream) : base(stream, Encoding.Default)

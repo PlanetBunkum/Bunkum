@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Reflection;
-using System.Security.Cryptography;
 using Bunkum.CustomHttpListener;
 using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.CustomHttpListener.Request;
@@ -13,13 +12,15 @@ using Bunkum.HttpServer.Database;
 using Bunkum.HttpServer.Database.Dummy;
 using Bunkum.HttpServer.Endpoints;
 using Bunkum.HttpServer.Endpoints.Middlewares;
-using Bunkum.HttpServer.Extensions;
 using Bunkum.HttpServer.Storage;
 using NotEnoughLogs;
 using NotEnoughLogs.Loggers;
 
 namespace Bunkum.HttpServer;
 
+/// <summary>
+/// The main class representing a Bunkum HTTP server and it's configuration.
+/// </summary>
 public class BunkumHttpServer
 {
     private readonly BunkumHttpListener _listener;
@@ -38,6 +39,13 @@ public class BunkumHttpServer
     // ReSharper disable ConvertToConstant.Global
     // ReSharper disable MemberCanBePrivate.Global
     // ReSharper disable FieldCanBeMadeReadOnly.Global
+    /// <summary>
+    /// Is authentication required for your endpoints?
+    /// If true, clients will receive 403 if your <see cref="IAuthenticationProvider{TUser}"/> does not return a user.
+    /// If false, endpoints will work as normal.
+    /// </summary>
+    /// <seealso cref="IAuthenticationProvider{TUser}"/>
+    /// <seealso cref="AuthenticationAttribute"/>
     public bool AssumeAuthenticationRequired = false;
     // ReSharper restore ConvertToConstant.Global
     // ReSharper restore ConvertToConstant.Global
@@ -272,6 +280,11 @@ public class BunkumHttpServer
 
     // TODO: Configuration hot reload
     // TODO: .ini? would be helpful as it supports comments and we can document in the file itself
+    /// <summary>
+    /// Defines a <see cref="Config"/> that is passed down to your endpoints.
+    /// </summary>
+    /// <param name="filename">What the config's filename should be stored as</param>
+    /// <typeparam name="TConfig">An object extending <see cref="Config"/> that represents your server's configuration.</typeparam>
     public void UseJsonConfig<TConfig>(string filename) where TConfig : Config, new()
     {
         this._config = Config.LoadFromFile<TConfig>(filename, this._logger);

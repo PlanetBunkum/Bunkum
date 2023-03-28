@@ -5,15 +5,25 @@ using NotEnoughLogs;
 
 namespace Bunkum.HttpServer.Configuration;
 
+/// <summary>
+/// A custom configuration file for a Bunkum server.
+/// If you're looking for Bunkum's base configuration, see <see cref="BunkumConfig"/>.
+/// </summary>
 [JsonObject(MemberSerialization.OptOut)]
 public abstract class Config
 {
     [JsonIgnore]
     private string? _filename;
 
+    /// <summary>
+    /// A number representing the schema version of your configuration. Start at 1, then change it when you make a change to your config class.
+    /// </summary>
     [JsonIgnore]
     public abstract int CurrentConfigVersion { get; }
     
+    /// <summary>
+    /// The configuration's current schema version. Do not touch this - you do not need to.
+    /// </summary>
     public abstract int Version { get; set; }
 
     /// <summary>

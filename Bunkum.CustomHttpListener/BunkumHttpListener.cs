@@ -12,6 +12,10 @@ using NotEnoughLogs.Loggers;
 
 namespace Bunkum.CustomHttpListener;
 
+/// <summary>
+/// A custom HTTP socket listener used by Bunkum's HTTP server.
+/// This probably isn't what you're looking for. 
+/// </summary>
 public class BunkumHttpListener : IDisposable
 {
     private readonly Uri _listenEndpoint;

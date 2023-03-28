@@ -1,5 +1,8 @@
 namespace Bunkum.HttpServer.Configuration;
 
+/// <summary>
+/// Bunkum's configuration file. Contains common settings.
+/// </summary>
 public class BunkumConfig : Config
 {
     public override int CurrentConfigVersion => 2;
