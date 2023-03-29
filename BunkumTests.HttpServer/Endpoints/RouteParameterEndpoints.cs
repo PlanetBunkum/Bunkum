@@ -17,4 +17,10 @@ public class RouteParameterEndpoints : EndpointGroup
     {
         return input + "," + inputOther;
     }
+    
+    [Endpoint("/inlineParam/inline{input}")]
+    public string InlineParameter(RequestContext context, string input)
+    {
+        return input;
+    }
 }

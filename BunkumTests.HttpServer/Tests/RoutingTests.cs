@@ -59,7 +59,6 @@ public class RoutingTests : ServerDependentTest
     [TestCase("{test}")]
     [TestCase("{input}")]
     [TestCase(";w'qas de'qed;'l.q';l3e2e")]
-    [TestCase("inline{input}")]
     // ReSharper restore StringLiteralTypo
     public async Task GetsRouteParameter(string text)
     {
@@ -67,6 +66,28 @@ public class RoutingTests : ServerDependentTest
         server.AddEndpointGroup<RouteParameterEndpoints>();
         
         HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/param/" + text));
+        Assert.Multiple(async () =>
+        {
+            Assert.That(msg.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(await msg.Content.ReadAsStringAsync(), Is.EqualTo(text));
+        });
+    }
+    
+    [Test]
+    // ReSharper disable StringLiteralTypo
+    [TestCase(";w'qas de'qed;'l.q';l3e2e")]
+    [TestCase("asdf")]
+    [TestCase("{test}")]
+    [TestCase("{input}")]
+    [TestCase(";w'qas de'qed;'l.q';l3e2e")]
+    [TestCase("798bb93e-82ad-4ac6-9611-31d64299b0c7")]
+    // ReSharper restore StringLiteralTypo
+    public async Task GetsInlineRouteParameter(string text)
+    {
+        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        server.AddEndpointGroup<RouteParameterEndpoints>();
+        
+        HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/inlineParam/inline" + text));
         Assert.Multiple(async () =>
         {
             Assert.That(msg.StatusCode, Is.EqualTo(HttpStatusCode.OK));

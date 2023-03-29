@@ -12,10 +12,22 @@ namespace Bunkum.HttpServer.Endpoints;
 public class EndpointAttribute : Attribute
 {
     public readonly string FullRoute;
-    private readonly Dictionary<int, string> _parameterIndexes = new();
+    private readonly Dictionary<int, RouteParam> _parameterIndexes = new();
 
     public readonly Method Method;
     public readonly ContentType ContentType;
+
+    private struct RouteParam
+    {
+        internal readonly int Skip;
+        internal readonly string Name;
+
+        internal RouteParam(int skip, string s)
+        {
+            this.Skip = skip;
+            this.Name = s;
+        }
+    }
 
     public EndpointAttribute(string route, Method method = Method.Get, ContentType contentType = ContentType.Plaintext)
     {
@@ -40,27 +52,18 @@ public class EndpointAttribute : Attribute
         {
             string s = routeSplit[i];
             if (i != 0) fullRoute += '/';
-            
-            // if (s.StartsWith('{') && s.EndsWith('}'))
-            // {
-            //     this._parameterIndexes.Add(i, s.Substring(1, s.Length - 2));
-            //     fullRoute += '_';
-            // }
-            // else
-            // {
-            //     fullRoute += s;
-            // }
 
             bool parsingParam = false;
             string param = string.Empty;
-            
+
+            int j = 0; // easier flow, this foreach uses lots of continues
             foreach (char c in s)
             {
                 if (parsingParam)
                 {
                     if (c == '}')
                     {
-                        this._parameterIndexes.Add(i, param);
+                        this._parameterIndexes.Add(i, new RouteParam(j, param));
                         fullRoute += '_';
                         parsingParam = false;
                         continue;
@@ -76,6 +79,7 @@ public class EndpointAttribute : Attribute
                     continue;
                 }
 
+                j++;
                 fullRoute += c;
             }
 
@@ -110,16 +114,18 @@ public class EndpointAttribute : Attribute
                 string s = routeSplit[i];
                 if (i != 0) fullRoute += '/';
                 
-                if (!this._parameterIndexes.TryGetValue(i, out string? paramName))
+                if (!this._parameterIndexes.TryGetValue(i, out RouteParam param))
                 {
                     fullRoute += s;
                 }
                 else
                 {
-                    Debug.Assert(paramName != null);
-                    parameters.Add(paramName, HttpUtility.UrlDecode(s));
-
-                    fullRoute += "_";
+                    string paramValue = s.Substring(param.Skip);
+                    string paramStart = s.Substring(0, param.Skip);
+                    
+                    parameters.Add(param.Name, HttpUtility.UrlDecode(paramValue));
+                    
+                    fullRoute += paramStart + '_';
                 }
             }
 
