@@ -120,12 +120,18 @@ public class EndpointAttribute : Attribute
                 }
                 else
                 {
-                    string paramValue = s.Substring(param.Skip);
-                    string paramStart = s.Substring(0, param.Skip);
-                    
-                    parameters.Add(param.Name, HttpUtility.UrlDecode(paramValue));
-                    
-                    fullRoute += paramStart + '_';
+                    try
+                    {
+                        string paramValue = s.Substring(param.Skip);
+                        string paramStart = s.Substring(0, param.Skip);
+                        
+                        parameters.Add(param.Name, HttpUtility.UrlDecode(paramValue));
+                        fullRoute += paramStart + '_';
+                    }
+                    catch
+                    {
+                        fullRoute += '_';
+                    }
                 }
             }
 
