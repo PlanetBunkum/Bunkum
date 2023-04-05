@@ -27,5 +27,8 @@ public class StorageTests
         
         Assert.True(this._dataStore.ExistsInStore("key"));
         Assert.That(this._dataStore.GetDataFromStore("key"), Is.EqualTo(this._value));
+        
+        this._dataStore.RemoveFromStore("key");
+        Assert.False(this._dataStore.ExistsInStore("key"));
     }
 }

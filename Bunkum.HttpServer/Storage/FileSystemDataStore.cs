@@ -26,4 +26,12 @@ public class FileSystemDataStore : IDataStore
     }
 
     public byte[] GetDataFromStore(string key) => File.ReadAllBytes(DataStoreDirectory + key);
+    public bool RemoveFromStore(string key)
+    {
+        if (!this.ExistsInStore(key)) return false;
+        
+        File.Delete(DataStoreDirectory + key);
+        return true;
+
+    }
 }

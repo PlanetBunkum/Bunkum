@@ -5,6 +5,7 @@ public class InMemoryDataStore : IDataStore
     private readonly Dictionary<string, byte[]> _data = new();
 
     public bool ExistsInStore(string key) => this._data.ContainsKey(key);
+    public bool RemoveFromStore(string key) => this._data.Remove(key);
 
     public bool WriteToStore(string key, byte[] data)
     {

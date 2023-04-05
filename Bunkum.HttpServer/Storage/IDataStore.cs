@@ -5,6 +5,7 @@ public interface IDataStore
     bool ExistsInStore(string key);
     bool WriteToStore(string key, byte[] data);
     byte[] GetDataFromStore(string key);
+    bool RemoveFromStore(string key);
 
     bool TryGetDataFromStore(string key, out byte[]? data)
     {
