@@ -22,7 +22,7 @@ internal class MainMiddleware : IMiddleware
     private readonly List<EndpointGroup> _endpoints;
     private readonly LoggerContainer<BunkumContext> _logger;
     
-    private readonly IAuthenticationProvider<IUser> _authenticationProvider;
+    private readonly IAuthenticationProvider<IUser, IToken> _authenticationProvider;
     private readonly bool _assumeAuthenticationRequired;
     
     private readonly IDataStore _dataStore;
@@ -32,7 +32,7 @@ internal class MainMiddleware : IMiddleware
     
     private readonly BunkumConfig _bunkumConfig;
     
-    public MainMiddleware(List<EndpointGroup> endpoints, LoggerContainer<BunkumContext> logger, IAuthenticationProvider<IUser> authenticationProvider, IDataStore dataStore, BunkumConfig bunkumConfig, Config? config, Type? configType, bool assumeAuthenticationRequired)
+    public MainMiddleware(List<EndpointGroup> endpoints, LoggerContainer<BunkumContext> logger, IAuthenticationProvider<IUser, IToken> authenticationProvider, IDataStore dataStore, BunkumConfig bunkumConfig, Config? config, Type? configType, bool assumeAuthenticationRequired)
     {
         this._endpoints = endpoints;
         this._logger = logger;
@@ -97,7 +97,9 @@ internal class MainMiddleware : IMiddleware
                     
                     this._logger.LogTrace(BunkumContext.Request, $"Handling request with {group.GetType().Name}.{method.Name}");
 
-                    IUser? user = this._authenticationProvider.AuthenticateUser(context, database.Value);
+                    IUser? user = this._authenticationProvider.AuthenticateUser(context, database);
+                    Lazy<IToken?> token = new(() => this._authenticationProvider.AuthenticateToken(context, database));
+                    
                     if (method.GetCustomAttribute<AuthenticationAttribute>()?.Required ?? this._assumeAuthenticationRequired)
                     {
                         if (user == null)
@@ -191,6 +193,10 @@ internal class MainMiddleware : IMiddleware
                         if (paramType.IsAssignableTo(typeof(IUser)))
                         {
                             invokeList.Add(user);
+                        }
+                        else if (paramType.IsAssignableTo(typeof(IToken)))
+                        {
+                            invokeList.Add(token.Value);
                         }
                         else if(paramType.IsAssignableTo(typeof(IDatabaseContext)))
                         {

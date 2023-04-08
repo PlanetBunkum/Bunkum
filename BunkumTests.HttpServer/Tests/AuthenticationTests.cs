@@ -33,4 +33,31 @@ public class AuthenticationTests : ServerDependentTest
         
         Assert.That(msg.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
     }
+    
+    [Test]
+    public async Task TokenWorksWhenAuthenticated()
+    {
+        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        server.AddEndpointGroup<AuthenticationEndpoints>();
+        
+        HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/token"));
+        
+        Assert.Multiple(async () =>
+        {
+            Assert.That(msg.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(await msg.Content.ReadAsStringAsync(), Is.EqualTo("DummyToken"));
+        });
+    }
+    
+    [Test]
+    public async Task TokenFailsWhenNotAuthenticated()
+    {
+        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        server.AddEndpointGroup<AuthenticationEndpoints>();
+        
+        client.DefaultRequestHeaders.Add("dummy-skip-auth", "true");
+        HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/token"));
+        
+        Assert.That(msg.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+    }
 }

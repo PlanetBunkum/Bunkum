@@ -27,7 +27,7 @@ public class BunkumHttpServer
     private readonly List<EndpointGroup> _endpoints = new();
     private readonly LoggerContainer<BunkumContext> _logger;
 
-    private IAuthenticationProvider<IUser> _authenticationProvider = new DummyAuthenticationProvider();
+    private IAuthenticationProvider<IUser, IToken> _authenticationProvider = new DummyAuthenticationProvider();
     private IDatabaseProvider<IDatabaseContext> _databaseProvider = new DummyDatabaseProvider();
     private IDataStore _dataStore = new NullDataStore();
     
@@ -218,7 +218,7 @@ public class BunkumHttpServer
             }
             catch
             {
-                // ignored
+                if (Debugger.IsAttached) throw;
             }
         }
         finally
@@ -263,7 +263,7 @@ public class BunkumHttpServer
 
     // ReSharper disable UnusedMember.Global
     // ReSharper disable MemberCanBePrivate.Global
-    public void UseAuthenticationProvider(IAuthenticationProvider<IUser> provider)
+    public void UseAuthenticationProvider(IAuthenticationProvider<IUser, IToken> provider)
     {
         this._authenticationProvider = provider;
     }

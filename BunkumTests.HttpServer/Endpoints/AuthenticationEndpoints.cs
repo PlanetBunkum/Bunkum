@@ -14,4 +14,11 @@ public class AuthenticationEndpoints : EndpointGroup
     {
         return user;
     }
+    
+    [Endpoint("/token", Method.Get, ContentType.Json)]
+    [Authentication(true)]
+    public string Authentication(RequestContext context, DummyToken token)
+    {
+        return token.GetType().Name;
+    }
 }

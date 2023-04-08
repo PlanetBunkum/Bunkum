@@ -14,7 +14,7 @@ public class CallbackAuthenticationProvider : DummyAuthenticationProvider
         this._action = action;
     }
 
-    public override DummyUser? AuthenticateUser(ListenerContext request, IDatabaseContext database)
+    public override DummyUser? AuthenticateUser(ListenerContext request, Lazy<IDatabaseContext> database)
     {
         this._action.Invoke();
         return base.AuthenticateUser(request, database);
