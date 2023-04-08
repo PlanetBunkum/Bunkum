@@ -3,16 +3,19 @@ using Bunkum.HttpServer.Storage;
 
 namespace BunkumTests.HttpServer.Tests;
 
+#pragma warning disable NUnit2045
+
 [NonParallelizable]
+[TestFixture(typeof(InMemoryDataStore))]
+[TestFixture(typeof(FileSystemDataStore))]
 public class StorageTests
 {
-    private IDataStore _dataStore;
-    private byte[] _value;
+    private readonly IDataStore _dataStore;
+    private readonly byte[] _value;
     
-    [SetUp]
-    public void SetUp()
+    public StorageTests(Type dataStoreType)
     {
-        this._dataStore = new InMemoryDataStore();
+        this._dataStore = (IDataStore)Activator.CreateInstance(dataStoreType)!;
         this._value = Encoding.Default.GetBytes("value");
     }
     
@@ -20,15 +23,36 @@ public class StorageTests
     [Test]
     public void DataStoreSystemWorks()
     {
-        Assert.False(this._dataStore.ExistsInStore("key"));
+        Assert.That(this._dataStore.ExistsInStore("key"), Is.False);
         Assert.That(() => this._dataStore.GetDataFromStore("key"), Throws.Exception);
         
-        Assert.True(this._dataStore.WriteToStore("key", this._value));
+        Assert.That(this._dataStore.WriteToStore("key", this._value), Is.True);
         
-        Assert.True(this._dataStore.ExistsInStore("key"));
+        Assert.That(this._dataStore.ExistsInStore("key"), Is.True);
         Assert.That(this._dataStore.GetDataFromStore("key"), Is.EqualTo(this._value));
         
-        this._dataStore.RemoveFromStore("key");
-        Assert.False(this._dataStore.ExistsInStore("key"));
+        Assert.That(this._dataStore.RemoveFromStore("key"), Is.True);
+        Assert.That(this._dataStore.ExistsInStore("key"), Is.False);
+    }
+
+    [Test]
+    [TestCase("dir/")]
+    [TestCase("dir/sub/")]
+    public void CanCreateAndReadDirectories(string dir)
+    {
+        string key = dir + "a";
+        
+        Assert.That(this._dataStore.ExistsInStore(key), Is.False);
+        Assert.That(() => this._dataStore.GetDataFromStore(key), Throws.Exception);
+        
+        Assert.That(this._dataStore.WriteToStore(key, this._value), Is.True);
+        
+        Assert.That(this._dataStore.ExistsInStore(key), Is.True);
+        Assert.That(this._dataStore.ExistsInStore(dir), Is.False);
+        
+        Assert.That(this._dataStore.GetDataFromStore(key), Is.EqualTo(this._value));
+        
+        Assert.That(this._dataStore.RemoveFromStore(key), Is.True);
+        Assert.That(this._dataStore.ExistsInStore(key), Is.False);
     }
 }
