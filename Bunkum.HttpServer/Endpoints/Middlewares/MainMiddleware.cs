@@ -97,12 +97,12 @@ internal class MainMiddleware : IMiddleware
                     
                     this._logger.LogTrace(BunkumContext.Request, $"Handling request with {group.GetType().Name}.{method.Name}");
 
-                    IUser? user = this._authenticationProvider.AuthenticateUser(context, database);
+                    Lazy<IUser?> user = new(() => this._authenticationProvider.AuthenticateUser(context, database));
                     Lazy<IToken?> token = new(() => this._authenticationProvider.AuthenticateToken(context, database));
                     
                     if (method.GetCustomAttribute<AuthenticationAttribute>()?.Required ?? this._assumeAuthenticationRequired)
                     {
-                        if (user == null)
+                        if (user.Value == null)
                             return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.Forbidden);
                     }
 
@@ -192,7 +192,7 @@ internal class MainMiddleware : IMiddleware
                         
                         if (paramType.IsAssignableTo(typeof(IUser)))
                         {
-                            invokeList.Add(user);
+                            invokeList.Add(user.Value);
                         }
                         else if (paramType.IsAssignableTo(typeof(IToken)))
                         {
