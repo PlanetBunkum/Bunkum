@@ -12,6 +12,7 @@ using Bunkum.HttpServer.Database;
 using Bunkum.HttpServer.Database.Dummy;
 using Bunkum.HttpServer.Endpoints;
 using Bunkum.HttpServer.Endpoints.Middlewares;
+using Bunkum.HttpServer.RateLimit;
 using Bunkum.HttpServer.Storage;
 using NotEnoughLogs;
 using NotEnoughLogs.Loggers;
@@ -30,6 +31,7 @@ public class BunkumHttpServer
     private IAuthenticationProvider<IUser, IToken> _authenticationProvider = new DummyAuthenticationProvider();
     private IDatabaseProvider<IDatabaseContext> _databaseProvider = new DummyDatabaseProvider();
     private IDataStore _dataStore = new NullDataStore();
+    private IRateLimiter? _rateLimiter;
     
     private Config? _config;
     private Type? _configType;
@@ -175,7 +177,8 @@ public class BunkumHttpServer
                 this._bunkumConfig,
                 this._config,
                 this._configType,
-                this.AssumeAuthenticationRequired);
+                this.AssumeAuthenticationRequired,
+                this._rateLimiter);
 
             Action next = () => { mainMiddleware.HandleRequest(context, database, null!); };
             
@@ -293,4 +296,6 @@ public class BunkumHttpServer
 
     public void AddMiddleware<TMiddleware>() where TMiddleware : IMiddleware, new() => this.AddMiddleware(new TMiddleware());
     public void AddMiddleware<TMiddleware>(TMiddleware middleware) where TMiddleware : IMiddleware => this._middlewares.Add(middleware);
+
+    public void UseRateLimiter() => this._rateLimiter = new RateLimiter();
 }

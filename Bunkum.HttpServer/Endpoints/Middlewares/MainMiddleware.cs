@@ -10,6 +10,7 @@ using Bunkum.HttpServer.Authentication;
 using Bunkum.HttpServer.Configuration;
 using Bunkum.HttpServer.Database;
 using Bunkum.HttpServer.Extensions;
+using Bunkum.HttpServer.RateLimit;
 using Bunkum.HttpServer.Responses;
 using Bunkum.HttpServer.Storage;
 using Newtonsoft.Json;
@@ -26,19 +27,23 @@ internal class MainMiddleware : IMiddleware
     private readonly bool _assumeAuthenticationRequired;
     
     private readonly IDataStore _dataStore;
+    private readonly IRateLimiter _rateLimiter;
     
     private readonly Config? _config;
     private readonly Type? _configType;
     
     private readonly BunkumConfig _bunkumConfig;
     
-    public MainMiddleware(List<EndpointGroup> endpoints, LoggerContainer<BunkumContext> logger, IAuthenticationProvider<IUser, IToken> authenticationProvider, IDataStore dataStore, BunkumConfig bunkumConfig, Config? config, Type? configType, bool assumeAuthenticationRequired)
+    public MainMiddleware(List<EndpointGroup> endpoints, LoggerContainer<BunkumContext> logger,
+        IAuthenticationProvider<IUser, IToken> authenticationProvider, IDataStore dataStore, BunkumConfig bunkumConfig,
+        Config? config, Type? configType, bool assumeAuthenticationRequired, IRateLimiter rateLimiter)
     {
         this._endpoints = endpoints;
         this._logger = logger;
         
         this._authenticationProvider = authenticationProvider;
         this._dataStore = dataStore;
+        this._rateLimiter = rateLimiter;
         
         this._config = config;
         this._configType = configType;
