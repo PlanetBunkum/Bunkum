@@ -21,11 +21,6 @@ public class RateLimitBenchmarks
     {
         this._timeProvider = new MockTimeProvider();
         this._rateLimiter = new RateLimiter(this._timeProvider);
-    }
-
-    [IterationSetup]
-    public void IterationSetup()
-    {
         this._user = new MockRateLimitUser("user");
     }
 
