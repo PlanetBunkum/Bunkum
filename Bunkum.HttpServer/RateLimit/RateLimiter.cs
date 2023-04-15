@@ -13,35 +13,36 @@ public class RateLimiter : IRateLimiter
     public const int RequestTimeout = 60;
     public const int MaxRequestAmount = 50;
 
-    private readonly List<RateLimitUserInfo> _userInfos = new();
+    private readonly List<RateLimitUserInfo> _userInfos = new(25);
 
     public bool ViolatesRateLimit(RequestContext context, IRateLimitUser user)
     {
         RateLimitUserInfo? info = this._userInfos
             .FirstOrDefault(i => user.UserIdIsEqual(i.User.RateLimitUserId));
 
-        int now = this._timeProvider.Seconds;
-
         if (info == null)
         {
-            info = new RateLimitUserInfo(user, now);
+            info = new RateLimitUserInfo(user);
             this._userInfos.Add(info);
         }
         
-        if (info.LimitedUntil != null)
+        int now = this._timeProvider.Seconds;
+        
+        if (info.LimitedUntil != 0)
         {
             if (info.LimitedUntil > now) return true;
-            info.LimitedUntil = null;
+            info.LimitedUntil = 0;
         }
         
         info.RequestTimes.RemoveAll(r => r - RequestTimeout < now - RequestTimeout);
-        info.RequestTimes.Add(now);
         
-        if (info.RequestTimes.Count > MaxRequestAmount)
+        if (info.RequestTimes.Count + 1 > MaxRequestAmount)
         {
             info.LimitedUntil = now + 30;
             return true;
         }
+        
+        info.RequestTimes.Add(now);
         
         return false;
     }

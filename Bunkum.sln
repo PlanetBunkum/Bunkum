@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BunkumTests.HttpServerManua
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bunkum.CustomHttpListener", "Bunkum.CustomHttpListener\Bunkum.CustomHttpListener.csproj", "{4A5BC9E5-E7AF-4F0B-B9FE-2BC0E4A6D8D1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BunkumTests.Benchmarks", "BunkumTests.Benchmarks\BunkumTests.Benchmarks.csproj", "{09433A85-130A-42ED-9DDE-320F45080392}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,8 @@ Global
 		{4A5BC9E5-E7AF-4F0B-B9FE-2BC0E4A6D8D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A5BC9E5-E7AF-4F0B-B9FE-2BC0E4A6D8D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A5BC9E5-E7AF-4F0B-B9FE-2BC0E4A6D8D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09433A85-130A-42ED-9DDE-320F45080392}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09433A85-130A-42ED-9DDE-320F45080392}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09433A85-130A-42ED-9DDE-320F45080392}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 	EndGlobalSection
 EndGlobal
