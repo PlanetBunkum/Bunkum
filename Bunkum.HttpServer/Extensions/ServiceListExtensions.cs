@@ -1,5 +1,4 @@
 using Bunkum.HttpServer.Services;
-using JetBrains.Annotations;
 
 namespace Bunkum.HttpServer.Extensions;
 

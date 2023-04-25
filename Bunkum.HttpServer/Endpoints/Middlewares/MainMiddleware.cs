@@ -94,30 +94,14 @@ internal class MainMiddleware : IMiddleware
                     
                     this._logger.LogTrace(BunkumContext.Request, $"Handling request with {group.GetType().Name}.{method.Name}");
 
-                    Lazy<IUser?> user;
-                    Lazy<IToken?> token;
-
-                    if (this._services.TryGetService(out AuthenticationService? authenticationService))
+                    foreach (Service service in this._services)
                     {
-                        Debug.Assert(authenticationService != null);
-                        
-                        user = new Lazy<IUser?>(() => authenticationService.AuthenticateUser(context, database)); 
-                        token = new Lazy<IToken?>(() => authenticationService.AuthenticateToken(context, database));
-                        
-                        if (method.GetCustomAttribute<AuthenticationAttribute>()?.Required ?? authenticationService.AssumeAuthenticationRequired)
-                        {
-                            if (user.Value == null)
-                                return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.Forbidden);
-                        }
-                    }
-                    else
-                    {
-                        user = new Lazy<IUser?>(() => null);
-                        token = new Lazy<IToken?>(() => null);
+                        Response? response = service.OnRequestHandled(context, method, database);
+                        if (response != null) return response;
                     }
 
                     HttpStatusCode nullCode = method.GetCustomAttribute<NullStatusCodeAttribute>()?.StatusCode ??
-                                              HttpStatusCode.NotFound;
+                                                  HttpStatusCode.NotFound;
                     
                     HttpStatusCode okCode = method.GetCustomAttribute<SuccessStatusCodeAttribute>()?.StatusCode ??
                                               HttpStatusCode.OK;
@@ -140,7 +124,7 @@ internal class MainMiddleware : IMiddleware
                     };
 
                     // Next, lets iterate through the method's arguments and add some based on what we find.
-                    foreach (ParameterInfo param in method.GetParameters().Skip(1))
+                    foreach (ParameterInfo param in method.GetParameters().Skip(1)) // Skip the request context.
                     {
                         Type paramType = param.ParameterType;
 
@@ -199,16 +183,8 @@ internal class MainMiddleware : IMiddleware
 
                             continue;
                         }
-                        
-                        if (paramType.IsAssignableTo(typeof(IUser)))
-                        {
-                            invokeList.Add(user.Value);
-                        }
-                        else if (paramType.IsAssignableTo(typeof(IToken)))
-                        {
-                            invokeList.Add(token.Value);
-                        }
-                        else if(paramType.IsAssignableTo(typeof(IDatabaseContext)))
+
+                        if(paramType.IsAssignableTo(typeof(IDatabaseContext)))
                         {
                             // Pass in a database context if the endpoint needs one.
                             invokeList.Add(database.Value);
@@ -231,9 +207,21 @@ internal class MainMiddleware : IMiddleware
                         }
                         else
                         {
-                            // We don't know what this param is or what to do with it, so pass in null.
-                            // Better than not calling the endpoint and throwing an exception.
-                            invokeList.Add(null);
+                            // Ask all services to try to provide an argument for this parameter.
+                            object? arg = null;
+                            
+                            List<Service>.Enumerator services = this._services.GetEnumerator();
+                            while (arg == null)
+                            {
+                                if (!services.MoveNext()) break;
+                                arg = services.Current.AddParameterToEndpoint(context, param, database);
+                            }
+                            
+                            services.Dispose();
+
+                            // Add the arg even if null, as even if we don't know what this param is or what to do with it,
+                            // it's probably better than not calling the endpoint and throwing an exception.
+                            invokeList.Add(arg);
                         }
                     }
 
