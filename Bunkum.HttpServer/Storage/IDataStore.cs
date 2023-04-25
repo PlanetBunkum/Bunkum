@@ -4,6 +4,7 @@ public interface IDataStore
 {
     bool ExistsInStore(string key);
     bool WriteToStore(string key, byte[] data);
+    void WriteToStore(string key, ReadOnlySpan<byte> data) => this.WriteToStore(key, data.ToArray());
     byte[] GetDataFromStore(string key);
     bool RemoveFromStore(string key);
 

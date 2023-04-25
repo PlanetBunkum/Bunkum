@@ -6,13 +6,11 @@ using System.Text;
 using System.Xml.Serialization;
 using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.CustomHttpListener.Request;
-using Bunkum.HttpServer.Authentication;
 using Bunkum.HttpServer.Configuration;
 using Bunkum.HttpServer.Database;
 using Bunkum.HttpServer.Extensions;
 using Bunkum.HttpServer.Responses;
 using Bunkum.HttpServer.Services;
-using Bunkum.HttpServer.Storage;
 using Newtonsoft.Json;
 using NotEnoughLogs;
 
@@ -25,20 +23,17 @@ internal class MainMiddleware : IMiddleware
 
     private readonly List<Service> _services;
 
-    private readonly IDataStore _dataStore;
-    
     private readonly Config? _config;
     private readonly Type? _configType;
     
     private readonly BunkumConfig _bunkumConfig;
     
-    public MainMiddleware(List<EndpointGroup> endpoints, LoggerContainer<BunkumContext> logger, List<Service> services, IDataStore dataStore, BunkumConfig bunkumConfig, Config? config, Type? configType)
+    public MainMiddleware(List<EndpointGroup> endpoints, LoggerContainer<BunkumContext> logger, List<Service> services, BunkumConfig bunkumConfig, Config? config, Type? configType)
     {
         this._endpoints = endpoints;
         this._logger = logger;
         this._services = services;
-        this._dataStore = dataStore;
-        
+
         this._config = config;
         this._configType = configType;
 
@@ -114,7 +109,6 @@ internal class MainMiddleware : IMiddleware
                             QueryString = context.Query,
                             Url = context.Uri,
                             Logger = this._logger,
-                            DataStore = this._dataStore,
                             Cookies = context.Cookies,
                             RemoteEndpoint = context.RemoteEndpoint,
                             Method = context.Method,
@@ -240,6 +234,8 @@ internal class MainMiddleware : IMiddleware
                             return new Response(Array.Empty<byte>(), attribute.ContentType, nullCode);
                         case Response response:
                             return response;
+                        case byte[] data:
+                            return new Response(data, attribute.ContentType, okCode);
                         default:
                             return new Response(val, attribute.ContentType, okCode);
                     }

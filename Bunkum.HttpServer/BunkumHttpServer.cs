@@ -28,8 +28,7 @@ public class BunkumHttpServer
     private readonly LoggerContainer<BunkumContext> _logger;
     
     private IDatabaseProvider<IDatabaseContext> _databaseProvider = new DummyDatabaseProvider();
-    private IDataStore _dataStore = new NullDataStore();
-    
+
     private Config? _config;
     private Type? _configType;
     private readonly BunkumConfig _bunkumConfig;
@@ -151,7 +150,6 @@ public class BunkumHttpServer
             MainMiddleware mainMiddleware = new(this._endpoints,
                 this._logger,
                 this._services,
-                this._dataStore,
                 this._bunkumConfig,
                 this._config,
                 this._configType);
@@ -247,11 +245,6 @@ public class BunkumHttpServer
         this._databaseProvider = provider;
     }
 
-    public void UseDataStore(IDataStore dataStore)
-    {
-        this._dataStore = dataStore;
-    }
-
     // TODO: Configuration hot reload
     // TODO: .ini? would be helpful as it supports comments and we can document in the file itself
     /// <summary>
@@ -311,14 +304,27 @@ public class BunkumHttpServer
     {
         this.AddService<AuthenticationService>(provider, assumeAuthenticationRequired);
     }
+
+    public void AddStorageService<TDataStore>() where TDataStore : IDataStore
+    {
+        this.AddService<StorageService>(Activator.CreateInstance<TDataStore>());
+    }
     
     #region Obsolete
+    // ReSharper disable UnusedParameter.Global
 
     [Obsolete($"Instead of using UseAuthenticationProvider, the new method is adding a {nameof(AuthenticationService)}. See AddService.", true)]
     public void UseAuthenticationProvider(IAuthenticationProvider<IUser, IToken> provider)
     {
-        throw new InvalidOperationException("UseAuthenticationProvider is obsolete. Please see the documentation.");
+        throw new InvalidOperationException("UseAuthenticationProvider is obsolete.");
     }
     
+    [Obsolete($"Instead of using UseAuthenticationProvider, the new method is adding a {nameof(StorageService)}. See AddService.", true)]
+    public void UseDataStore(IDataStore dataStore)
+    {
+        throw new InvalidOperationException("UseDataStore is obsolete.");
+    }
+    
+    // ReSharper restore UnusedParameter.Global
     #endregion
 }
