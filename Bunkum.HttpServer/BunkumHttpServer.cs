@@ -79,8 +79,18 @@ public class BunkumHttpServer
         stopwatch.Start();
         
         this._logger.LogInfo(BunkumContext.Startup, "Starting up...");
-        
-        foreach (Service service in this._services) service.Initialize();
+
+        foreach (Service service in this._services)
+        {
+            this._logger.LogInfo(BunkumContext.Startup, $"Initializing service {service.GetType().Name}...");
+            service.Initialize();
+        }
+
+        if (this._services.Count > 0)
+        {
+            string was = this._services.Count == 1 ? " was" : "s were";
+            this._logger.LogInfo(BunkumContext.Startup, $"{this._services.Count} service{was} initialized.");
+        }
 
         this._logger.LogDebug(BunkumContext.Startup, "Initializing database provider...");
         this._databaseProvider.Initialize();
