@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using Bunkum.HttpServer;
+using Bunkum.HttpServer.Services;
 using JetBrains.Annotations;
 
 namespace BunkumTests.HttpServer;
@@ -41,6 +42,7 @@ public class ServerDependentTest
         }
 
         BunkumHttpServer server = new(uri);
+        server.AddAuthenticationService();
         if(start) server.Start();
 
         HttpClient client = new();

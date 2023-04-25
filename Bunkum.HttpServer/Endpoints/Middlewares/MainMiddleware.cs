@@ -11,6 +11,7 @@ using Bunkum.HttpServer.Configuration;
 using Bunkum.HttpServer.Database;
 using Bunkum.HttpServer.Extensions;
 using Bunkum.HttpServer.Responses;
+using Bunkum.HttpServer.Services;
 using Bunkum.HttpServer.Storage;
 using Newtonsoft.Json;
 using NotEnoughLogs;
@@ -21,10 +22,9 @@ internal class MainMiddleware : IMiddleware
 {
     private readonly List<EndpointGroup> _endpoints;
     private readonly LoggerContainer<BunkumContext> _logger;
-    
-    private readonly IAuthenticationProvider<IUser, IToken> _authenticationProvider;
-    private readonly bool _assumeAuthenticationRequired;
-    
+
+    private readonly List<Service> _services;
+
     private readonly IDataStore _dataStore;
     
     private readonly Config? _config;
@@ -32,18 +32,15 @@ internal class MainMiddleware : IMiddleware
     
     private readonly BunkumConfig _bunkumConfig;
     
-    public MainMiddleware(List<EndpointGroup> endpoints, LoggerContainer<BunkumContext> logger, IAuthenticationProvider<IUser, IToken> authenticationProvider, IDataStore dataStore, BunkumConfig bunkumConfig, Config? config, Type? configType, bool assumeAuthenticationRequired)
+    public MainMiddleware(List<EndpointGroup> endpoints, LoggerContainer<BunkumContext> logger, List<Service> services, IDataStore dataStore, BunkumConfig bunkumConfig, Config? config, Type? configType)
     {
         this._endpoints = endpoints;
         this._logger = logger;
-        
-        this._authenticationProvider = authenticationProvider;
+        this._services = services;
         this._dataStore = dataStore;
         
         this._config = config;
         this._configType = configType;
-        
-        this._assumeAuthenticationRequired = assumeAuthenticationRequired;
 
         this._bunkumConfig = bunkumConfig;
     }
@@ -97,13 +94,26 @@ internal class MainMiddleware : IMiddleware
                     
                     this._logger.LogTrace(BunkumContext.Request, $"Handling request with {group.GetType().Name}.{method.Name}");
 
-                    Lazy<IUser?> user = new(() => this._authenticationProvider.AuthenticateUser(context, database));
-                    Lazy<IToken?> token = new(() => this._authenticationProvider.AuthenticateToken(context, database));
-                    
-                    if (method.GetCustomAttribute<AuthenticationAttribute>()?.Required ?? this._assumeAuthenticationRequired)
+                    Lazy<IUser?> user;
+                    Lazy<IToken?> token;
+
+                    if (this._services.TryGetService(out AuthenticationService? authenticationService))
                     {
-                        if (user.Value == null)
-                            return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.Forbidden);
+                        Debug.Assert(authenticationService != null);
+                        
+                        user = new Lazy<IUser?>(() => authenticationService.AuthenticateUser(context, database)); 
+                        token = new Lazy<IToken?>(() => authenticationService.AuthenticateToken(context, database));
+                        
+                        if (method.GetCustomAttribute<AuthenticationAttribute>()?.Required ?? authenticationService.AssumeAuthenticationRequired)
+                        {
+                            if (user.Value == null)
+                                return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.Forbidden);
+                        }
+                    }
+                    else
+                    {
+                        user = new Lazy<IUser?>(() => null);
+                        token = new Lazy<IToken?>(() => null);
                     }
 
                     HttpStatusCode nullCode = method.GetCustomAttribute<NullStatusCodeAttribute>()?.StatusCode ??

@@ -6,12 +6,12 @@ using Bunkum.CustomHttpListener;
 using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.CustomHttpListener.Request;
 using Bunkum.HttpServer.Authentication;
-using Bunkum.HttpServer.Authentication.Dummy;
 using Bunkum.HttpServer.Configuration;
 using Bunkum.HttpServer.Database;
 using Bunkum.HttpServer.Database.Dummy;
 using Bunkum.HttpServer.Endpoints;
 using Bunkum.HttpServer.Endpoints.Middlewares;
+using Bunkum.HttpServer.Services;
 using Bunkum.HttpServer.Storage;
 using NotEnoughLogs;
 using NotEnoughLogs.Loggers;
@@ -26,8 +26,7 @@ public class BunkumHttpServer
     private readonly BunkumHttpListener _listener;
     private readonly List<EndpointGroup> _endpoints = new();
     private readonly LoggerContainer<BunkumContext> _logger;
-
-    private IAuthenticationProvider<IUser, IToken> _authenticationProvider = new DummyAuthenticationProvider();
+    
     private IDatabaseProvider<IDatabaseContext> _databaseProvider = new DummyDatabaseProvider();
     private IDataStore _dataStore = new NullDataStore();
     
@@ -35,24 +34,8 @@ public class BunkumHttpServer
     private Type? _configType;
     private readonly BunkumConfig _bunkumConfig;
 
-    // ReSharper disable UnassignedField.Global
-    // ReSharper disable ConvertToConstant.Global
-    // ReSharper disable MemberCanBePrivate.Global
-    // ReSharper disable FieldCanBeMadeReadOnly.Global
-    /// <summary>
-    /// Is authentication required for your endpoints?
-    /// If true, clients will receive 403 if your <see cref="IAuthenticationProvider{TUser}"/> does not return a user.
-    /// If false, endpoints will work as normal.
-    /// </summary>
-    /// <seealso cref="IAuthenticationProvider{TUser}"/>
-    /// <seealso cref="AuthenticationAttribute"/>
-    public bool AssumeAuthenticationRequired = false;
-    // ReSharper restore ConvertToConstant.Global
-    // ReSharper restore ConvertToConstant.Global
-    // ReSharper restore MemberCanBePrivate.Global
-    // ReSharper restore FieldCanBeMadeReadOnly.Global
-
     private readonly List<IMiddleware> _middlewares = new();
+    private readonly List<Service> _services = new();
 
     public BunkumHttpServer(Uri? listenEndpoint = null)
     {
@@ -97,12 +80,9 @@ public class BunkumHttpServer
         stopwatch.Start();
         
         this._logger.LogInfo(BunkumContext.Startup, "Starting up...");
-        if (this._authenticationProvider is DummyAuthenticationProvider && this.AssumeAuthenticationRequired)
-        {
-            this._logger.LogWarning(BunkumContext.Startup, "The server was started with a dummy authentication provider. " +
-                                                            "If your application relies on authentication, users will always have full access.");
-        }
         
+        foreach (Service service in this._services) service.Initialize();
+
         this._logger.LogDebug(BunkumContext.Startup, "Initializing database provider...");
         this._databaseProvider.Initialize();
         
@@ -170,12 +150,11 @@ public class BunkumHttpServer
             // Passing in these parameters is a little janky in my opinion, but it gets the job done. 
             MainMiddleware mainMiddleware = new(this._endpoints,
                 this._logger,
-                this._authenticationProvider,
+                this._services,
                 this._dataStore,
                 this._bunkumConfig,
                 this._config,
-                this._configType,
-                this.AssumeAuthenticationRequired);
+                this._configType);
 
             Action next = () => { mainMiddleware.HandleRequest(context, database, null!); };
             
@@ -263,11 +242,6 @@ public class BunkumHttpServer
 
     // ReSharper disable UnusedMember.Global
     // ReSharper disable MemberCanBePrivate.Global
-    public void UseAuthenticationProvider(IAuthenticationProvider<IUser, IToken> provider)
-    {
-        this._authenticationProvider = provider;
-    }
-
     public void UseDatabaseProvider(IDatabaseProvider<IDatabaseContext> provider)
     {
         this._databaseProvider = provider;
@@ -293,4 +267,58 @@ public class BunkumHttpServer
 
     public void AddMiddleware<TMiddleware>() where TMiddleware : IMiddleware, new() => this.AddMiddleware(new TMiddleware());
     public void AddMiddleware<TMiddleware>(TMiddleware middleware) where TMiddleware : IMiddleware => this._middlewares.Add(middleware);
+
+    public void AddService<TService>(params object?[] args) where TService : Service
+    {
+        List<object?> fullArgs = new object?[] { this._logger }.Concat(args).ToList();
+        
+        // Find a suitable constructor for the given parameters. This accounts for null parameters.
+        ConstructorInfo? ctor = typeof(TService).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
+            .FirstOrDefault(info =>
+            {
+                ParameterInfo[] paramInfos = info.GetParameters();
+
+                if (paramInfos.Length != fullArgs.Count)
+                    return false;
+
+                for (int i = 0; i < paramInfos.Length; i++)
+                {
+                    if (fullArgs[i] == null)
+                    {
+                        if (paramInfos[i].ParameterType.IsValueType)
+                            return false;
+                    }
+                    else if (!paramInfos[i].ParameterType.IsInstanceOfType(fullArgs[i])) return false;
+                }
+
+                return true;
+            });
+        
+        TService? service = (TService?)ctor?.Invoke(fullArgs.ToArray());
+
+        if (service == null) throw new InvalidOperationException("Service failed to initialize correctly.");
+        
+        this.AddService(service);
+    }
+
+    public void AddService(Service service)
+    {
+        this._services.Add(service);
+    }
+
+    public void AddAuthenticationService(IAuthenticationProvider<IUser, IToken>? provider = null,
+        bool assumeAuthenticationRequired = false)
+    {
+        this.AddService<AuthenticationService>(provider, assumeAuthenticationRequired);
+    }
+    
+    #region Obsolete
+
+    [Obsolete($"Instead of using UseAuthenticationProvider, the new method is adding a {nameof(AuthenticationService)}. See AddService.", true)]
+    public void UseAuthenticationProvider(IAuthenticationProvider<IUser, IToken> provider)
+    {
+        throw new InvalidOperationException("UseAuthenticationProvider is obsolete. Please see the documentation.");
+    }
+    
+    #endregion
 }
