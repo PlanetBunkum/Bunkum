@@ -62,7 +62,18 @@ public class BunkumHttpListener : IDisposable
     {
         while (true)
         {
-            ListenerContext? request = await this.WaitForConnectionAsyncInternal();
+            ListenerContext? request = null;
+            try
+            {
+                request = await this.WaitForConnectionAsyncInternal();
+            }
+            catch (Exception e)
+            {
+                this._logger.LogError(HttpLogContext.Request, "Failed to handle a connection: " + e);
+                if (!(request?.SocketClosed).GetValueOrDefault(true)) await request!.SendResponse(HttpStatusCode.BadRequest);
+                continue;
+            }
+            
             if (request == null) continue;
             
             await action.Invoke(request);
@@ -79,10 +90,23 @@ public class BunkumHttpListener : IDisposable
         Socket client = await this._socket.AcceptAsync();
         NetworkStream stream = new(client);
 
-        string[] requestLineSplit = ReadRequestLine(stream);
-        string method = requestLineSplit[0];
-        string path = requestLineSplit[1];
-        string version = requestLineSplit[2].TrimEnd('\0').TrimEnd('\r');
+        string method;
+        string path;
+        string version;
+
+        try
+        {
+            string[] requestLineSplit = ReadRequestLine(stream);
+
+            method = requestLineSplit[0];
+            path = requestLineSplit[1];
+            version = requestLineSplit[2].TrimEnd('\0').TrimEnd('\r');
+        }
+        catch (Exception e)
+        {
+            this._logger.LogError(HttpLogContext.Request, "Failed to read request line: " + e);
+            return null;
+        }
 
         ListenerContext context = new(client)
         {
