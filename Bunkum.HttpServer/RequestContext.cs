@@ -2,6 +2,7 @@ using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using Bunkum.CustomHttpListener.Parsing;
+using Bunkum.HttpServer.Services;
 using Bunkum.HttpServer.Storage;
 using NotEnoughLogs;
 
@@ -17,11 +18,12 @@ public struct RequestContext
     public Uri Url { get; internal set; }
     
     public LoggerContainer<BunkumContext> Logger { get; internal set; }
-    public IDataStore DataStore { get; internal set; }
-    
+
     public NameValueCollection QueryString { get; internal set; }
     public NameValueCollection Cookies { get; internal set; }
     
     public NameValueCollection RequestHeaders { get; internal set; }
     public Dictionary<string, string> ResponseHeaders { get; internal set; }
+    
+    public List<Service> Services { get; internal set; }
 }
