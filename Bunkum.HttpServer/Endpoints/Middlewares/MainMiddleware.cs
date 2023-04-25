@@ -214,8 +214,16 @@ internal class MainMiddleware : IMiddleware
                             
                             services.Dispose();
 
+                            // If our argument is still null, log a warning as a precaution.
+                            if (arg == null)
+                            {
+                                this._logger.LogWarning(BunkumContext.Request, 
+                                    $"Could not find an valid argument for the {paramType.Name} parameter '{param.Name}'." +
+                                    $"Null will be used instead.");
+                            }
+
                             // Add the arg even if null, as even if we don't know what this param is or what to do with it,
-                            // it's probably better than not calling the endpoint and throwing an exception.
+                            // it's probably better than not calling the endpoint and throwing an exception causing things to explode.
                             invokeList.Add(arg);
                         }
                     }
