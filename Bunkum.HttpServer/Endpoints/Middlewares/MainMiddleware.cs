@@ -6,12 +6,11 @@ using System.Text;
 using System.Xml.Serialization;
 using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.CustomHttpListener.Request;
-using Bunkum.HttpServer.Authentication;
 using Bunkum.HttpServer.Configuration;
 using Bunkum.HttpServer.Database;
 using Bunkum.HttpServer.Extensions;
 using Bunkum.HttpServer.Responses;
-using Bunkum.HttpServer.Storage;
+using Bunkum.HttpServer.Services;
 using Newtonsoft.Json;
 using NotEnoughLogs;
 
@@ -21,29 +20,22 @@ internal class MainMiddleware : IMiddleware
 {
     private readonly List<EndpointGroup> _endpoints;
     private readonly LoggerContainer<BunkumContext> _logger;
-    
-    private readonly IAuthenticationProvider<IUser, IToken> _authenticationProvider;
-    private readonly bool _assumeAuthenticationRequired;
-    
-    private readonly IDataStore _dataStore;
-    
+
+    private readonly List<Service> _services;
+
     private readonly Config? _config;
     private readonly Type? _configType;
     
     private readonly BunkumConfig _bunkumConfig;
     
-    public MainMiddleware(List<EndpointGroup> endpoints, LoggerContainer<BunkumContext> logger, IAuthenticationProvider<IUser, IToken> authenticationProvider, IDataStore dataStore, BunkumConfig bunkumConfig, Config? config, Type? configType, bool assumeAuthenticationRequired)
+    public MainMiddleware(List<EndpointGroup> endpoints, LoggerContainer<BunkumContext> logger, List<Service> services, BunkumConfig bunkumConfig, Config? config, Type? configType)
     {
         this._endpoints = endpoints;
         this._logger = logger;
-        
-        this._authenticationProvider = authenticationProvider;
-        this._dataStore = dataStore;
-        
+        this._services = services;
+
         this._config = config;
         this._configType = configType;
-        
-        this._assumeAuthenticationRequired = assumeAuthenticationRequired;
 
         this._bunkumConfig = bunkumConfig;
     }
@@ -97,17 +89,14 @@ internal class MainMiddleware : IMiddleware
                     
                     this._logger.LogTrace(BunkumContext.Request, $"Handling request with {group.GetType().Name}.{method.Name}");
 
-                    Lazy<IUser?> user = new(() => this._authenticationProvider.AuthenticateUser(context, database));
-                    Lazy<IToken?> token = new(() => this._authenticationProvider.AuthenticateToken(context, database));
-                    
-                    if (method.GetCustomAttribute<AuthenticationAttribute>()?.Required ?? this._assumeAuthenticationRequired)
+                    foreach (Service service in this._services)
                     {
-                        if (user.Value == null)
-                            return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.Forbidden);
+                        Response? response = service.OnRequestHandled(context, method, database);
+                        if (response != null) return response;
                     }
 
                     HttpStatusCode nullCode = method.GetCustomAttribute<NullStatusCodeAttribute>()?.StatusCode ??
-                                              HttpStatusCode.NotFound;
+                                                  HttpStatusCode.NotFound;
                     
                     HttpStatusCode okCode = method.GetCustomAttribute<SuccessStatusCodeAttribute>()?.StatusCode ??
                                               HttpStatusCode.OK;
@@ -120,17 +109,17 @@ internal class MainMiddleware : IMiddleware
                             QueryString = context.Query,
                             Url = context.Uri,
                             Logger = this._logger,
-                            DataStore = this._dataStore,
                             Cookies = context.Cookies,
                             RemoteEndpoint = context.RemoteEndpoint,
                             Method = context.Method,
                             RequestHeaders = context.RequestHeaders,
                             ResponseHeaders = context.ResponseHeaders,
+                            Services = this._services,
                         },
                     };
 
                     // Next, lets iterate through the method's arguments and add some based on what we find.
-                    foreach (ParameterInfo param in method.GetParameters().Skip(1))
+                    foreach (ParameterInfo param in method.GetParameters().Skip(1)) // Skip the request context.
                     {
                         Type paramType = param.ParameterType;
 
@@ -189,16 +178,8 @@ internal class MainMiddleware : IMiddleware
 
                             continue;
                         }
-                        
-                        if (paramType.IsAssignableTo(typeof(IUser)))
-                        {
-                            invokeList.Add(user.Value);
-                        }
-                        else if (paramType.IsAssignableTo(typeof(IToken)))
-                        {
-                            invokeList.Add(token.Value);
-                        }
-                        else if(paramType.IsAssignableTo(typeof(IDatabaseContext)))
+
+                        if(paramType.IsAssignableTo(typeof(IDatabaseContext)))
                         {
                             // Pass in a database context if the endpoint needs one.
                             invokeList.Add(database.Value);
@@ -221,9 +202,29 @@ internal class MainMiddleware : IMiddleware
                         }
                         else
                         {
-                            // We don't know what this param is or what to do with it, so pass in null.
-                            // Better than not calling the endpoint and throwing an exception.
-                            invokeList.Add(null);
+                            // Ask all services to try to provide an argument for this parameter.
+                            object? arg = null;
+                            
+                            List<Service>.Enumerator services = this._services.GetEnumerator();
+                            while (arg == null)
+                            {
+                                if (!services.MoveNext()) break;
+                                arg = services.Current.AddParameterToEndpoint(context, param, database);
+                            }
+                            
+                            services.Dispose();
+
+                            // If our argument is still null, log a warning as a precaution.
+                            if (arg == null)
+                            {
+                                this._logger.LogWarning(BunkumContext.Request, 
+                                    $"Could not find an valid argument for the {paramType.Name} parameter '{param.Name}'." +
+                                    $"Null will be used instead.");
+                            }
+
+                            // Add the arg even if null, as even if we don't know what this param is or what to do with it,
+                            // it's probably better than not calling the endpoint and throwing an exception causing things to explode.
+                            invokeList.Add(arg);
                         }
                     }
 
@@ -242,6 +243,8 @@ internal class MainMiddleware : IMiddleware
                             return new Response(Array.Empty<byte>(), attribute.ContentType, nullCode);
                         case Response response:
                             return response;
+                        case byte[] data:
+                            return new Response(data, attribute.ContentType, okCode);
                         default:
                             return new Response(val, attribute.ContentType, okCode);
                     }
