@@ -48,7 +48,7 @@ public class RateLimiter : IRateLimiter
             this._userInfos.Add(info);
         }
 
-        return this.ViolatesRateLimit(info);
+        return this.ViolatesRateLimit(context, info);
     }
 
     public bool RemoteEndpointViolatesRateLimit(ListenerContext context)
@@ -64,10 +64,10 @@ public class RateLimiter : IRateLimiter
             this._remoteEndpointInfos.Add(info);
         }
 
-        return this.ViolatesRateLimit(info);
+        return this.ViolatesRateLimit(context, info);
     }
 
-    private bool ViolatesRateLimit(IRateLimitInfo info)
+    private bool ViolatesRateLimit(ListenerContext context, IRateLimitInfo info)
     {
         int now = this._timeProvider.Seconds;
         
@@ -83,6 +83,8 @@ public class RateLimiter : IRateLimiter
         if (info.RequestTimes.Count + 1 > this._settings.MaxRequestAmount)
         {
             info.LimitedUntil = now + this._settings.RequestBlockDuration;
+            context.ResponseHeaders.Add("Retry-After", this._settings.RequestBlockDuration.ToString());
+            
             return true;
         }
         
