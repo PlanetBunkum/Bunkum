@@ -276,24 +276,37 @@ public class BunkumHttpServer
         List<object?> fullArgs = new object?[] { this._logger }.Concat(args).ToList();
         
         // Find a suitable constructor for the given parameters. This accounts for null parameters.
-        ConstructorInfo? ctor = typeof(TService).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
+        // Some additional logic is present to check for references to services and automatically inject them if present.
+        ConstructorInfo? ctor = typeof(TService).GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
             .FirstOrDefault(info =>
             {
+                List<object?> newArgs = new(fullArgs);
                 ParameterInfo[] paramInfos = info.GetParameters();
-
-                if (paramInfos.Length != fullArgs.Count)
-                    return false;
 
                 for (int i = 0; i < paramInfos.Length; i++)
                 {
-                    if (fullArgs[i] == null)
+                    // Attempt to find dependencies on other services and inject them.
+                    if (paramInfos[i].ParameterType.IsAssignableTo(typeof(Service)))
+                    {
+                        Service? service = this._services.FirstOrDefault(s => s.GetType() == paramInfos[i].ParameterType);
+                        if (service == null) 
+                            throw new Exception($"Could not find {paramInfos[i].ParameterType}, which {typeof(TService).Name} depends on.");
+                        
+                        newArgs.Insert(i, service);
+                        continue;
+                    }
+                    
+                    if (newArgs[i] == null)
                     {
                         if (paramInfos[i].ParameterType.IsValueType)
                             return false;
                     }
-                    else if (!paramInfos[i].ParameterType.IsInstanceOfType(fullArgs[i])) return false;
+                    else if (!paramInfos[i].ParameterType.IsInstanceOfType(newArgs[i])) return false;
                 }
 
+                if (newArgs.Count != paramInfos.Length) return false;
+                
+                fullArgs = newArgs;
                 return true;
             });
         
