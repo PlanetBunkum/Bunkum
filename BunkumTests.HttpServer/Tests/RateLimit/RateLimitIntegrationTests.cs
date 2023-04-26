@@ -37,7 +37,7 @@ public class RateLimitIntegrationTests : ServerDependentTest
         server.AddEndpointGroup<TestEndpoints>();
         server.AddService<RateLimitService>(rateLimiter);
 
-        for (int i = 0; i < RateLimiter.MaxRequestAmount; i++)
+        for (int i = 0; i < RateLimitSettings.DefaultMaxRequestAmount; i++)
         {
             HttpResponseMessage msg = client.Send(new HttpRequestMessage(HttpMethod.Get, "/"));
             Assert.Multiple(async () =>
@@ -58,7 +58,7 @@ public class RateLimitIntegrationTests : ServerDependentTest
         server.AddEndpointGroup<TestEndpoints>();
         server.AddService<RateLimitService>(rateLimiter);
 
-        for (int i = 0; i < RateLimiter.MaxRequestAmount; i++)
+        for (int i = 0; i < RateLimitSettings.DefaultMaxRequestAmount; i++)
         {
             HttpResponseMessage msg = client.Send(new HttpRequestMessage(HttpMethod.Get, "/"));
             Assert.Multiple(async () =>
@@ -82,7 +82,7 @@ public class RateLimitIntegrationTests : ServerDependentTest
         server.AddEndpointGroup<TestEndpoints>();
         server.AddService<RateLimitService>(rateLimiter);
 
-        for (int i = 0; i < RateLimiter.MaxRequestAmount; i++)
+        for (int i = 0; i < RateLimitSettings.DefaultMaxRequestAmount; i++)
         {
             HttpResponseMessage msg = client.Send(new HttpRequestMessage(HttpMethod.Get, "/"));
             Assert.Multiple(async () =>
@@ -95,7 +95,7 @@ public class RateLimitIntegrationTests : ServerDependentTest
         HttpResponseMessage newMsg = client.Send(new HttpRequestMessage(HttpMethod.Get, "/"));
         Assert.That(newMsg.StatusCode, Is.EqualTo(HttpStatusCode.TooManyRequests));
 
-        timeProvider.Seconds = RateLimiter.RequestTimeout;
+        timeProvider.Seconds = RateLimitSettings.DefaultRequestTimeoutDuration;
         
         newMsg = client.Send(new HttpRequestMessage(HttpMethod.Get, "/"));
         Assert.That(newMsg.StatusCode, Is.EqualTo(HttpStatusCode.OK));

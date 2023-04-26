@@ -29,7 +29,7 @@ public class RateLimitTests
 
         RateLimiter rateLimiter = new(timeProvider);
 
-        for (int i = 0; i < RateLimiter.MaxRequestAmount; i++)
+        for (int i = 0; i < RateLimitSettings.DefaultMaxRequestAmount; i++)
         {
             Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user), Is.False);
         }
@@ -43,7 +43,7 @@ public class RateLimitTests
 
         RateLimiter rateLimiter = new(timeProvider);
 
-        for (int i = 0; i < RateLimiter.MaxRequestAmount; i++)
+        for (int i = 0; i < RateLimitSettings.DefaultMaxRequestAmount; i++)
         {
             Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user), Is.False);
         }
@@ -59,14 +59,14 @@ public class RateLimitTests
 
         RateLimiter rateLimiter = new(timeProvider);
 
-        for (int i = 0; i < RateLimiter.MaxRequestAmount; i++)
+        for (int i = 0; i < RateLimitSettings.DefaultMaxRequestAmount; i++)
         {
             Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user), Is.False);
         }
         
         Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user), Is.True);
 
-        timeProvider.Seconds = RateLimiter.RequestTimeout;
+        timeProvider.Seconds = RateLimitSettings.DefaultRequestTimeoutDuration;
         Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user), Is.False);
     }
     
@@ -79,7 +79,7 @@ public class RateLimitTests
 
         RateLimiter rateLimiter = new(timeProvider);
 
-        for (int i = 0; i < RateLimiter.MaxRequestAmount; i++)
+        for (int i = 0; i < RateLimitSettings.DefaultMaxRequestAmount; i++)
         {
             Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user1), Is.False);
         }

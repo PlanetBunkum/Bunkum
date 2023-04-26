@@ -8,12 +8,31 @@ namespace Bunkum.HttpServer.RateLimit;
 public class RateLimiter : IRateLimiter 
 {
     private readonly ITimeProvider _timeProvider;
+    private readonly RateLimitSettings _settings;
+    
+    public RateLimiter()
+    {
+        this._timeProvider = new RealTimeProvider();
+        this._settings = RateLimitSettings.DefaultSettings;
+    }
 
-    public RateLimiter(ITimeProvider timeProvider) => this._timeProvider = timeProvider;
-    public RateLimiter() => this._timeProvider = new RealTimeProvider();
+    public RateLimiter(ITimeProvider timeProvider)
+    {
+        this._timeProvider = timeProvider;
+        this._settings = RateLimitSettings.DefaultSettings;
+    }
 
-    public const int RequestTimeout = 60;
-    public const int MaxRequestAmount = 50;
+    public RateLimiter(RateLimitSettings settings)
+    {
+        this._timeProvider = new RealTimeProvider();
+        this._settings = settings;
+    }
+    
+    public RateLimiter(ITimeProvider provider, RateLimitSettings settings)
+    {
+        this._timeProvider = provider;
+        this._settings = settings;
+    }
 
     private readonly List<RateLimitUserInfo> _userInfos = new(25);
     private readonly List<RateLimitRemoteEndpointInfo> _remoteEndpointInfos = new(25);
@@ -58,11 +77,11 @@ public class RateLimiter : IRateLimiter
             info.LimitedUntil = 0;
         }
         
-        info.RequestTimes.RemoveAll(r => r <= now - RequestTimeout);
+        info.RequestTimes.RemoveAll(r => r <= now - this._settings.RequestTimeoutDuration);
         
-        if (info.RequestTimes.Count + 1 > MaxRequestAmount)
+        if (info.RequestTimes.Count + 1 > this._settings.MaxRequestAmount)
         {
-            info.LimitedUntil = now + 30;
+            info.LimitedUntil = now + this._settings.RequestBlockDuration;
             return true;
         }
         

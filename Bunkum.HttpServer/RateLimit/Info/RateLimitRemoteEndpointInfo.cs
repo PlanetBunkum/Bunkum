@@ -10,6 +10,6 @@ public class RateLimitRemoteEndpointInfo : IRateLimitInfo
     }
 
     internal IPAddress IpAddress { get; init; }
-    public List<int> RequestTimes { get; init; } = new(RateLimiter.MaxRequestAmount / 2);
+    public List<int> RequestTimes { get; init; } = new(RateLimitSettings.DefaultMaxRequestAmount / 2);
     public int LimitedUntil { get; set; }
 }
