@@ -83,7 +83,7 @@ public class RateLimiter : IRateLimiter
         if (info.RequestTimes.Count + 1 > this._settings.MaxRequestAmount)
         {
             info.LimitedUntil = now + this._settings.RequestBlockDuration;
-            context.ResponseHeaders.Add("Retry-After", this._settings.RequestBlockDuration.ToString());
+            context.ResponseHeaders.TryAdd("Retry-After", this._settings.RequestBlockDuration.ToString());
             
             return true;
         }
