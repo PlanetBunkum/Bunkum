@@ -116,7 +116,7 @@ public class BunkumHttpListener : IDisposable
                 ["Connection"] = "close",
                 ["Date"] = DateTime.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'"),
             },
-            RemoteEndpoint = client.RemoteEndPoint!,
+            RemoteEndpoint = (client.RemoteEndPoint as IPEndPoint)!,
         };
 
         if (version != "HTTP/1.1")

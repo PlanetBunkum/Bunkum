@@ -36,7 +36,7 @@ public class RateLimitBenchmarks
     {
         for (int i = 0; i < this.Requests; i++)
         {
-            this._rateLimiter.ViolatesRateLimit(Ctx, this._user);
+            this._rateLimiter.UserViolatesRateLimit(Ctx, this._user);
         }
     }
 }

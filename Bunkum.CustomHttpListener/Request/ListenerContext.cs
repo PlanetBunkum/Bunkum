@@ -26,7 +26,7 @@ public class ListenerContext
     private bool _socketClosed;
     internal bool SocketClosed => this._socketClosed || !this._socket.Connected;
 
-    public EndPoint RemoteEndpoint = null!;
+    public IPEndPoint RemoteEndpoint = null!;
 
     public long ContentLength
     {

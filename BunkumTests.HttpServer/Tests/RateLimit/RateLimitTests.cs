@@ -18,7 +18,7 @@ public class RateLimitTests
         MockRateLimitUser user = new("user");
 
         RateLimiter rateLimiter = new(timeProvider);
-        Assert.That(rateLimiter.ViolatesRateLimit(Ctx, user), Is.False);
+        Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user), Is.False);
     }
     
     [Test]
@@ -31,7 +31,7 @@ public class RateLimitTests
 
         for (int i = 0; i < RateLimiter.MaxRequestAmount; i++)
         {
-            Assert.That(rateLimiter.ViolatesRateLimit(Ctx, user), Is.False);
+            Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user), Is.False);
         }
     }
     
@@ -45,10 +45,10 @@ public class RateLimitTests
 
         for (int i = 0; i < RateLimiter.MaxRequestAmount; i++)
         {
-            Assert.That(rateLimiter.ViolatesRateLimit(Ctx, user), Is.False);
+            Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user), Is.False);
         }
         
-        Assert.That(rateLimiter.ViolatesRateLimit(Ctx, user), Is.True);
+        Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user), Is.True);
     }
     
     [Test]
@@ -61,13 +61,13 @@ public class RateLimitTests
 
         for (int i = 0; i < RateLimiter.MaxRequestAmount; i++)
         {
-            Assert.That(rateLimiter.ViolatesRateLimit(Ctx, user), Is.False);
+            Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user), Is.False);
         }
         
-        Assert.That(rateLimiter.ViolatesRateLimit(Ctx, user), Is.True);
+        Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user), Is.True);
 
         timeProvider.Seconds = RateLimiter.RequestTimeout;
-        Assert.That(rateLimiter.ViolatesRateLimit(Ctx, user), Is.False);
+        Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user), Is.False);
     }
     
     [Test]
@@ -81,13 +81,13 @@ public class RateLimitTests
 
         for (int i = 0; i < RateLimiter.MaxRequestAmount; i++)
         {
-            Assert.That(rateLimiter.ViolatesRateLimit(Ctx, user1), Is.False);
+            Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user1), Is.False);
         }
 
         Assert.Multiple(() =>
         {
-            Assert.That(rateLimiter.ViolatesRateLimit(Ctx, user1), Is.True);
-            Assert.That(rateLimiter.ViolatesRateLimit(Ctx, user2), Is.False);
+            Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user1), Is.True);
+            Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, user2), Is.False);
         });
     }
 }
