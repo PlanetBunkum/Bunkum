@@ -28,6 +28,10 @@ public class RateLimitService : Service
     public override Response? OnRequestHandled(ListenerContext context, MethodInfo method, Lazy<IDatabaseContext> database)
     {
         IUser? user = this._authService.AuthenticateUser(context, database);
+            
+        if (user is null)
+            return null;
+        
         if (user is not IRateLimitUser rateLimitUser) 
             throw new InvalidOperationException($"Cannot rate-limit a user that does not extend {nameof(IRateLimitUser)}");
 

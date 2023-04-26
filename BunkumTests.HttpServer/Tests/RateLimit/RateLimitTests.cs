@@ -66,7 +66,7 @@ public class RateLimitTests
         
         Assert.That(rateLimiter.ViolatesRateLimit(Ctx, user), Is.True);
 
-        timeProvider.Seconds = 30;
+        timeProvider.Seconds = RateLimiter.RequestTimeout;
         Assert.That(rateLimiter.ViolatesRateLimit(Ctx, user), Is.False);
     }
     

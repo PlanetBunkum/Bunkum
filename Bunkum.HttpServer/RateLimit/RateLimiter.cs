@@ -34,7 +34,7 @@ public class RateLimiter : IRateLimiter
             info.LimitedUntil = 0;
         }
         
-        info.RequestTimes.RemoveAll(r => r - RequestTimeout < now - RequestTimeout);
+        info.RequestTimes.RemoveAll(r => r <= now - RequestTimeout);
         
         if (info.RequestTimes.Count + 1 > MaxRequestAmount)
         {

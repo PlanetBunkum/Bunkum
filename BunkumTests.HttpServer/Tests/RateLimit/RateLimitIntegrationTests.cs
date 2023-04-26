@@ -95,7 +95,7 @@ public class RateLimitIntegrationTests : ServerDependentTest
         HttpResponseMessage newMsg = client.Send(new HttpRequestMessage(HttpMethod.Get, "/"));
         Assert.That(newMsg.StatusCode, Is.EqualTo(HttpStatusCode.TooManyRequests));
 
-        timeProvider.Seconds = 30;
+        timeProvider.Seconds = RateLimiter.RequestTimeout;
         
         newMsg = client.Send(new HttpRequestMessage(HttpMethod.Get, "/"));
         Assert.That(newMsg.StatusCode, Is.EqualTo(HttpStatusCode.OK));
