@@ -75,6 +75,7 @@ public class RateLimiter : IRateLimiter
         {
             if (info.LimitedUntil > now) return true;
             info.LimitedUntil = 0;
+            info.RequestTimes.Clear();
         }
         
         info.RequestTimes.RemoveAll(r => r <= now - this._settings.RequestTimeoutDuration);
