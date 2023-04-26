@@ -15,5 +15,6 @@ public class DummyUser : IRateLimitUser
         return this.UserId == (ulong)obj;
     }
 
+    [JsonIgnore]
     public object RateLimitUserId => this.UserId;
 }
