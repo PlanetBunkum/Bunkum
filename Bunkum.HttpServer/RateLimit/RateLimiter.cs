@@ -15,10 +15,10 @@ public class RateLimiter : IRateLimiter
 
     private readonly List<RateLimitUserInfo> _userInfos = new(25);
 
-    public bool ViolatesRateLimit(RequestContext context, IRateLimitUser user)
+    public bool ViolatesRateLimit(ListenerContext context, IRateLimitUser user)
     {
         RateLimitUserInfo? info = this._userInfos
-            .FirstOrDefault(i => user.UserIdIsEqual(i.User.RateLimitUserId));
+            .FirstOrDefault(i => user.RateLimitUserIdIsEqual(i.User.RateLimitUserId));
 
         if (info == null)
         {

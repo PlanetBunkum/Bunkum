@@ -62,23 +62,25 @@ public class AuthenticationService : Service
         Type paramType = paramInfo.ParameterType;
         
         if(paramType.IsAssignableTo(typeof(IUser)))
-        {
-            // Look for the user in the cache.
-            if (this._userCache.TryGetValue(context, out IUser? user))
-            {
-                this._userCache.Remove(context);
-                return user;
-            }
-            
-            return this._authenticationProvider.AuthenticateUser(context, database);
-        }
+            return this.AuthenticateUser(context, database, true);
 
         if (paramType.IsAssignableTo(typeof(IToken)))
-        {
             return this._authenticationProvider.AuthenticateToken(context, database);
-        }
 
         this._userCache.Remove(context);
         return null;
+    }
+
+    public IUser? AuthenticateUser(ListenerContext context, Lazy<IDatabaseContext> database, bool remove = false)
+    {
+        // Look for the user in the cache.
+        // ReSharper disable once InvertIf
+        if (this._userCache.TryGetValue(context, out IUser? user))
+        {
+            if(remove) this._userCache.Remove(context);
+            return user;
+        }
+            
+        return this._authenticationProvider.AuthenticateUser(context, database);
     }
 }

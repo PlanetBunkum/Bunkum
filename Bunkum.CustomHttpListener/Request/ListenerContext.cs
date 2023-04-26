@@ -71,6 +71,12 @@ public class ListenerContext
         this._socket = socket;
     }
 
+    [Obsolete("This is a constructor intended for use by unit tests. Do not use this unless you know what you are doing.")]
+    public ListenerContext()
+    {
+        this._socket = null!;
+    }
+
     public async Task FlushResponseAndClose()
     {
         if (this.ResponseType != null)

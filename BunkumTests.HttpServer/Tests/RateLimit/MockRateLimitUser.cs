@@ -11,7 +11,7 @@ public class MockRateLimitUser : IRateLimitUser
 
     private string UserId { get; }
     
-    public bool UserIdIsEqual(object obj)
+    public bool RateLimitUserIdIsEqual(object obj)
     {
         return (string)obj == this.UserId;
     }

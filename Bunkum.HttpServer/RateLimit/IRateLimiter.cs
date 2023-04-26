@@ -4,5 +4,5 @@ namespace Bunkum.HttpServer.RateLimit;
 
 public interface IRateLimiter
 {
-    public bool ViolatesRateLimit(RequestContext context, IRateLimitUser user);
+    public bool ViolatesRateLimit(ListenerContext context, IRateLimitUser user);
 }

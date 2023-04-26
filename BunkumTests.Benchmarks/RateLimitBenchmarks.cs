@@ -1,4 +1,5 @@
 using BenchmarkDotNet.Attributes;
+using Bunkum.CustomHttpListener.Request;
 using Bunkum.HttpServer;
 using Bunkum.HttpServer.RateLimit;
 using BunkumTests.HttpServer.Tests.RateLimit;
@@ -11,7 +12,9 @@ namespace BunkumTests.Benchmarks;
 [SimpleJob(invocationCount: 50_000)]
 public class RateLimitBenchmarks
 {
-    private static readonly RequestContext Ctx = new();
+#pragma warning disable CS0618
+    private static readonly ListenerContext Ctx = new();
+#pragma warning restore CS0618
     private RateLimiter _rateLimiter = null!;
     private MockTimeProvider _timeProvider = null!;
     private MockRateLimitUser _user = null!;

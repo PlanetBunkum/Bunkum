@@ -9,7 +9,7 @@ public interface IRateLimitUser : IUser
 {
     /// <param name="obj">The object to check against.</param>
     /// <returns>True if the object is equal to this user's id, false otherwise.</returns>
-    public bool UserIdIsEqual(object obj);
+    public bool RateLimitUserIdIsEqual(object obj);
     
     public object RateLimitUserId { get; }
 }
