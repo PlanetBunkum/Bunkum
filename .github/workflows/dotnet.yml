@@ -17,6 +17,6 @@ jobs:
         with:
           dotnet-version: 7.0.x
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore /property:Configuration=Release
       - name: Test
         run: dotnet test -c Release --verbosity normal
