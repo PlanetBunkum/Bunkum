@@ -28,10 +28,8 @@ public partial class BunkumHttpServer
     private readonly LoggerContainer<BunkumContext> _logger;
     
     private IDatabaseProvider<IDatabaseContext> _databaseProvider = new DummyDatabaseProvider();
-
-    private Config? _config;
-    private Type? _configType;
-    private readonly BunkumConfig _bunkumConfig;
+    
+    private readonly List<Config> _configs;
 
     private readonly List<IMiddleware> _middlewares = new();
     private readonly List<Service> _services = new();
@@ -47,7 +45,11 @@ public partial class BunkumHttpServer
             this._logger.LogInfo(BunkumContext.Startup, "You can override where data is stored using the BUNKUM_DATA_FOLDER environment variable.");
         }
 
-        this._bunkumConfig = Config.LoadFromFile<BunkumConfig>("bunkum.json", this._logger);
+        BunkumConfig bunkumConfig = Config.LoadFromFile<BunkumConfig>("bunkum.json", this._logger);
+        this._configs = new List<Config>(2)
+        {
+            bunkumConfig,
+        };
 
         if (listenEndpoint != null)
         {
@@ -55,7 +57,7 @@ public partial class BunkumHttpServer
         }
         else
         {
-            listenEndpoint = new Uri($"http://{this._bunkumConfig.ListenHost}:{this._bunkumConfig.ListenPort}");
+            listenEndpoint = new Uri($"http://{bunkumConfig.ListenHost}:{bunkumConfig.ListenPort}");
         }
         
         this._listener = new BunkumHttpListener(listenEndpoint);
@@ -160,9 +162,7 @@ public partial class BunkumHttpServer
             MainMiddleware mainMiddleware = new(this._endpoints,
                 this._logger,
                 this._services,
-                this._bunkumConfig,
-                this._config,
-                this._configType);
+                this._configs);
 
             Action next = () => { mainMiddleware.HandleRequest(context, database, null!); };
             
@@ -264,8 +264,8 @@ public partial class BunkumHttpServer
     /// <typeparam name="TConfig">An object extending <see cref="Config"/> that represents your server's configuration.</typeparam>
     public void UseJsonConfig<TConfig>(string filename) where TConfig : Config, new()
     {
-        this._config = Config.LoadFromFile<TConfig>(filename, this._logger);
-        this._configType = typeof(TConfig);
+        TConfig config = Config.LoadFromFile<TConfig>(filename, this._logger);
+        this._configs.Add(config);
     }
 
     public void AddMiddleware<TMiddleware>() where TMiddleware : IMiddleware, new() => this.AddMiddleware(new TMiddleware());

@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Bunkum.HttpServer.Authentication;
+using Bunkum.HttpServer.Configuration;
 using Bunkum.HttpServer.RateLimit;
 using Bunkum.HttpServer.Services;
 using Bunkum.HttpServer.Storage;
@@ -37,6 +38,16 @@ public partial class BunkumHttpServer // Services
                         continue;
                     }
                     
+                    if (paramInfos[i].ParameterType.IsAssignableTo(typeof(Config)))
+                    {
+                        Config? config = this._configs.FirstOrDefault(s => s.GetType() == paramInfos[i].ParameterType);
+                        if (config == null) 
+                            throw new Exception($"Could not find {paramInfos[i].ParameterType}, which {typeof(TService).Name} depends on.");
+                        
+                        newArgs.Insert(i, config);
+                        continue;
+                    }
+
                     if (newArgs[i] == null)
                     {
                         if (paramInfos[i].ParameterType.IsValueType)

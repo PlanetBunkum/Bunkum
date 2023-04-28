@@ -23,21 +23,15 @@ internal class MainMiddleware : IMiddleware
 
     private readonly List<Service> _services;
 
-    private readonly Config? _config;
-    private readonly Type? _configType;
-    
-    private readonly BunkumConfig _bunkumConfig;
-    
-    public MainMiddleware(List<EndpointGroup> endpoints, LoggerContainer<BunkumContext> logger, List<Service> services, BunkumConfig bunkumConfig, Config? config, Type? configType)
+    private readonly List<Config> _configs;
+
+    public MainMiddleware(List<EndpointGroup> endpoints, LoggerContainer<BunkumContext> logger, List<Service> services, List<Config> configs)
     {
         this._endpoints = endpoints;
         this._logger = logger;
         this._services = services;
 
-        this._config = config;
-        this._configType = configType;
-
-        this._bunkumConfig = bunkumConfig;
+        this._configs = configs;
     }
     
     public void HandleRequest(ListenerContext context, Lazy<IDatabaseContext> database, Action next)
@@ -184,16 +178,17 @@ internal class MainMiddleware : IMiddleware
                             // Pass in a database context if the endpoint needs one.
                             invokeList.Add(database.Value);
                         }
-                        else if (paramType.IsAssignableTo(this._configType))
+                        else if (paramType.IsAssignableTo(typeof(Config)))
                         {
-                            if (this._config == null)
-                                throw new InvalidOperationException("A config was attempted to be passed into an endpoint, but there was no config set on startup!");
-                            
-                            invokeList.Add(this._config);
-                        }
-                        else if (paramType.IsAssignableTo(typeof(BunkumConfig)))
-                        {
-                            invokeList.Add(this._bunkumConfig);
+                            Config? configToPass = this._configs.FirstOrDefault(config => paramType == config.GetType());
+
+                            if (configToPass == null)
+                            {
+                                throw new ArgumentNullException(
+                                    $"Could not find an valid config for the {paramType.Name} parameter '{param.Name}'");
+                            }
+
+                            invokeList.Add(configToPass);
                         }
                         else if (paramType == typeof(string))
                         {
@@ -218,7 +213,7 @@ internal class MainMiddleware : IMiddleware
                             if (arg == null)
                             {
                                 this._logger.LogWarning(BunkumContext.Request, 
-                                    $"Could not find an valid argument for the {paramType.Name} parameter '{param.Name}'." +
+                                    $"Could not find an valid argument for the {paramType.Name} parameter '{param.Name}'. " +
                                     $"Null will be used instead.");
                             }
 
