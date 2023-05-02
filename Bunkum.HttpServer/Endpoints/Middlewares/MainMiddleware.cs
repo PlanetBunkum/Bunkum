@@ -195,6 +195,13 @@ internal class MainMiddleware : IMiddleware
                             // Attempt to pass in a route parameter based on the method parameter's name
                             invokeList.Add(parameters!.GetValueOrDefault(param.Name));
                         }
+                        else if (paramType == typeof(int))
+                        {
+                            // Also try to pass in a route parameter for integers
+                            string? strParam = parameters!.GetValueOrDefault(param.Name);
+                            bool intParsed = int.TryParse(strParam, out int intParam);
+                            invokeList.Add(intParsed ? intParam : null); // check result, intParam will be null
+                        }
                         else
                         {
                             // Ask all services to try to provide an argument for this parameter.
