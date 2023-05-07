@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Reflection;
 using Bunkum.CustomHttpListener;
+using Bunkum.CustomHttpListener.Listeners;
 using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.CustomHttpListener.Request;
 using Bunkum.HttpServer.Configuration;
@@ -60,7 +61,7 @@ public partial class BunkumHttpServer
             listenEndpoint = new Uri($"http://{bunkumConfig.ListenHost}:{bunkumConfig.ListenPort}");
         }
         
-        this._listener = new BunkumHttpListener(listenEndpoint);
+        this._listener = new SocketHttpListener(listenEndpoint);
     }
 
     public void Start()
