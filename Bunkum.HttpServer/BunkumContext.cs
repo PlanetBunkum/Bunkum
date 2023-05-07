@@ -11,9 +11,12 @@ public enum BunkumContext
     Filter,
     Digest,
     
+    Service,
+    Middleware,
     Request,
     Api,
     Game,
+    Matching,
     
     UserContent,
     UserPhotos,
