@@ -35,7 +35,7 @@ public partial class BunkumHttpServer
     private readonly List<IMiddleware> _middlewares = new();
     private readonly List<Service> _services = new();
 
-    public BunkumHttpServer(Uri? listenEndpoint = null)
+    private BunkumHttpServer(bool setListener)
     {
         this._logger = new LoggerContainer<BunkumContext>();
         this._logger.RegisterLogger(new ConsoleLogger());
@@ -52,16 +52,27 @@ public partial class BunkumHttpServer
             bunkumConfig,
         };
 
-        if (listenEndpoint != null)
+        if (setListener)
         {
-            this._logger.LogDebug(BunkumContext.Startup, $"Using hardcoded listen endpoint {listenEndpoint}");
+            Uri listenEndpoint = new($"http://{bunkumConfig.ListenHost}:{bunkumConfig.ListenPort}");
+            this._listener = new SocketHttpListener(listenEndpoint);
         }
         else
         {
-            listenEndpoint = new Uri($"http://{bunkumConfig.ListenHost}:{bunkumConfig.ListenPort}");
+            this._listener = null!;
         }
-        
-        this._listener = new SocketHttpListener(listenEndpoint);
+    }
+
+    public BunkumHttpServer() : this(true) {}
+    
+    public BunkumHttpServer(BunkumHttpListener listener) : this(false)
+    {
+        this._listener = listener;
+    }
+
+    public BunkumHttpServer(Uri listenEndpoint) : this(new SocketHttpListener(listenEndpoint))
+    {
+        this._logger.LogDebug(BunkumContext.Startup, $"Using hardcoded listen endpoint {listenEndpoint}");
     }
 
     public void Start()
