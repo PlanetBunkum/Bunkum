@@ -254,6 +254,11 @@ public partial class BunkumHttpServer
     {
         this._databaseProvider = provider;
     }
+    
+    public void UseConfig(Config config)
+    {
+        this._configs.Add(config);
+    }
 
     // TODO: Configuration hot reload
     // TODO: .ini? would be helpful as it supports comments and we can document in the file itself
@@ -265,7 +270,7 @@ public partial class BunkumHttpServer
     public void UseJsonConfig<TConfig>(string filename) where TConfig : Config, new()
     {
         TConfig config = Config.LoadFromFile<TConfig>(filename, this._logger);
-        this._configs.Add(config);
+        this.UseConfig(config);
     }
 
     public void AddMiddleware<TMiddleware>() where TMiddleware : IMiddleware, new() => this.AddMiddleware(new TMiddleware());

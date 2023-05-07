@@ -80,6 +80,11 @@ public partial class BunkumHttpServer // Services
         this.AddService<AuthenticationService>(provider, assumeAuthenticationRequired);
     }
 
+    public void AddStorageService(IDataStore dataStore)
+    {
+        this.AddService<StorageService>(dataStore);
+    }
+
     public void AddStorageService<TDataStore>() where TDataStore : IDataStore
     {
         this.AddService<StorageService>(Activator.CreateInstance<TDataStore>());
