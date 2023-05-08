@@ -1,5 +1,6 @@
+using System.Diagnostics;
 using System.Net;
-using System.Text;
+using Bunkum.CustomHttpListener.Extensions;
 
 namespace Bunkum.CustomHttpListener.Listeners.Direct;
 
@@ -25,34 +26,42 @@ public class BunkumHttpMessageHandler : HttpMessageHandler
         return ParseResponseMessage(stream);
     }
 
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+        CancellationToken cancellationToken)
     {
         return Task.FromResult(this.Send(request, cancellationToken));
     }
 
     private static HttpResponseMessage ParseResponseMessage(Stream stream)
     {
-        byte[] buffer = new byte[stream.Length];
-        _ = stream.Read(buffer);
-        string responseStr = Encoding.ASCII.GetString(buffer);
-        
-        string[] lines = responseStr.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-        string[] responseLine = lines[0].Split(' ');
-        
-        HttpStatusCode statusCode = (HttpStatusCode)Enum.Parse(typeof(HttpStatusCode), responseLine[1]);
+        string[] responseLine = BunkumHttpListener.ReadRequestLine(stream);
+
+        HttpStatusCode statusCode = Enum.Parse<HttpStatusCode>(responseLine[1]);
         HttpResponseMessage response = new(statusCode);
+
+        string contentLengthStr = null!;
         
-        // skip first line, then parse rest of response as headers
-        for (int i = 1; i < lines.Length; i++)
+        foreach ((string? key, string? value) in BunkumHttpListener.ReadHeaders(stream))
         {
-            string[] header = lines[i].Split(new[] { ": " }, StringSplitOptions.RemoveEmptyEntries);
-            if (header.Length == 2)
-            {
-                response.Headers.TryAddWithoutValidation(header[0], header[1]);
-            }
+            Debug.Assert(key != null);
+            Debug.Assert(value != null);
+
+            if (key == "Content-Length") contentLengthStr = value;
+
+            response.Headers.TryAddWithoutValidation(key, value);
         }
+
+        // int count = (int)(stream.Length - stream.Position);
+        Debug.Assert(contentLengthStr != null);
+        int count = int.Parse(contentLengthStr);
+            
+        MemoryStream inputStream = new(count);
+        stream.ReadIntoStream(inputStream, count);
         
-        response.Content = new StreamContent(stream);
+        inputStream.Seek(0, SeekOrigin.Begin);
+
+        stream.Position = 0;
+        response.Content = new StreamContent(inputStream);
 
         return response;
     }

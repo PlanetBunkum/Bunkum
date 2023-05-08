@@ -39,7 +39,11 @@ public class DirectHttpListener : BunkumHttpListener
 
                 MemoryStream stream = new();
                 Stream? requestStream = message.Message.Content?.ReadAsStream();
-                if (requestStream != null) await requestStream.CopyToAsync(stream);
+                if (requestStream != null)
+                {
+                    await requestStream.CopyToAsync(stream);
+                    stream.Position = 0;
+                }
 
                 ListenerContext context = new DirectListenerContext(message.Stream, message.Reset)
                 {

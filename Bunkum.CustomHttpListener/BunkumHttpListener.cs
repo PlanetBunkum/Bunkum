@@ -52,7 +52,7 @@ public abstract class BunkumHttpListener : IDisposable
 
     protected abstract Task<ListenerContext?> WaitForConnectionAsyncInternal();
 
-    protected static IEnumerable<(string, string)> ReadCookies(string header)
+    internal static IEnumerable<(string, string)> ReadCookies(string header)
     {
         if (string.IsNullOrEmpty(header)) yield break;
 
@@ -69,7 +69,7 @@ public abstract class BunkumHttpListener : IDisposable
         }
     }
 
-    protected static string[] ReadRequestLine(Stream stream)
+    internal static string[] ReadRequestLine(Stream stream)
     {
         byte[] requestLineBytes = new byte[RequestLineLimit];
         // Probably breaks spec to just look for \n instead of \r\n but who cares
@@ -78,7 +78,7 @@ public abstract class BunkumHttpListener : IDisposable
         return Encoding.ASCII.GetString(requestLineBytes).Split(' ');
     }
 
-    protected static IEnumerable<(string, string)> ReadHeaders(Stream stream)
+    internal static IEnumerable<(string, string)> ReadHeaders(Stream stream)
     {
         while (true)
         {
