@@ -12,9 +12,8 @@ namespace BunkumTests.Benchmarks;
 [SimpleJob(invocationCount: 50_000)]
 public class RateLimitBenchmarks
 {
-#pragma warning disable CS0618
-    private static readonly ListenerContext Ctx = new();
-#pragma warning restore CS0618
+    private static readonly ListenerContext Ctx = new DirectListenerContext();
+
     private RateLimiter _rateLimiter = null!;
     private MockTimeProvider _timeProvider = null!;
     private MockRateLimitUser _user = null!;
