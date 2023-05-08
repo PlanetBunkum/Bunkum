@@ -39,7 +39,7 @@ public class BunkumHttpMessageHandler : HttpMessageHandler
         HttpStatusCode statusCode = Enum.Parse<HttpStatusCode>(responseLine[1]);
         HttpResponseMessage response = new(statusCode);
 
-        string contentLengthStr = null!;
+        string contentLengthStr = "0";
         
         foreach ((string? key, string? value) in BunkumHttpListener.ReadHeaders(stream))
         {
@@ -56,11 +56,12 @@ public class BunkumHttpMessageHandler : HttpMessageHandler
         int count = int.Parse(contentLengthStr);
             
         MemoryStream inputStream = new(count);
-        stream.ReadIntoStream(inputStream, count);
+        if (count > 0)
+        {
+            stream.ReadIntoStream(inputStream, count);
+            inputStream.Position = 0;
+        }
         
-        inputStream.Seek(0, SeekOrigin.Begin);
-
-        stream.Position = 0;
         response.Content = new StreamContent(inputStream);
 
         return response;
