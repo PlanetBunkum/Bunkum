@@ -12,12 +12,19 @@ namespace Bunkum.CustomHttpListener.Listeners;
 public partial class SocketHttpListener : BunkumHttpListener
 {
     private Socket? _socket;
+    private readonly Uri _listenEndpoint;
     
     [GeneratedRegex("^[a-zA-Z]+$")]
     private static partial Regex LettersRegex();
-    
-    public SocketHttpListener(Uri listenEndpoint) : base(listenEndpoint)
-    {}
+
+    public SocketHttpListener(Uri listenEndpoint)
+    {
+        this._listenEndpoint = listenEndpoint;
+        
+        this.Logger.LogInfo(HttpLogContext.Startup, "Internal server is listening at URL " + listenEndpoint);
+        this.Logger.LogInfo(HttpLogContext.Startup, "The above URL is probably not the URL you should use to patch. " +
+                                                     "See https://littlebigrefresh.github.io/Docs/patch-url for more information.");
+    }
     
     public override void StartListening()
     {
@@ -38,7 +45,7 @@ public partial class SocketHttpListener : BunkumHttpListener
         this._socket.Bind(listenEndpoint);
         this._socket.Listen(128);
         
-        this._logger.LogInfo(HttpLogContext.Startup, "Listening...");
+        this.Logger.LogInfo(HttpLogContext.Startup, "Listening...");
     }
 
     protected override async Task<ListenerContext?> WaitForConnectionAsyncInternal()
@@ -63,11 +70,11 @@ public partial class SocketHttpListener : BunkumHttpListener
         }
         catch (Exception e)
         {
-            this._logger.LogError(HttpLogContext.Request, "Failed to read request line: " + e);
+            this.Logger.LogError(HttpLogContext.Request, "Failed to read request line: " + e);
             return null;
         }
 
-        ListenerContext context = new(client)
+        ListenerContext context = new SocketListenerContext(client)
         {
             ResponseHeaders =
             {
@@ -87,7 +94,7 @@ public partial class SocketHttpListener : BunkumHttpListener
         Method parsedMethod = MethodUtils.FromString(method);
         if (parsedMethod == Method.Invalid)
         {
-            this._logger.LogWarning(HttpLogContext.Request, "Rejected request that sent invalid method " + method);
+            this.Logger.LogWarning(HttpLogContext.Request, "Rejected request that sent invalid method " + method);
             await context.SendResponse(HttpStatusCode.BadRequest);
             return null;
         }
@@ -104,7 +111,7 @@ public partial class SocketHttpListener : BunkumHttpListener
 
         if (context.RequestHeaders["Host"] == null)
         {
-            this._logger.LogWarning(HttpLogContext.Request, "Rejected request without Host header");
+            this.Logger.LogWarning(HttpLogContext.Request, "Rejected request without Host header");
             await context.SendResponse(HttpStatusCode.BadRequest);
             return null;
         }

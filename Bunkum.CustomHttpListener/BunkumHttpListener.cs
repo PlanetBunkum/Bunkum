@@ -1,11 +1,6 @@
-using System.Diagnostics;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Web;
 using Bunkum.CustomHttpListener.Extensions;
-using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.CustomHttpListener.Request;
 using NotEnoughLogs;
 using NotEnoughLogs.Loggers;
@@ -18,21 +13,15 @@ namespace Bunkum.CustomHttpListener;
 /// </summary>
 public abstract class BunkumHttpListener : IDisposable
 {
-    protected readonly Uri _listenEndpoint;
-    protected readonly LoggerContainer<HttpLogContext> _logger;
+    protected readonly LoggerContainer<HttpLogContext> Logger;
 
     private const int HeaderLineLimit = 1024; // 1KB per header
     private const int RequestLineLimit = 256; // 256 bytes
     
-    public BunkumHttpListener(Uri listenEndpoint)
+    public BunkumHttpListener()
     {
-        this._listenEndpoint = listenEndpoint;
-        this._logger = new LoggerContainer<HttpLogContext>();
-        this._logger.RegisterLogger(new ConsoleLogger());
-        
-        this._logger.LogInfo(HttpLogContext.Startup, "Internal server is listening at URL " + listenEndpoint);
-        this._logger.LogInfo(HttpLogContext.Startup, "The above URL is probably not the URL you should use to patch. " +
-                                                     "See https://littlebigrefresh.github.io/Docs/patch-url for more information.");
+        this.Logger = new LoggerContainer<HttpLogContext>();
+        this.Logger.RegisterLogger(new ConsoleLogger());
     }
 
     public abstract void StartListening();
@@ -48,15 +37,15 @@ public abstract class BunkumHttpListener : IDisposable
             }
             catch (Exception e)
             {
-                this._logger.LogError(HttpLogContext.Request, "Failed to handle a connection: " + e);
-                if (!(request?.SocketClosed).GetValueOrDefault(true)) await request!.SendResponse(HttpStatusCode.BadRequest);
+                this.Logger.LogError(HttpLogContext.Request, "Failed to handle a connection: " + e);
+                if ((request?.CanSendData).GetValueOrDefault(true)) await request!.SendResponse(HttpStatusCode.BadRequest);
                 continue;
             }
             
             if (request == null) continue;
             
             await action.Invoke(request);
-            if(!request.SocketClosed) await request.SendResponse(HttpStatusCode.NotFound);
+            if(request.CanSendData) await request.SendResponse(HttpStatusCode.NotFound);
             return;
         }
     }

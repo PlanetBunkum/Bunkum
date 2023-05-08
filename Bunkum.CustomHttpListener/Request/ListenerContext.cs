@@ -9,9 +9,10 @@ using Bunkum.CustomHttpListener.Parsing;
 namespace Bunkum.CustomHttpListener.Request;
 
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
-public class ListenerContext
+public abstract class ListenerContext
 {
-    private readonly Socket _socket;
+    public abstract bool CanSendData { get; }
+    
     public MemoryStream InputStream { get; internal set; } = null!;
 
     public Method Method { get; internal set; }
@@ -22,9 +23,6 @@ public class ListenerContext
 
     public readonly NameValueCollection Cookies = new();
     public NameValueCollection Query { get; internal set; } = null!;
-
-    private bool _socketClosed;
-    internal bool SocketClosed => this._socketClosed || !this._socket.Connected;
 
     public IPEndPoint RemoteEndpoint = null!;
 
@@ -65,17 +63,6 @@ public class ListenerContext
         this.ResponseStream.Write(buffer);
         this._responseLength += buffer.Length;
     }
-    
-    internal ListenerContext(Socket socket)
-    {
-        this._socket = socket;
-    }
-
-    [Obsolete("This is a constructor intended for use by unit tests. Do not use this unless you know what you are doing.")]
-    public ListenerContext()
-    {
-        this._socket = null!;
-    }
 
     public async Task FlushResponseAndClose()
     {
@@ -88,7 +75,7 @@ public class ListenerContext
         await this.SendResponse(this.ResponseCode, this.ResponseStream.GetBuffer());
     }
 
-    internal async Task SendResponse(HttpStatusCode code, byte[]? data = null)
+    internal virtual async Task SendResponse(HttpStatusCode code, byte[]? data = null)
     {
         List<string> response = new() { $"HTTP/1.1 {(int)code} {code.ToString()}" };
         foreach ((string? key, string? value) in this.ResponseHeaders)
@@ -103,39 +90,11 @@ public class ListenerContext
         await this.SendBufferSafe(string.Join("\r\n", response));
         if (data != null) await this.SendBufferSafe(data);
         
-        this.CloseSocket();
+        this.CloseConnection();
     }
 
-    private void CloseSocket()
-    {
-        if (this.SocketClosed) return;
-
-        this._socketClosed = true;
-        try
-        {
-            this._socket.Shutdown(SocketShutdown.Both);
-            this._socket.Disconnect(false);
-            this._socket.Close();
-            this._socket.Dispose();
-        }
-        catch
-        {
-            // ignored
-        }
-    }
+    public abstract void CloseConnection();
 
     private Task SendBufferSafe(string str) => this.SendBufferSafe(Encoding.UTF8.GetBytes(str));
-    private async Task SendBufferSafe(byte[] buffer)
-    {
-        if (this.SocketClosed) return;
-        
-        try
-        {
-            await this._socket.SendAsync(buffer);
-        }
-        catch
-        {
-            // ignored, log warning in the future?
-        }
-    }
+    protected abstract Task SendBufferSafe(byte[] buffer);
 }
