@@ -39,14 +39,18 @@ public class DirectHttpListener : BunkumHttpListener
 
                 MemoryStream stream;
                 Stream? requestStream = message.Message.Content?.ReadAsStream();
-                if (requestStream != null)
+
+                if (requestStream != null && requestStream.Length != 0)
                 {
                     stream = new MemoryStream((int)requestStream.Length);
-                
+
                     await requestStream.CopyToAsync(stream, (int)requestStream.Length);
                     stream.Position = 0;
                 }
-                else stream = new MemoryStream(0);
+                else
+                {
+                    stream = new MemoryStream(0);
+                }
 
                 ListenerContext context = new DirectListenerContext(message.Stream, message.Reset)
                 {
@@ -61,7 +65,7 @@ public class DirectHttpListener : BunkumHttpListener
                 {
                     Debug.Assert(key != null);
                     Debug.Assert(values != null);
-                    
+
                     foreach (string value in values) context.RequestHeaders.Add(key, value);
                 }
 
@@ -69,13 +73,13 @@ public class DirectHttpListener : BunkumHttpListener
                 {
                     Debug.Assert(key != null);
                     Debug.Assert(value != null);
-                    
+
                     context.Cookies.Add(key, value);
                 }
 
                 return context;
             }
-            
+
             Thread.Sleep(10);
         }
     }

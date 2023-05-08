@@ -38,14 +38,15 @@ public abstract class BunkumHttpListener : IDisposable
             catch (Exception e)
             {
                 this.Logger.LogError(HttpLogContext.Request, "Failed to handle a connection: " + e);
-                if ((request?.CanSendData).GetValueOrDefault(true)) await request!.SendResponse(HttpStatusCode.BadRequest);
+                if(request != null) await request.SendResponse(HttpStatusCode.BadRequest);
+                else this.Logger.LogWarning(HttpLogContext.Request, "Couldn't inform the client of the issue due to the request being null.");
                 continue;
             }
             
             if (request == null) continue;
             
             await action.Invoke(request);
-            if(request.CanSendData) await request.SendResponse(HttpStatusCode.NotFound);
+            await request.SendResponse(HttpStatusCode.NotFound);
             return;
         }
     }

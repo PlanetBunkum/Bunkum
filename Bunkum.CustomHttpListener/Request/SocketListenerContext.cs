@@ -7,16 +7,16 @@ public class SocketListenerContext : ListenerContext
     private readonly Socket _socket;
     
     private bool _socketClosed;
-    internal bool SocketClosed => this._socketClosed || !this._socket.Connected;
+    private bool SocketClosed => this._socketClosed || !this._socket.Connected;
     
     internal SocketListenerContext(Socket socket)
     {
         this._socket = socket;
     }
 
-    public override bool CanSendData => !this.SocketClosed;
+    protected override bool CanSendData => !this.SocketClosed;
 
-    public override void CloseConnection()
+    protected override void CloseConnection()
     {
         if (this.SocketClosed) return;
 
@@ -33,17 +33,9 @@ public class SocketListenerContext : ListenerContext
             // ignored
         }
     }
-    protected override async Task SendBufferSafe(byte[] buffer)
+
+    protected override async Task SendBuffer(byte[] buffer)
     {
-        if (this.SocketClosed) return;
-        
-        try
-        {
-            await this._socket.SendAsync(buffer);
-        }
-        catch
-        {
-            // ignored, log warning in the future?
-        }
+        await this._socket.SendAsync(buffer);
     }
 }

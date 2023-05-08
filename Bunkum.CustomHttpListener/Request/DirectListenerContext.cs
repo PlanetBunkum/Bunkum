@@ -16,19 +16,18 @@ public class DirectListenerContext : ListenerContext
     {
         this._stream = new MemoryStream(Array.Empty<byte>(), false);
     }
-    
-    public override bool CanSendData => !this._closed;
+
+    protected override bool CanSendData => !this._closed;
     public override long ContentLength => this.InputStream.Length;
 
-    public override void CloseConnection()
+    protected override void CloseConnection()
     {
         this._reset?.Set(); // Tell any threads that may be waiting on us that they can read.
         this._closed = true;
     }
 
-    protected override async Task SendBufferSafe(byte[] buffer)
+    protected override async Task SendBuffer(byte[] buffer)
     {
-        if (this._closed) throw new InvalidOperationException("The connection has been closed.");
         await this._stream.WriteAsync(buffer);
     }
 }
