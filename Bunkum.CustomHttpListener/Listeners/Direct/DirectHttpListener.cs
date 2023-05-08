@@ -37,13 +37,16 @@ public class DirectHttpListener : BunkumHttpListener
             {
                 Debug.Assert(message != null);
 
-                MemoryStream stream = new();
+                MemoryStream stream;
                 Stream? requestStream = message.Message.Content?.ReadAsStream();
                 if (requestStream != null)
                 {
-                    await requestStream.CopyToAsync(stream);
+                    stream = new MemoryStream((int)requestStream.Length);
+                
+                    await requestStream.CopyToAsync(stream, (int)requestStream.Length);
                     stream.Position = 0;
                 }
+                else stream = new MemoryStream(0);
 
                 ListenerContext context = new DirectListenerContext(message.Stream, message.Reset)
                 {
@@ -52,8 +55,23 @@ public class DirectHttpListener : BunkumHttpListener
                     Query = HttpUtility.ParseQueryString(message.Message.RequestUri!.Query),
                     RemoteEndpoint = IPEndPoint.Parse("0.0.0.0"),
                     InputStream = stream,
-                    // TODO: cookies & headers
                 };
+
+                foreach ((string? key, IEnumerable<string>? values) in message.Message.Headers)
+                {
+                    Debug.Assert(key != null);
+                    Debug.Assert(values != null);
+                    
+                    foreach (string value in values) context.RequestHeaders.Add(key, value);
+                }
+
+                foreach ((string? key, string? value) in ReadCookies(context.RequestHeaders["Cookie"]))
+                {
+                    Debug.Assert(key != null);
+                    Debug.Assert(value != null);
+                    
+                    context.Cookies.Add(key, value);
+                }
 
                 return context;
             }

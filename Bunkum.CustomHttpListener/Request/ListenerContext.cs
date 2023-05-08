@@ -26,7 +26,7 @@ public abstract class ListenerContext
 
     public IPEndPoint RemoteEndpoint = null!;
 
-    public long ContentLength
+    public virtual long ContentLength
     {
         get
         {
@@ -36,16 +36,7 @@ public abstract class ListenerContext
         }
     }
 
-    public bool HasBody
-    {
-        get
-        {
-            string? lengthStr = this.RequestHeaders["Content-Length"];
-            if (lengthStr is null or "0") return false;
-
-            return true;
-        }
-    }
+    public bool HasBody => this.ContentLength > 0;
 
     // Response
     public HttpStatusCode ResponseCode = HttpStatusCode.OK;

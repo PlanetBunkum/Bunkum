@@ -18,6 +18,8 @@ public class DirectListenerContext : ListenerContext
     }
     
     public override bool CanSendData => !this._closed;
+    public override long ContentLength => this.InputStream.Length;
+
     public override void CloseConnection()
     {
         this._reset?.Set(); // Tell any threads that may be waiting on us that they can read.

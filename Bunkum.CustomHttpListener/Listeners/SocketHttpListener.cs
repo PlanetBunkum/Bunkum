@@ -120,7 +120,7 @@ public partial class SocketHttpListener : BunkumHttpListener
         
         if (context.RequestHeaders["Cookie"] != null)
         {
-            foreach ((string? key, string? value) in ReadCookies(context.RequestHeaders["Cookie"]!))
+            foreach ((string? key, string? value) in ReadCookies(context.RequestHeaders["Cookie"]))
             {
                 Debug.Assert(key != null);
                 Debug.Assert(value != null);

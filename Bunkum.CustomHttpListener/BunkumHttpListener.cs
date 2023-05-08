@@ -52,7 +52,7 @@ public abstract class BunkumHttpListener : IDisposable
 
     protected abstract Task<ListenerContext?> WaitForConnectionAsyncInternal();
 
-    internal static IEnumerable<(string, string)> ReadCookies(string header)
+    internal static IEnumerable<(string, string)> ReadCookies(string? header)
     {
         if (string.IsNullOrEmpty(header)) yield break;
 

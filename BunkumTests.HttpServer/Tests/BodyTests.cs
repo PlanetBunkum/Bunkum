@@ -16,7 +16,11 @@ public class BodyTests : ServerDependentTest
         server.AddEndpointGroup<BodyEndpoints>();
         
         HttpResponseMessage msg = await client.PostAsync(endpoint, new StringContent("works"));
-        Assert.That(await msg.Content.ReadAsStringAsync(), Is.EqualTo("works"));
+        Assert.Multiple(async () =>
+        {
+            Assert.That(msg.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(await msg.Content.ReadAsStringAsync(), Is.EqualTo("works"));
+        });
     }
 
     [Test]
