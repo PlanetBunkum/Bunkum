@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Bunkum.HttpServer.Responses;
 
-public struct Response
+public partial struct Response
 {
     public Response(byte[] data, ContentType contentType = ContentType.Html, HttpStatusCode statusCode = HttpStatusCode.OK)
     {
@@ -23,8 +23,11 @@ public struct Response
     static Response()
     {
         Namespaces.Add("", "");
+        SetupResponseCache();
     }
     #endregion
+
+    private static partial void SetupResponseCache();
 
     public Response(HttpStatusCode statusCode) : this("", ContentType.BinaryData, statusCode) 
     {}
@@ -72,8 +75,6 @@ public struct Response
 
         this.Data = stream.ToArray();
     }
-
-    public static implicit operator Response(HttpStatusCode code) => new(code);
 
     public readonly HttpStatusCode StatusCode;
     public readonly ContentType ContentType;
