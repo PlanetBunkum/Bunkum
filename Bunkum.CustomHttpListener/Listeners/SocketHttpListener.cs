@@ -71,6 +71,7 @@ public partial class SocketHttpListener : BunkumHttpListener
         catch (Exception e)
         {
             this.Logger.LogError(HttpLogContext.Request, "Failed to read request line: " + e);
+            await new SocketListenerContext(client).SendResponse(HttpStatusCode.BadRequest);
             return null;
         }
 
