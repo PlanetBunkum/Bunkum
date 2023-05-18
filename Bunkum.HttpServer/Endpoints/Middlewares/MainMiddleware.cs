@@ -108,7 +108,6 @@ internal class MainMiddleware : IMiddleware
                             Method = context.Method,
                             RequestHeaders = context.RequestHeaders,
                             ResponseHeaders = context.ResponseHeaders,
-                            Services = this._services,
                         },
                     };
 
