@@ -5,7 +5,7 @@ namespace Bunkum.HttpServer.Configuration;
 /// </summary>
 public class BunkumConfig : Config
 {
-    public override int CurrentConfigVersion => 2;
+    public override int CurrentConfigVersion => 3;
     public override int Version { get; set; }
     protected internal override void Migrate(int oldVer, dynamic oldConfig)
     {
@@ -16,4 +16,5 @@ public class BunkumConfig : Config
 
     public string ListenHost { get; set; } = "0.0.0.0";
     public int ListenPort { get; set; } = 10061;
+    public int ThreadCount { get; set; } = 4;
 }

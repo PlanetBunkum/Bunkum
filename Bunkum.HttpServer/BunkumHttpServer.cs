@@ -75,15 +75,38 @@ public partial class BunkumHttpServer
         this._logger.LogDebug(BunkumContext.Startup, $"Using hardcoded listen endpoint {listenEndpoint}");
     }
 
+    /// <summary>
+    /// Start the server in multithreaded mode. Caller is responsible for blocking.
+    /// </summary>
     public void Start()
     {
         this.RunStartupTasks();
-        Task.Factory.StartNew(async () => await this.Block());
+
+        BunkumConfig? bunkumConfig = (BunkumConfig?)this._configs.FirstOrDefault(c => c is BunkumConfig);
+        Debug.Assert(bunkumConfig != null);
+
+        int tasks = bunkumConfig.ThreadCount;
+
+        this._logger.LogInfo(BunkumContext.Startup, $"Blocking in multithreaded mode with {tasks} tasks");
+
+        for (int i = 0; i < tasks; i++)
+        {
+            int threadN = i + 1;
+            Task.Factory.StartNew(async () =>
+            {
+                this._logger.LogTrace(BunkumContext.Startup, $"Spinning up task {threadN}/{tasks}");
+                await this.Block();
+            });
+        }
     }
     
+    /// <summary>
+    /// Start the server in single-threaded mode. Bunkum is responsible for blocking.
+    /// </summary>
     public async Task StartAndBlockAsync()
     {
         this.RunStartupTasks();
+        this._logger.LogInfo(BunkumContext.Startup, "Blocking in single-threaded mode");
         await this.Block();
     }
 
