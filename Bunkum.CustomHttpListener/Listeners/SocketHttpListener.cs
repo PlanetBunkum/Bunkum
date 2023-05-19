@@ -48,12 +48,12 @@ public partial class SocketHttpListener : BunkumHttpListener
         this.Logger.LogInfo(HttpLogContext.Startup, "Listening...");
     }
 
-    protected override async Task<ListenerContext?> WaitForConnectionAsyncInternal()
+    protected override async Task<ListenerContext?> WaitForConnectionAsyncInternal(CancellationToken ct)
     {
         if (this._socket == null)
             throw new InvalidOperationException("Cannot wait for a connection when we are not listening");
 
-        Socket client = await this._socket.AcceptAsync();
+        Socket client = await this._socket.AcceptAsync(ct);
         NetworkStream stream = new(client);
 
         string method;
@@ -62,7 +62,7 @@ public partial class SocketHttpListener : BunkumHttpListener
 
         try
         {
-            string[] requestLineSplit = ReadRequestLine(stream);
+            string[] requestLineSplit = await ReadRequestLine(stream, ct);
 
             method = requestLineSplit[0];
             path = requestLineSplit[1];
@@ -102,7 +102,10 @@ public partial class SocketHttpListener : BunkumHttpListener
 
         context.Method = parsedMethod;
 
-        foreach ((string? key, string? value) in ReadHeaders(stream))
+        // ReSharper disable once MethodSupportsCancellation
+#pragma warning disable CA2016
+        await foreach ((string? key, string? value) in ReadHeaders(stream).WithCancellation(ct))
+#pragma warning restore CA2016
         {
             Debug.Assert(key != null);
             Debug.Assert(value != null);
@@ -135,7 +138,7 @@ public partial class SocketHttpListener : BunkumHttpListener
         MemoryStream inputStream = new((int)context.ContentLength);
         if (context.ContentLength > 0)
         {
-            stream.ReadIntoStream(inputStream, (int)context.ContentLength);
+            await stream.ReadIntoStreamAsync(inputStream, (int)context.ContentLength, ct);
             inputStream.Seek(0, SeekOrigin.Begin);
         }
         context.InputStream = inputStream;

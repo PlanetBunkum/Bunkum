@@ -2,11 +2,23 @@ namespace Bunkum.CustomHttpListener.Extensions;
 
 internal static class StreamExtensions
 {
-    internal static int ReadIntoBufferUntilChar(this Stream stream, char charToReadTo, byte[] buffer)
+    private static async Task<int> ReadByteAsync(this Stream stream, CancellationToken ct)
+    {
+        byte[] oneByteArray = new byte[1];
+        int r = await stream.ReadAsync(oneByteArray, 0, 1, ct);
+        return r == 0 ? -1 : oneByteArray[0];
+    }
+
+    private static async Task WriteByteAsync(this Stream stream, byte value, CancellationToken ct)
+    {
+        await stream.WriteAsync(new byte[1] { value }, 0, 1, ct);
+    }
+    
+    internal static async Task<int> ReadIntoBufferUntilCharAsync(this Stream stream, char charToReadTo, byte[] buffer, CancellationToken ct)
     {
         int readByte;
         int i = 0;
-        while ((readByte = stream.ReadByte()) != -1)
+        while ((readByte = await stream.ReadByteAsync(ct)) != -1)
         {
             if ((char)readByte == charToReadTo) break;
 
@@ -17,14 +29,14 @@ internal static class StreamExtensions
         return i;
     }
 
-    internal static int ReadIntoStream(this Stream stream, Stream otherStream, int count)
+    internal static async Task<int> ReadIntoStreamAsync(this Stream stream, Stream otherStream, int count, CancellationToken ct)
     {
         int i = 0;
         while(i < count)
         {
-            int readByte = stream.ReadByte();
+            int readByte = await stream.ReadByteAsync(ct);
 
-            otherStream.WriteByte((byte)readByte);
+            await otherStream.WriteByteAsync((byte)readByte, ct);
             i++;
         }
 

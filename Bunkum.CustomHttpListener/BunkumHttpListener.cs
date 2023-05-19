@@ -1,4 +1,5 @@
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Bunkum.CustomHttpListener.Extensions;
 using Bunkum.CustomHttpListener.Request;
@@ -31,9 +32,13 @@ public abstract class BunkumHttpListener : IDisposable
         while (true)
         {
             ListenerContext? request = null;
+            
+            CancellationTokenSource source = new();
+            source.CancelAfter(5_000);
+
             try
             {
-                request = await this.WaitForConnectionAsyncInternal();
+                request = await this.WaitForConnectionAsyncInternal(source.Token);
             }
             catch (Exception e)
             {
@@ -51,7 +56,7 @@ public abstract class BunkumHttpListener : IDisposable
         }
     }
 
-    protected abstract Task<ListenerContext?> WaitForConnectionAsyncInternal();
+    protected abstract Task<ListenerContext?> WaitForConnectionAsyncInternal(CancellationToken ct);
 
     internal static IEnumerable<(string, string)> ReadCookies(string? header)
     {
@@ -70,21 +75,21 @@ public abstract class BunkumHttpListener : IDisposable
         }
     }
 
-    internal static string[] ReadRequestLine(Stream stream)
+    internal static async Task<string[]> ReadRequestLine(Stream stream, CancellationToken ct)
     {
         byte[] requestLineBytes = new byte[RequestLineLimit];
         // Probably breaks spec to just look for \n instead of \r\n but who cares
-        stream.ReadIntoBufferUntilChar('\n', requestLineBytes);
+        await stream.ReadIntoBufferUntilCharAsync('\n', requestLineBytes, ct);
         
         return Encoding.ASCII.GetString(requestLineBytes).Split(' ');
     }
 
-    internal static IEnumerable<(string, string)> ReadHeaders(Stream stream)
+    internal static async IAsyncEnumerable<(string key, string value)> ReadHeaders(Stream stream, [EnumeratorCancellation] CancellationToken ct = default)
     {
         while (true)
         {
             byte[] headerLineBytes = new byte[HeaderLineLimit];
-            int count = stream.ReadIntoBufferUntilChar('\n', headerLineBytes);
+            int count = await stream.ReadIntoBufferUntilCharAsync('\n', headerLineBytes, ct);
 
             string headerLine = Encoding.UTF8.GetString(headerLineBytes, 0, count);
             int index = headerLine.IndexOf(": ", StringComparison.Ordinal);

@@ -28,7 +28,7 @@ public class DirectHttpListener : BunkumHttpListener
         // No initialization required
     }
 
-    protected override async Task<ListenerContext?> WaitForConnectionAsyncInternal()
+    protected override async Task<ListenerContext?> WaitForConnectionAsyncInternal(CancellationToken ct)
     {
         while (true)
         {
@@ -38,13 +38,16 @@ public class DirectHttpListener : BunkumHttpListener
                 Debug.Assert(message != null);
 
                 MemoryStream stream;
-                Stream? requestStream = message.Message.Content?.ReadAsStream();
+                Stream? requestStream = null;
+
+                if (message.Message.Content != null)
+                    requestStream = await message.Message.Content.ReadAsStreamAsync(ct);
 
                 if (requestStream != null && requestStream.Length != 0)
                 {
                     stream = new MemoryStream((int)requestStream.Length);
 
-                    await requestStream.CopyToAsync(stream, (int)requestStream.Length);
+                    await requestStream.CopyToAsync(stream, (int)requestStream.Length, ct);
                     stream.Position = 0;
                 }
                 else
