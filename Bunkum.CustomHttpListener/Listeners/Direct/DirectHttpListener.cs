@@ -28,13 +28,17 @@ public class DirectHttpListener : BunkumHttpListener
         // No initialization required
     }
 
-    protected override async Task<ListenerContext?> WaitForConnectionAsyncInternal(CancellationToken ct)
+    protected override async Task<ListenerContext?> WaitForConnectionAsyncInternal()
     {
         while (true)
         {
             bool gotMessage = this._messages.TryDequeue(out DirectHttpMessage? message);
             if (gotMessage)
             {
+                CancellationTokenSource cts = new();
+                cts.CancelAfter(5_000);
+                CancellationToken ct = cts.Token;
+                
                 Debug.Assert(message != null);
 
                 MemoryStream stream;

@@ -18,8 +18,8 @@ public abstract class BunkumHttpListener : IDisposable
 
     private const int HeaderLineLimit = 1024; // 1KB per header
     private const int RequestLineLimit = 256; // 256 bytes
-    
-    public BunkumHttpListener()
+
+    protected BunkumHttpListener()
     {
         this.Logger = new LoggerContainer<HttpLogContext>();
         this.Logger.RegisterLogger(new ConsoleLogger());
@@ -32,13 +32,9 @@ public abstract class BunkumHttpListener : IDisposable
         while (true)
         {
             ListenerContext? request = null;
-            
-            CancellationTokenSource source = new();
-            source.CancelAfter(5_000);
-
             try
             {
-                request = await this.WaitForConnectionAsyncInternal(source.Token);
+                request = await this.WaitForConnectionAsyncInternal();
             }
             catch (Exception e)
             {
@@ -56,7 +52,7 @@ public abstract class BunkumHttpListener : IDisposable
         }
     }
 
-    protected abstract Task<ListenerContext?> WaitForConnectionAsyncInternal(CancellationToken ct);
+    protected abstract Task<ListenerContext?> WaitForConnectionAsyncInternal();
 
     internal static IEnumerable<(string, string)> ReadCookies(string? header)
     {
