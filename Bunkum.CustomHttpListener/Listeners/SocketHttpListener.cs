@@ -128,7 +128,9 @@ public partial class SocketHttpListener : BunkumHttpListener
 
         if (this._useForwardedIp && context.RequestHeaders["X-Forwarded-For"] != null)
         {
-            string forwardedIp = context.RequestHeaders["X-Forwarded-For"]! + ":" + context.RealRemoteEndpoint.Port;
+            string forwardedFor = context.RequestHeaders["X-Forwarded-For"]!.Split(',', 2)[0];
+
+            string forwardedIp = $"{forwardedFor}:{context.RealRemoteEndpoint.Port}";
             bool result = IPEndPoint.TryParse(forwardedIp, out IPEndPoint? endPoint);
 
             if (!result)
