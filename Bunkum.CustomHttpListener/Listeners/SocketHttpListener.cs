@@ -13,13 +13,15 @@ public partial class SocketHttpListener : BunkumHttpListener
 {
     private Socket? _socket;
     private readonly Uri _listenEndpoint;
+    private readonly bool _useForwardedIp;
     
     [GeneratedRegex("^[a-zA-Z]+$")]
     private static partial Regex LettersRegex();
 
-    public SocketHttpListener(Uri listenEndpoint)
+    public SocketHttpListener(Uri listenEndpoint, bool useForwardedIp)
     {
         this._listenEndpoint = listenEndpoint;
+        this._useForwardedIp = useForwardedIp;
         
         this.Logger.LogInfo(HttpLogContext.Startup, "Internal server is listening at URL " + listenEndpoint);
         this.Logger.LogInfo(HttpLogContext.Startup, "The above URL is probably not the URL you should use to patch. " +
@@ -87,7 +89,7 @@ public partial class SocketHttpListener : BunkumHttpListener
                 ["Connection"] = "close",
                 ["Date"] = DateTime.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'"),
             },
-            RemoteEndpoint = (client.RemoteEndPoint as IPEndPoint)!,
+            RealRemoteEndpoint = (client.RemoteEndPoint as IPEndPoint)!,
         };
 
         if (version != "HTTP/1.1")
@@ -122,6 +124,27 @@ public partial class SocketHttpListener : BunkumHttpListener
             this.Logger.LogWarning(HttpLogContext.Request, "Rejected request without Host header");
             await context.SendResponse(HttpStatusCode.BadRequest);
             return null;
+        }
+
+        if (this._useForwardedIp && context.RequestHeaders["X-Forwarded-For"] != null)
+        {
+            string forwardedIp = context.RequestHeaders["X-Forwarded-For"]! + ":" + context.RealRemoteEndpoint.Port;
+            bool result = IPEndPoint.TryParse(forwardedIp, out IPEndPoint? endPoint);
+
+            if (!result)
+            {
+                this.Logger.LogWarning(HttpLogContext.Request, $"Rejected request from proxy that sent invalid IP '{forwardedIp}'");
+                await context.SendResponse(HttpStatusCode.BadRequest);
+                return null;
+            }
+            
+            Debug.Assert(endPoint != null);
+
+            context.RemoteEndpoint = endPoint;
+        }
+        else
+        {
+            context.RemoteEndpoint = context.RealRemoteEndpoint;
         }
         
         context.Uri = new Uri($"http://{context.RequestHeaders["Host"]}{path}", UriKind.Absolute);

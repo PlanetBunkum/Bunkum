@@ -21,6 +21,15 @@ public abstract class ListenerContext
     public readonly NameValueCollection Cookies = new();
     public NameValueCollection Query { get; internal set; } = null!;
 
+    /// <summary>
+    /// The actual endpoint this request originated from, ignoring BunkumConfig.UseForwardedIp.
+    /// In most cases you should use <see cref="RemoteEndpoint"/>.
+    /// </summary>
+    public IPEndPoint RealRemoteEndpoint = null!;
+    /// <summary>
+    /// The endpoint this request originated from.
+    /// If BunkumConfig.UseForwardedIp is enabled, this will use the endpoint forwarded via the reverse proxy. 
+    /// </summary>
     public IPEndPoint RemoteEndpoint = null!;
 
     public virtual long ContentLength

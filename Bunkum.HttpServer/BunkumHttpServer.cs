@@ -55,7 +55,7 @@ public partial class BunkumHttpServer
         if (setListener)
         {
             Uri listenEndpoint = new($"http://{bunkumConfig.ListenHost}:{bunkumConfig.ListenPort}");
-            this._listener = new SocketHttpListener(listenEndpoint);
+            this._listener = new SocketHttpListener(listenEndpoint, bunkumConfig.UseForwardedIp);
         }
         else
         {
@@ -70,9 +70,11 @@ public partial class BunkumHttpServer
         this._listener = listener;
     }
 
-    public BunkumHttpServer(Uri listenEndpoint) : this(new SocketHttpListener(listenEndpoint))
+    [Obsolete("This method of creating the server will not let the user configure the endpoint or it's properties.")]
+    public BunkumHttpServer(Uri listenEndpoint) : this(new SocketHttpListener(listenEndpoint, false))
     {
         this._logger.LogDebug(BunkumContext.Startup, $"Using hardcoded listen endpoint {listenEndpoint}");
+        this._logger.LogDebug(BunkumContext.Startup, "Forwarded IP will be ignored - this method is not advised");
     }
 
     /// <summary>
