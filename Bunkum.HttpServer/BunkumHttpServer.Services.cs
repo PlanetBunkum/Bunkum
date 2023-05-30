@@ -2,6 +2,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Bunkum.HttpServer.Authentication;
 using Bunkum.HttpServer.Configuration;
+using Bunkum.HttpServer.Health;
+using Bunkum.HttpServer.Health.Endpoints;
+using Bunkum.HttpServer.Health.Reports;
 using Bunkum.HttpServer.RateLimit;
 using Bunkum.HttpServer.Services;
 using Bunkum.HttpServer.Storage;
@@ -97,6 +100,30 @@ public partial class BunkumHttpServer // Services
 
         IRateLimiter rateLimiter = new RateLimiter(timeProvider, settings.Value);
         this.AddService<RateLimitService>(rateLimiter);
+    }
+
+    public void AddHealthCheckService(IEnumerable<Type>? checkTypes = null)
+    {
+        List<IHealthCheck> checks;
+        if (checkTypes != null)
+        {
+            IEnumerable<Type> checkTypesList = checkTypes.ToList();
+            
+            if (checkTypesList.Any(check => check.BaseType != typeof(IHealthCheck)))
+                throw new InvalidOperationException($"Cannot use a health check that is not an {nameof(IHealthCheck)}");
+            
+            checks = checkTypesList.Select(t => (IHealthCheck?)Activator.CreateInstance(t))
+                .Where(c => c != null)
+                .ToList()!;
+        }
+        else
+        {
+            checks = new List<IHealthCheck>(1);
+        }
+        
+        checks.Add(new GeneralHealthCheck());
+        this.AddEndpointGroup<HealthCheckEndpoints>();
+        this.AddService<HealthService>(checks);
     }
 
     #region Obsolete

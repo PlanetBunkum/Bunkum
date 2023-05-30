@@ -4,6 +4,7 @@ using BunkumTests.HttpServer;
 BunkumConsole.AllocateConsole();
 
 BunkumHttpServer server = new();
+server.AddHealthCheckService();
 server.DiscoverEndpointsFromAssembly(typeof(ServerDependentTest).Assembly);
 
 // await server.StartAndBlockAsync();
