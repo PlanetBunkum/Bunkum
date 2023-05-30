@@ -102,7 +102,7 @@ public partial class BunkumHttpServer // Services
         this.AddService<RateLimitService>(rateLimiter);
     }
 
-    public void AddHealthCheckService(IEnumerable<Type>? checkTypes = null)
+    public void AddHealthCheckService(IEnumerable<Type>? checkTypes = null, bool addGeneralCheck = true)
     {
         List<IHealthCheck> checks;
         if (checkTypes != null)
@@ -121,7 +121,8 @@ public partial class BunkumHttpServer // Services
             checks = new List<IHealthCheck>(1);
         }
         
-        checks.Add(new GeneralHealthCheck());
+        if(addGeneralCheck) checks.Add(new GeneralHealthCheck());
+        
         this.AddEndpointGroup<HealthCheckEndpoints>();
         this.AddService<HealthService>(checks);
     }

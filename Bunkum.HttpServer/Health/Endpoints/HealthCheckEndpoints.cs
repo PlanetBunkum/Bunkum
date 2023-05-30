@@ -12,7 +12,7 @@ internal class HealthCheckEndpoints : EndpointGroup
 
         return new HealthReport
         {
-            StatusType = statusList.Max(s => s.StatusType),
+            StatusType = statusList.Min(s => s.StatusType),
             Checks = statusList,
         };
     }
