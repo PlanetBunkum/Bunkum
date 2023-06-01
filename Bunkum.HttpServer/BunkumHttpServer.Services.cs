@@ -9,6 +9,7 @@ using Bunkum.HttpServer.RateLimit;
 using Bunkum.HttpServer.Services;
 using Bunkum.HttpServer.Storage;
 using Bunkum.HttpServer.Time;
+using JetBrains.Annotations;
 
 namespace Bunkum.HttpServer;
 
@@ -18,13 +19,18 @@ public partial class BunkumHttpServer // Services
 {
     #region Dependency Injection
 
-    private static TObject? InjectDependencies<TObject>(object?[] args, IEnumerable<Func<ParameterInfo, object?>> injectorLists) where TObject : class
+    [Pure]
+    private static TObject? InjectDependencies<TObject>(object?[] args, IEnumerable<Func<ParameterInfo, object?>> injectorLists) where TObject : class 
+        => InjectDependencies<TObject>(typeof(TObject), args, injectorLists);
+
+    [Pure]
+    private static TObject? InjectDependencies<TObject>(Type type, object?[] args, IEnumerable<Func<ParameterInfo, object?>> injectorLists) where TObject : class
     {
         List<object?> fullArgs = args.ToList();
         
         // Find a suitable constructor for the given parameters. This accounts for null parameters.
         // Some additional logic is present to check for references to services and automatically inject them if present.
-        ConstructorInfo? ctor = typeof(TObject).GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+        ConstructorInfo? ctor = type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
             .FirstOrDefault(info =>
             {
                 List<object?> newArgs = new(args);
@@ -63,7 +69,7 @@ public partial class BunkumHttpServer // Services
 
         return service;
     }
-
+    
     private static object? InjectFromPool<TObject, TInjected>(ParameterInfo info, IEnumerable<TInjected> pool)
     {
         // Attempt to find dependencies on other services and inject them.
@@ -138,7 +144,7 @@ public partial class BunkumHttpServer // Services
 
     public void AddHealthCheckService(IEnumerable<Type>? checkTypes = null, bool addGeneralCheck = true)
     {
-        List<IHealthCheck> checks;
+        List<IHealthCheck> checks = new();
         if (checkTypes != null)
         {
             IEnumerable<Type> checkTypesList = checkTypes.ToList();
@@ -146,9 +152,21 @@ public partial class BunkumHttpServer // Services
             if (checkTypesList.Any(check => check.BaseType != typeof(IHealthCheck)))
                 throw new InvalidOperationException($"Cannot use a health check that is not an {nameof(IHealthCheck)}");
             
-            checks = checkTypesList.Select(t => (IHealthCheck?)Activator.CreateInstance(t))
-                .Where(c => c != null)
-                .ToList()!;
+            foreach (Type type in checkTypesList)
+            {
+                IHealthCheck? healthCheck = InjectDependencies<IHealthCheck>(type, Array.Empty<object>(), new[]
+                {
+                    CreateInjectorFromObject(this._databaseProvider),
+                });
+                
+                if (healthCheck == null)
+                {
+                    this._logger.LogWarning(BunkumContext.Health, $"Health Check {type.Name} failed to initialize.");
+                    continue;
+                }
+                
+                checks.Add(healthCheck);
+            }
         }
         else
         {

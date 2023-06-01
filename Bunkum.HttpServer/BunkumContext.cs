@@ -14,6 +14,7 @@ public enum BunkumContext
     Service,
     Middleware,
     Request,
+    Health,
     Api,
     Game,
     Matching,
