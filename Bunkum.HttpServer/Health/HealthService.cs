@@ -6,11 +6,11 @@ using NotEnoughLogs;
 
 namespace Bunkum.HttpServer.Health;
 
-internal class HealthService : Service
+public class HealthService : Service
 {
     private readonly List<IHealthCheck> _healthChecks;
 
-    internal HealthService(LoggerContainer<BunkumContext> logger, IEnumerable<IHealthCheck> checks) : base(logger)
+    public HealthService(LoggerContainer<BunkumContext> logger, IEnumerable<IHealthCheck> checks) : base(logger)
     {
         this._healthChecks = checks.ToList();
     }
@@ -21,10 +21,23 @@ internal class HealthService : Service
         Assembly declaringAssembly = paramInfo.Member.DeclaringType!.Assembly;
         if (declaringAssembly.Equals(Assembly.GetAssembly(typeof(HealthService))))
         {
-            if (paramInfo.ParameterType.IsAssignableFrom(typeof(IEnumerable<IHealthCheck>)))
-                return this._healthChecks;
+            if (paramInfo.ParameterType.IsAssignableFrom(typeof(HealthReport)))
+                return this.GenerateReport();
         }
 
         return base.AddParameterToEndpoint(context, paramInfo, database);
+    }
+
+    public HealthReport GenerateReport()
+    {
+        List<HealthStatus> statusList = this._healthChecks
+            .Select(healthCheck => healthCheck.RunCheck() with {CheckName = healthCheck.Name})
+            .ToList();
+
+        return new HealthReport
+        {
+            StatusType = statusList.Min(s => s.StatusType),
+            Checks = statusList,
+        };
     }
 }

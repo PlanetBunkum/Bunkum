@@ -1,13 +1,38 @@
 using Bunkum.HttpServer;
+using Bunkum.HttpServer.Health;
+using BunkumTests.HttpServer.Health;
+using NotEnoughLogs;
+using static Bunkum.HttpServer.Health.HealthStatusType;
 
 namespace BunkumTests.HttpServer.Tests;
 
-public class HealthCheckTests : ServerDependentTest
+public class HealthCheckTests
 {
     [Test]
-    public async Task HealthChecksWork()
+    [TestCase(Unhealthy)]
+    [TestCase(Degraded)]
+    [TestCase(Healthy)]
+    public void HealthChecksWork(HealthStatusType type)
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
-        server.AddHealthCheckService();
+        TestHealthCheck check = new(type);
+        LoggerContainer<BunkumContext> logger = new();
+        HealthService healthService = new(logger, new []{check});
+
+        HealthReport report = healthService.GenerateReport();
+        Assert.That(report.StatusType, Is.EqualTo(type));
+    }
+    
+    [Test]
+    public void PicksCorrectStatus()
+    {
+        TestHealthCheck check1 = new(Healthy);
+        TestHealthCheck check2 = new(Healthy);
+        TestHealthCheck check3 = new(Unhealthy);
+        
+        LoggerContainer<BunkumContext> logger = new();
+        HealthService healthService = new(logger, new []{check1, check2, check3});
+
+        HealthReport report = healthService.GenerateReport();
+        Assert.That(report.StatusType, Is.EqualTo(Unhealthy));
     }
 }
