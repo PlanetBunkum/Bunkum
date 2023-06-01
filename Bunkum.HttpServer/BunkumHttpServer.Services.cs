@@ -16,40 +16,33 @@ namespace Bunkum.HttpServer;
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public partial class BunkumHttpServer // Services
 {
-    public void AddService<TService>(params object?[] args) where TService : Service
+    #region Dependency Injection
+
+    private static TObject? InjectDependencies<TObject>(object?[] args, IEnumerable<Func<ParameterInfo, object?>> injectorLists) where TObject : class
     {
-        List<object?> fullArgs = new object?[] { this._logger }.Concat(args).ToList();
+        List<object?> fullArgs = args.ToList();
         
         // Find a suitable constructor for the given parameters. This accounts for null parameters.
         // Some additional logic is present to check for references to services and automatically inject them if present.
-        ConstructorInfo? ctor = typeof(TService).GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+        ConstructorInfo? ctor = typeof(TObject).GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
             .FirstOrDefault(info =>
             {
-                List<object?> newArgs = new(fullArgs);
+                List<object?> newArgs = new(args);
                 ParameterInfo[] paramInfos = info.GetParameters();
 
                 for (int i = 0; i < paramInfos.Length; i++)
                 {
-                    // Attempt to find dependencies on other services and inject them.
-                    if (paramInfos[i].ParameterType.IsAssignableTo(typeof(Service)))
+                    bool foundArg = false;
+                    foreach (Func<ParameterInfo, object?> injector in injectorLists)
                     {
-                        Service? service = this._services.FirstOrDefault(s => s.GetType() == paramInfos[i].ParameterType);
-                        if (service == null) 
-                            throw new Exception($"Could not find {paramInfos[i].ParameterType}, which {typeof(TService).Name} depends on.");
+                        object? result = injector.Invoke(paramInfos[i]);
+                        if (result == null) continue;
                         
-                        newArgs.Insert(i, service);
-                        continue;
+                        newArgs.Insert(i, result);
+                        foundArg = true;
+                        break;
                     }
-                    
-                    if (paramInfos[i].ParameterType.IsAssignableTo(typeof(Config)))
-                    {
-                        Config? config = this._configs.FirstOrDefault(s => s.GetType() == paramInfos[i].ParameterType);
-                        if (config == null) 
-                            throw new Exception($"Could not find {paramInfos[i].ParameterType}, which {typeof(TService).Name} depends on.");
-                        
-                        newArgs.Insert(i, config);
-                        continue;
-                    }
+                    if(foundArg) continue;
 
                     if (newArgs[i] == null)
                     {
@@ -64,8 +57,49 @@ public partial class BunkumHttpServer // Services
                 fullArgs = newArgs;
                 return true;
             });
+
+        if (ctor == null) return null;
+        TObject? service = (TObject?)ctor.Invoke(fullArgs.ToArray());
+
+        return service;
+    }
+
+    private static object? InjectFromPool<TObject, TInjected>(ParameterInfo info, IEnumerable<TInjected> pool)
+    {
+        // Attempt to find dependencies on other services and inject them.
+        if (!info.ParameterType.IsAssignableTo(typeof(TInjected))) return null;
         
-        TService? service = (TService?)ctor?.Invoke(fullArgs.ToArray());
+        TInjected? injected = pool.FirstOrDefault(s => s!.GetType() == info.ParameterType);
+        if (injected == null) 
+            throw new Exception($"Could not find {info.ParameterType}, which {typeof(TObject).Name} depends on.");
+
+        return injected;
+    }
+    
+    private static object? InjectFromObject<TInjected>(ParameterInfo info, TInjected obj)
+    {
+        // Attempt to find dependencies on other services and inject them.
+        if (!info.ParameterType.IsAssignableTo(typeof(TInjected))) return null;
+
+        if (obj!.GetType() == info.ParameterType) return obj;
+        return null;
+    }
+    
+    private static Func<ParameterInfo, object?> CreateInjectorFromPool<TObject, TInjected>(IEnumerable<TInjected> pool) 
+        => info => InjectFromPool<TObject, TInjected>(info, pool);
+    
+    private static Func<ParameterInfo, object?> CreateInjectorFromObject<TInjected>(TInjected obj) 
+        => info => InjectFromObject(info, obj);
+
+    #endregion
+    
+    public void AddService<TService>(params object?[] args) where TService : Service
+    {
+        TService? service = InjectDependencies<TService>(new[] {this._logger}.Concat(args).ToArray(), new List<Func<ParameterInfo, object?>>
+        {
+            CreateInjectorFromPool<TService, Service>(this._services),
+            CreateInjectorFromPool<TService, Config>(this._configs),
+        });
 
         if (service == null) throw new InvalidOperationException("Service failed to initialize correctly.");
         
