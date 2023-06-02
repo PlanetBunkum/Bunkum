@@ -50,15 +50,20 @@ public partial class BunkumHttpServer // Services
                     }
                     if(foundArg) continue;
 
+                    if (newArgs.Count <= i)
+                        return false;
+
                     if (newArgs[i] == null)
                     {
                         if (paramInfos[i].ParameterType.IsValueType)
                             return false;
                     }
-                    else if (!paramInfos[i].ParameterType.IsInstanceOfType(newArgs[i])) return false;
+                    else if (!paramInfos[i].ParameterType.IsInstanceOfType(newArgs[i]))
+                        return false;
                 }
 
-                if (newArgs.Count != paramInfos.Length) return false;
+                if (newArgs.Count != paramInfos.Length)
+                    return false;
                 
                 fullArgs = newArgs;
                 return true;
@@ -86,9 +91,7 @@ public partial class BunkumHttpServer // Services
     {
         // Attempt to find dependencies on other services and inject them.
         if (!info.ParameterType.IsAssignableTo(typeof(TInjected))) return null;
-
-        if (obj!.GetType() == info.ParameterType) return obj;
-        return null;
+        return obj;
     }
     
     private static Func<ParameterInfo, object?> CreateInjectorFromPool<TObject, TInjected>(IEnumerable<TInjected> pool) 
@@ -148,8 +151,8 @@ public partial class BunkumHttpServer // Services
         if (checkTypes != null)
         {
             IEnumerable<Type> checkTypesList = checkTypes.ToList();
-            
-            if (checkTypesList.Any(check => check.BaseType != typeof(IHealthCheck)))
+
+            if (checkTypesList.Any(check => !check.IsAssignableTo(typeof(IHealthCheck))))
                 throw new InvalidOperationException($"Cannot use a health check that is not an {nameof(IHealthCheck)}");
             
             foreach (Type type in checkTypesList)
