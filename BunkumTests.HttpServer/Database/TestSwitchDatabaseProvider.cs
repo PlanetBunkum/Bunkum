@@ -9,6 +9,11 @@ public class TestSwitchDatabaseProvider : IDatabaseProvider<TestSwitchDatabaseCo
         
     }
 
+    public void Warmup()
+    {
+        
+    }
+
     public TestSwitchDatabaseContext GetContext()
     {
         return new TestSwitchDatabaseContext();

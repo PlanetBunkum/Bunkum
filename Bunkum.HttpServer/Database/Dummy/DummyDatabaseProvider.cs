@@ -7,6 +7,11 @@ public class DummyDatabaseProvider : IDatabaseProvider<DummyDatabaseContext>
         
     }
 
+    public void Warmup()
+    {
+        
+    }
+
     public DummyDatabaseContext GetContext()
     {
         return new DummyDatabaseContext();
