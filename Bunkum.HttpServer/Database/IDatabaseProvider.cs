@@ -4,5 +4,7 @@ public interface IDatabaseProvider<out TDatabaseContext> : IDisposable where TDa
 {
     void Initialize();
 
+    void Warmup();
+
     TDatabaseContext GetContext();
 }

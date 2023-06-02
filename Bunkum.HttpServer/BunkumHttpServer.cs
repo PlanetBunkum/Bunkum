@@ -148,6 +148,9 @@ public partial class BunkumHttpServer
             this._logger.Dispose();
             BunkumConsole.WaitForInputAndExit(1);
         }
+        
+        this._logger.LogDebug(BunkumContext.Startup, "Warming up database provider...");
+        this._databaseProvider.Warmup();
 
         stopwatch.Stop();
         this._logger.LogInfo(BunkumContext.Startup, $"Ready to go! Startup tasks took {stopwatch.ElapsedMilliseconds}ms.");
