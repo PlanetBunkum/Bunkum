@@ -12,6 +12,8 @@ public enum ContentType
     [ContentType("text/xml", true)] Xml,
     [ContentType("application/json", true)] Json,
     [ContentType("application/octet-stream", false)] BinaryData,
+    [ContentType("image/png", false)] Png,
+    [ContentType("image/jpeg", false)] Jpeg,
 }
 
 [AttributeUsage(AttributeTargets.Field)]
