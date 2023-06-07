@@ -31,6 +31,9 @@ public class StorageTests
         Assert.That(this._dataStore.ExistsInStore("key"), Is.True);
         Assert.That(this._dataStore.GetDataFromStore("key"), Is.EqualTo(this._value));
         
+        Assert.That(this._dataStore.GetKeysFromStore(), Does.Contain("key"));
+        Assert.That(this._dataStore.GetKeysFromStore(), Has.Length.EqualTo(1));
+        
         Assert.That(this._dataStore.RemoveFromStore("key"), Is.True);
         Assert.That(this._dataStore.ExistsInStore("key"), Is.False);
     }
@@ -51,6 +54,9 @@ public class StorageTests
         Assert.That(this._dataStore.ExistsInStore(dir), Is.False);
         
         Assert.That(this._dataStore.GetDataFromStore(key), Is.EqualTo(this._value));
+        
+        Assert.That(this._dataStore.GetKeysFromStore(), Does.Contain(key));
+        Assert.That(this._dataStore.GetKeysFromStore(), Has.Length.EqualTo(1));
         
         Assert.That(this._dataStore.RemoveFromStore(key), Is.True);
         Assert.That(this._dataStore.ExistsInStore(key), Is.False);

@@ -7,6 +7,7 @@ public interface IDataStore
     void WriteToStore(string key, ReadOnlySpan<byte> data) => this.WriteToStore(key, data.ToArray());
     byte[] GetDataFromStore(string key);
     bool RemoveFromStore(string key);
+    string[] GetKeysFromStore();
 
     bool TryGetDataFromStore(string key, out byte[]? data)
     {

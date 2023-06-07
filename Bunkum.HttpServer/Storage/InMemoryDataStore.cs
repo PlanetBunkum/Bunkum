@@ -6,6 +6,7 @@ public class InMemoryDataStore : IDataStore
 
     public bool ExistsInStore(string key) => this._data.ContainsKey(key);
     public bool RemoveFromStore(string key) => this._data.Remove(key);
+    public string[] GetKeysFromStore() => this._data.Keys.ToArray();
 
     public bool WriteToStore(string key, byte[] data)
     {

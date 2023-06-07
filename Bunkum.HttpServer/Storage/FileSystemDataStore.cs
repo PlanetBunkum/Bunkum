@@ -51,4 +51,10 @@ public class FileSystemDataStore : IDataStore
         return true;
 
     }
+
+    public string[] GetKeysFromStore() =>
+        Directory.GetFiles(DataStoreDirectory, "*", SearchOption.AllDirectories)
+            .Select(key => key.Replace(DataStoreDirectory, ""))
+            .Select(key => key.Replace(Path.DirectorySeparatorChar, '/'))
+            .ToArray();
 }
