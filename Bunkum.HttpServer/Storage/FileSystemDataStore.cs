@@ -61,4 +61,24 @@ public class FileSystemDataStore : IDataStore
             .Select(key => key.Replace(DataStoreDirectory, string.Empty))
             .Select(key => key.Replace(Path.DirectorySeparatorChar, '/'))
             .ToArray();
+
+    public bool WriteToStore(string key, Stream data)
+    {
+        try
+        {
+            FileStream fileStream = File.OpenWrite(GetPath(key));
+            data.CopyTo(fileStream);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public Stream GetStreamFromStore(string key)
+    {
+        FileStream stream = File.OpenRead(GetPath(key));
+        return stream;
+    }
 }

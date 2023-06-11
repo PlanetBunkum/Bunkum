@@ -26,4 +26,17 @@ public class InMemoryDataStore : IDataStore
     {
         return this._data[key];
     }
+
+    public bool WriteToStore(string key, Stream data)
+    {
+        using MemoryStream ms = new();
+        data.CopyTo(data);
+        return this.WriteToStore(key, ms.ToArray());
+    }
+
+    public Stream GetStreamFromStore(string key)
+    {
+        byte[] data = this.GetDataFromStore(key);
+        return new MemoryStream(data);
+    }
 }

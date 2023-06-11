@@ -8,6 +8,9 @@ public interface IDataStore
     byte[] GetDataFromStore(string key);
     bool RemoveFromStore(string key);
     string[] GetKeysFromStore();
+    
+    bool WriteToStore(string key, Stream data);
+    Stream GetStreamFromStore(string key);
 
     bool TryGetDataFromStore(string key, out byte[]? data)
     {
