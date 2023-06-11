@@ -12,7 +12,10 @@ public class FileSystemDataStore : IDataStore
 
     private static string GetPath(string key)
     {
-        key = key.Replace('/', Path.DirectorySeparatorChar);
+        if (!key.Contains('/')) return DataStoreDirectory + key;
+        
+        if (Path.DirectorySeparatorChar != '/') 
+            key = key.Replace('/', Path.DirectorySeparatorChar);
 
         string[] dirs = key.Split(Path.DirectorySeparatorChar);
         string path = DataStoreDirectory;
@@ -21,7 +24,9 @@ public class FileSystemDataStore : IDataStore
             string dir = dirs[i];
 
             path = Path.Combine(path, dir);
-            Directory.CreateDirectory(path);
+            
+            if(!Directory.Exists(path)) // checking beforehand avoids alloc
+                Directory.CreateDirectory(path);
         }
 
         return DataStoreDirectory + key;
@@ -49,12 +54,11 @@ public class FileSystemDataStore : IDataStore
         
         File.Delete(GetPath(key));
         return true;
-
     }
 
     public string[] GetKeysFromStore() =>
         Directory.GetFiles(DataStoreDirectory, "*", SearchOption.AllDirectories)
-            .Select(key => key.Replace(DataStoreDirectory, ""))
+            .Select(key => key.Replace(DataStoreDirectory, string.Empty))
             .Select(key => key.Replace(Path.DirectorySeparatorChar, '/'))
             .ToArray();
 }
