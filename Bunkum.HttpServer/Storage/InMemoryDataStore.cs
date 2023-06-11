@@ -27,7 +27,7 @@ public class InMemoryDataStore : IDataStore
         return this._data[key];
     }
 
-    public bool WriteToStore(string key, Stream data)
+    public bool WriteToStoreFromStream(string key, Stream data)
     {
         using MemoryStream ms = new();
         data.CopyTo(data);
@@ -38,5 +38,10 @@ public class InMemoryDataStore : IDataStore
     {
         byte[] data = this.GetDataFromStore(key);
         return new MemoryStream(data);
+    }
+
+    public Stream OpenWriteStream(string key)
+    {
+        throw new NotImplementedException();
     }
 }

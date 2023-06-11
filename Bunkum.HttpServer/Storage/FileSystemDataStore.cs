@@ -62,7 +62,7 @@ public class FileSystemDataStore : IDataStore
             .Select(key => key.Replace(Path.DirectorySeparatorChar, '/'))
             .ToArray();
 
-    public bool WriteToStore(string key, Stream data)
+    public bool WriteToStoreFromStream(string key, Stream data)
     {
         try
         {
@@ -74,6 +74,11 @@ public class FileSystemDataStore : IDataStore
         {
             return false;
         }
+    }
+
+    public Stream OpenWriteStream(string key)
+    {
+        return File.OpenWrite(GetPath(key));
     }
 
     public Stream GetStreamFromStore(string key)
