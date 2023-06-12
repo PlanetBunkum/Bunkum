@@ -12,8 +12,8 @@ public abstract class ListenerContext
 {
     public MemoryStream InputStream { get; internal set; } = null!;
 
-    public Method Method { get; internal set; }
-    public Uri Uri { get; internal set; } = null!;
+    public Method Method { get; set; }
+    public Uri Uri { get; set; } = null!;
 
     public readonly NameValueCollection RequestHeaders = new();
     public readonly Dictionary<string, string> ResponseHeaders = new();
