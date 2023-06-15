@@ -21,7 +21,7 @@ public class TestRequestBenchmarks
         this._client = this._listener.GetClient();
         this._server = new BunkumHttpServer(this._listener, false);
         
-        this._server.AddEndpointGroup<TestEndpoints>();
+        this._server.DiscoverEndpointsFromAssembly(typeof(TestEndpoints).Assembly);
         this._server.Start(1);
     }
 
