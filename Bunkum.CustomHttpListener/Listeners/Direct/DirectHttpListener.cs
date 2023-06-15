@@ -86,8 +86,6 @@ public class DirectHttpListener : BunkumHttpListener
 
                 return context;
             }
-
-            Thread.Sleep(10);
         }
     }
 

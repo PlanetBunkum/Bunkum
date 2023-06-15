@@ -6,7 +6,6 @@ using BunkumTests.HttpServer.Endpoints;
 namespace BunkumTests.Benchmarks;
 
 [MemoryDiagnoser]
-[SimpleJob(invocationCount: 1_024)]
 public class TestRequestBenchmarks
 {
     private static readonly Uri Endpoint = new("/");
