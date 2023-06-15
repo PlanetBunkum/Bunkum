@@ -86,8 +86,15 @@ public class DirectHttpListener : BunkumHttpListener
 
                 return context;
             }
+
+            if (this._sleep) Thread.Sleep(10);
         }
     }
 
-    public DirectHttpListener(bool logToConsole = true) : base(logToConsole) {}
+    private readonly bool _sleep;
+
+    public DirectHttpListener(bool logToConsole = true, bool sleep = false) : base(logToConsole)
+    {
+        this._sleep = sleep;
+    }
 }
