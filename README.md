@@ -12,6 +12,6 @@ An open-source HTTP server for custom game servers built with flexibility in min
 
 [LittleBigRefresh/Refresh](https://github.com/LittleBigRefresh/Refresh) - A second-generation custom server for LittleBigPlanet that focuses on code quality and reliability. 
 
-[turecross321/SoundShapesServer](https://github.com/turecross321/SoundShapesServer) - A very early-in-development custom server for Sound Shapes
+[turecross321/SoundShapesServer](https://github.com/turecross321/SoundShapesServer) - A custom server for Sound Shapes
 
 *Made with :heart: for the LittleBigPlanet community*
