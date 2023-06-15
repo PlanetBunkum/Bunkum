@@ -19,10 +19,10 @@ public abstract class BunkumHttpListener : IDisposable
     private const int HeaderLineLimit = 1024; // 1KB per header
     private const int RequestLineLimit = 256; // 256 bytes
 
-    protected BunkumHttpListener()
+    protected BunkumHttpListener(bool logToConsole)
     {
         this.Logger = new LoggerContainer<HttpLogContext>();
-        this.Logger.RegisterLogger(new ConsoleLogger());
+        if(logToConsole) this.Logger.RegisterLogger(new ConsoleLogger());
     }
 
     public abstract void StartListening();

@@ -35,10 +35,10 @@ public partial class BunkumHttpServer
     private readonly List<IMiddleware> _middlewares = new();
     private readonly List<Service> _services = new();
 
-    private BunkumHttpServer(bool setListener)
+    private BunkumHttpServer(bool setListener, bool logToConsole)
     {
         this._logger = new LoggerContainer<BunkumContext>();
-        this._logger.RegisterLogger(new ConsoleLogger());
+        if(logToConsole) this._logger.RegisterLogger(new ConsoleLogger());
         
         this._logger.LogInfo(BunkumContext.Startup, $"Bunkum is storing its data at {BunkumFileSystem.DataDirectory}.");
         if (!BunkumFileSystem.UsingCustomDirectory)
@@ -63,9 +63,9 @@ public partial class BunkumHttpServer
         }
     }
 
-    public BunkumHttpServer() : this(true) {}
+    public BunkumHttpServer() : this(true, true) {}
     
-    public BunkumHttpServer(BunkumHttpListener listener) : this(false)
+    public BunkumHttpServer(BunkumHttpListener listener, bool logToConsole = true) : this(false, logToConsole)
     {
         this._listener = listener;
     }
@@ -80,14 +80,15 @@ public partial class BunkumHttpServer
     /// <summary>
     /// Start the server in multithreaded mode. Caller is responsible for blocking.
     /// </summary>
-    public void Start()
+    /// <param name="taskOverride">Override the number of tasks spun up.</param>
+    public void Start(int? taskOverride = null)
     {
         this.RunStartupTasks();
 
         BunkumConfig? bunkumConfig = (BunkumConfig?)this._configs.FirstOrDefault(c => c is BunkumConfig);
         Debug.Assert(bunkumConfig != null);
 
-        int tasks = bunkumConfig.ThreadCount;
+        int tasks = taskOverride ?? bunkumConfig.ThreadCount;
 
         this._logger.LogInfo(BunkumContext.Startup, $"Blocking in multithreaded mode with {tasks} tasks");
 

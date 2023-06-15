@@ -18,7 +18,7 @@ public partial class SocketHttpListener : BunkumHttpListener
     [GeneratedRegex("^[a-zA-Z]+$")]
     private static partial Regex LettersRegex();
 
-    public SocketHttpListener(Uri listenEndpoint, bool useForwardedIp)
+    public SocketHttpListener(Uri listenEndpoint, bool useForwardedIp, bool logToConsole = true) : base(logToConsole)
     {
         this._listenEndpoint = listenEndpoint;
         this._useForwardedIp = useForwardedIp;

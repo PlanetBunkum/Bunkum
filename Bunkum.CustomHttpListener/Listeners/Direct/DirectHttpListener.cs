@@ -90,4 +90,6 @@ public class DirectHttpListener : BunkumHttpListener
             Thread.Sleep(10);
         }
     }
+
+    public DirectHttpListener(bool logToConsole = true) : base(logToConsole) {}
 }
