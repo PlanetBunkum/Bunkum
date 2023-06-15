@@ -24,8 +24,6 @@ public partial class SocketHttpListener : BunkumHttpListener
         this._useForwardedIp = useForwardedIp;
         
         this.Logger.LogInfo(HttpLogContext.Startup, "Internal server is listening at URL " + listenEndpoint);
-        this.Logger.LogInfo(HttpLogContext.Startup, "The above URL is probably not the URL you should use to patch. " +
-                                                     "See https://littlebigrefresh.github.io/Docs/patch-url for more information.");
     }
     
     public override void StartListening()
