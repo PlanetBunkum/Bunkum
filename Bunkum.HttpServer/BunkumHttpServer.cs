@@ -298,7 +298,16 @@ public partial class BunkumHttpServer : IHotReloadable, IDisposable
     void IHotReloadable.ProcessHotReload()
     {
         // If there's no initialization function, we can't do anything without destroying the server.
-        if (this.Initialize == null) return;
+        if (this.Initialize == null)
+        {
+            this._logger.LogWarning(BunkumContext.Server, "The server's configuration does not properly support hot reloading.");
+            this._logger.LogWarning(BunkumContext.Server, "To resolve this, move your initialization code into `BunkumHttpServer.Initialize`.");
+            return;
+        }
+        
+        this._logger.LogDebug(BunkumContext.Server, "Refreshing Bunkum's internal state for a hot reload, hold tight!");
+        Stopwatch stopwatch = new();
+        stopwatch.Start();
 
         // Back up the current BunkumConfig
         BunkumConfig? bunkumConfig = (BunkumConfig?)this._configs.FirstOrDefault(c => c is BunkumConfig);
@@ -315,6 +324,8 @@ public partial class BunkumHttpServer : IHotReloadable, IDisposable
         
         // Refresh internal state using (potentially new) initialization function
         this.Initialize.Invoke();
+        
+        this._logger.LogInfo(BunkumContext.Server, $"Successfully refreshed Bunkum's internal state in {stopwatch.ElapsedMilliseconds}ms.");
     }
 
     private void AddEndpointGroup(Type type)
