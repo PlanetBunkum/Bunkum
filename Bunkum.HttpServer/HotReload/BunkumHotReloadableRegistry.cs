@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Bunkum.HttpServer.HotReload;
 
 /// <summary>
@@ -9,17 +11,17 @@ internal static class BunkumHotReloadableRegistry
 
     internal static void ProcessHotReload()
     {
-        Console.WriteLine("Hot reload!");
-        Console.WriteLine($"- Processing {HotReloadableObjects.Count} reloadable objects");
+        Debug.WriteLine("Hot reload!");
+        Debug.WriteLine($"- Processing {HotReloadableObjects.Count} reloadable objects");
         int i = 0;
         foreach (IHotReloadable reloadable in HotReloadableObjects)
         {
             i++;
-            Console.WriteLine($"  ({i}/{HotReloadableObjects.Count}) Reloading {reloadable.GetType().Name}...");
+            Debug.WriteLine($"  ({i}/{HotReloadableObjects.Count}) Reloading {reloadable.GetType().Name}...");
             reloadable.ProcessHotReload();
         }
         
-        Console.WriteLine("Done hot reloading.");
+        Debug.WriteLine("Done hot reloading.");
     }
 
     /// <summary>
