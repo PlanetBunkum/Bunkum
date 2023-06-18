@@ -48,12 +48,12 @@ public partial class SocketHttpListener : BunkumHttpListener
         this.Logger.LogInfo(HttpLogContext.Startup, "Listening...");
     }
 
-    protected override async Task<ListenerContext?> WaitForConnectionAsyncInternal()
+    protected override async Task<ListenerContext?> WaitForConnectionAsyncInternal(CancellationToken? globalCt = null)
     {
         if (this._socket == null)
             throw new InvalidOperationException("Cannot wait for a connection when we are not listening");
 
-        Socket client = await this._socket.AcceptAsync(CancellationToken.None);
+        Socket client = await this._socket.AcceptAsync(globalCt ?? CancellationToken.None);
         NetworkStream stream = new(client);
 
         CancellationTokenSource cts = new();

@@ -156,11 +156,11 @@ public partial class BunkumHttpServer
         stopwatch.Stop();
         this._logger.LogInfo(BunkumContext.Startup, $"Ready to go! Startup tasks took {stopwatch.ElapsedMilliseconds}ms.");
     }
-
-    [DoesNotReturn]
+    
     private async Task Block()
     {
-        while (true)
+        while (!this._stopToken.IsCancellationRequested)
+        {
             await this._listener.WaitForConnectionAsync(async context => await Task.Factory.StartNew(async () =>
             {
                 try
@@ -184,8 +184,20 @@ public partial class BunkumHttpServer
                     context.Write("Internal Server Error");
                     #endif
                 }
-            }));
-        // ReSharper disable once FunctionNeverReturns
+            }), this._stopToken.Token);
+        }
+        
+        Debug.WriteLine("Block task was stopped");
+    }
+    
+    private readonly CancellationTokenSource _stopToken = new();
+
+    /// <summary>
+    /// Attempts to stop all block tasks, including those managed by the caller.
+    /// </summary>
+    public void Stop()
+    {
+        this._stopToken.Cancel();
     }
 
     private async Task HandleRequest(ListenerContext context, Lazy<IDatabaseContext> database)

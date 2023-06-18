@@ -27,14 +27,18 @@ public abstract class BunkumHttpListener : IDisposable
 
     public abstract void StartListening();
 
-    public async Task WaitForConnectionAsync(Func<ListenerContext, Task> action)
+    public async Task WaitForConnectionAsync(Func<ListenerContext, Task> action, CancellationToken? globalCt = null)
     {
-        while (true)
+        while (globalCt is not { IsCancellationRequested: true })
         {
             ListenerContext? request = null;
             try
             {
-                request = await this.WaitForConnectionAsyncInternal();
+                request = await this.WaitForConnectionAsyncInternal(globalCt);
+            }
+            catch(OperationCanceledException)
+            {
+                // ignore
             }
             catch (Exception e)
             {
@@ -52,7 +56,7 @@ public abstract class BunkumHttpListener : IDisposable
         }
     }
 
-    protected abstract Task<ListenerContext?> WaitForConnectionAsyncInternal();
+    protected abstract Task<ListenerContext?> WaitForConnectionAsyncInternal(CancellationToken? globalCt = null);
 
     internal static IEnumerable<(string, string)> ReadCookies(string? header)
     {
