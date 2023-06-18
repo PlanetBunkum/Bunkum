@@ -288,6 +288,7 @@ public partial class BunkumHttpServer : IHotReloadable, IDisposable
         private get => this._initialize;
         set
         {
+            if (this._initialize != null) throw new InvalidOperationException("Initializer has already been set.");
             if (value == null) throw new InvalidOperationException("Cannot set a null initializer");
             this._initialize = value;
             
