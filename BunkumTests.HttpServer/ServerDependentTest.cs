@@ -15,7 +15,7 @@ public class ServerDependentTest
     [Pure]
     private protected (BunkumHttpServer, HttpClient) Setup(bool start = true)
     {
-        DirectHttpListener listener = new(true, true);
+        DirectHttpListener listener = new();
         HttpClient client = listener.GetClient();
 
         BunkumHttpServer server = new(listener);
