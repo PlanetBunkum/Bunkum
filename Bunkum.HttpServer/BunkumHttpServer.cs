@@ -23,7 +23,7 @@ namespace Bunkum.HttpServer;
 /// </summary>
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-public partial class BunkumHttpServer : IHotReloadable, IDisposable
+public partial class BunkumHttpServer : IHotReloadable
 {
     private readonly BunkumHttpListener _listener;
     private readonly LoggerContainer<BunkumContext> _logger;
@@ -195,10 +195,13 @@ public partial class BunkumHttpServer : IHotReloadable, IDisposable
 
     /// <summary>
     /// Attempts to stop all block tasks, including those managed by the caller.
+    /// 
+    /// If you are creating a server that does not span across the entire lifetime of the application, you are responsible for calling this to stop the server.
     /// </summary>
     public void Stop()
     {
         this._stopToken.Cancel();
+        BunkumHotReloadableRegistry.UnregisterReloadable(this);
     }
 
     private async Task HandleRequest(ListenerContext context, Lazy<IDatabaseContext> database)
@@ -376,12 +379,4 @@ public partial class BunkumHttpServer : IHotReloadable, IDisposable
 
     public void AddMiddleware<TMiddleware>() where TMiddleware : IMiddleware, new() => this.AddMiddleware(new TMiddleware());
     public void AddMiddleware<TMiddleware>(TMiddleware middleware) where TMiddleware : IMiddleware => this._middlewares.Add(middleware);
-
-    // we don't handle full disposal
-#pragma warning disable CA1816
-    public void Dispose()
-#pragma warning restore CA1816
-    {
-        BunkumHotReloadableRegistry.UnregisterReloadable(this);
-    }
 }
