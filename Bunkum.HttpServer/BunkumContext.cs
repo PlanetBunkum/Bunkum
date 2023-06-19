@@ -11,6 +11,7 @@ public enum BunkumContext
     Filter,
     Digest,
     
+    Server,
     Service,
     Middleware,
     Request,

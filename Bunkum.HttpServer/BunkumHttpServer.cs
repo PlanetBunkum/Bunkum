@@ -11,6 +11,7 @@ using Bunkum.HttpServer.Database;
 using Bunkum.HttpServer.Database.Dummy;
 using Bunkum.HttpServer.Endpoints;
 using Bunkum.HttpServer.Endpoints.Middlewares;
+using Bunkum.HttpServer.HotReload;
 using Bunkum.HttpServer.Services;
 using NotEnoughLogs;
 using NotEnoughLogs.Loggers;
@@ -22,16 +23,14 @@ namespace Bunkum.HttpServer;
 /// </summary>
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-public partial class BunkumHttpServer
+public partial class BunkumHttpServer : IHotReloadable
 {
     private readonly BunkumHttpListener _listener;
-    private readonly List<EndpointGroup> _endpoints = new();
     private readonly LoggerContainer<BunkumContext> _logger;
     
     private IDatabaseProvider<IDatabaseContext> _databaseProvider = new DummyDatabaseProvider();
-    
     private readonly List<Config> _configs;
-
+    private readonly List<EndpointGroup> _endpoints = new();
     private readonly List<IMiddleware> _middlewares = new();
     private readonly List<Service> _services = new();
 
@@ -61,6 +60,8 @@ public partial class BunkumHttpServer
         {
             this._listener = null!;
         }
+        
+        BunkumHotReloadableRegistry.RegisterReloadable(this);
     }
 
     public BunkumHttpServer() : this(true, true) {}
@@ -194,10 +195,13 @@ public partial class BunkumHttpServer
 
     /// <summary>
     /// Attempts to stop all block tasks, including those managed by the caller.
+    /// 
+    /// If you are creating a server that does not span across the entire lifetime of the application, you are responsible for calling this to stop the server.
     /// </summary>
     public void Stop()
     {
         this._stopToken.Cancel();
+        BunkumHotReloadableRegistry.UnregisterReloadable(this);
     }
 
     private async Task HandleRequest(ListenerContext context, Lazy<IDatabaseContext> database)
@@ -279,6 +283,53 @@ public partial class BunkumHttpServer
                 // ignored
             }
         }
+    }
+
+    private Action? _initialize;
+    public Action? Initialize
+    {
+        private get => this._initialize;
+        set
+        {
+            if (this._initialize != null) throw new InvalidOperationException("Initializer has already been set.");
+            if (value == null) throw new InvalidOperationException("Cannot set a null initializer");
+            this._initialize = value;
+            
+            this._initialize.Invoke();
+        }
+    }
+
+    void IHotReloadable.ProcessHotReload()
+    {
+        // If there's no initialization function, we can't do anything without destroying the server.
+        if (this.Initialize == null)
+        {
+            this._logger.LogWarning(BunkumContext.Server, "The server's configuration does not properly support hot reloading.");
+            this._logger.LogWarning(BunkumContext.Server, "To resolve this, move your initialization code into `BunkumHttpServer.Initialize`.");
+            return;
+        }
+        
+        this._logger.LogDebug(BunkumContext.Server, "Refreshing Bunkum's internal state for a hot reload, hold tight!");
+        Stopwatch stopwatch = new();
+        stopwatch.Start();
+
+        // Back up the current BunkumConfig
+        BunkumConfig? bunkumConfig = (BunkumConfig?)this._configs.FirstOrDefault(c => c is BunkumConfig);
+        Debug.Assert(bunkumConfig != null);
+        
+        // Clear current internal state
+        this._configs.Clear();
+        this._configs.Add(bunkumConfig);
+        
+        this._endpoints.Clear();
+        this._services.Clear();
+        this._middlewares.Clear();
+        this._databaseProvider.Dispose();
+        
+        // Refresh internal state using (potentially new) initialization function
+        this.Initialize.Invoke();
+        
+        this._logger.LogInfo(BunkumContext.Server, $"Successfully refreshed Bunkum's internal state in {stopwatch.ElapsedMilliseconds}ms.");
     }
 
     private void AddEndpointGroup(Type type)
