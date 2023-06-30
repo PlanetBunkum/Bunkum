@@ -18,7 +18,7 @@ public partial struct Response
 
     #region Serialization setup
     private static readonly XmlSerializerNamespaces Namespaces = new();
-    private static readonly JsonSerializer _jsonSerializer = new();
+    private static readonly JsonSerializer JsonSerializer = new();
 
     static Response()
     {
@@ -43,16 +43,23 @@ public partial struct Response
             return;
         }
         
+        // ReSharper disable once ConvertIfStatementToSwitchStatement
         if(data is INeedsPreparationBeforeSerialization prep) 
             prep.PrepareForSerialization();
+
+        if (data is IHasResponseCode status)
+            this.StatusCode = status.StatusCode;
 
         using MemoryStream stream = new();
         switch (contentType)
         {
+            case ContentType.Png:
+            case ContentType.Jpeg:
             case ContentType.Html:
             case ContentType.Plaintext:
             case ContentType.BinaryData:
                 throw new InvalidOperationException();
+            
             case ContentType.Xml:
             {
                 using BunkumXmlTextWriter writer = new(stream);
@@ -66,7 +73,7 @@ public partial struct Response
                 using StreamWriter sw = new(stream);
                 using JsonWriter writer = new JsonTextWriter(sw);
                 
-                _jsonSerializer.Serialize(writer, data);
+                JsonSerializer.Serialize(writer, data);
                 break;
             }
             default:
