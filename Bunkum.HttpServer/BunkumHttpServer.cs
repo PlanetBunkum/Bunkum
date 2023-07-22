@@ -329,6 +329,12 @@ public partial class BunkumHttpServer : IHotReloadable
         // Refresh internal state using (potentially new) initialization function
         this.Initialize.Invoke();
         
+        // Initialize the database provider
+        this._logger.LogDebug(BunkumContext.Startup, "Initializing database provider...");
+        this._databaseProvider.Initialize();
+        this._logger.LogDebug(BunkumContext.Startup, "Warming up database provider...");
+        this._databaseProvider.Warmup();
+        
         this._logger.LogInfo(BunkumContext.Server, $"Successfully refreshed Bunkum's internal state in {stopwatch.ElapsedMilliseconds}ms.");
     }
 
