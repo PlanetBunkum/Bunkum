@@ -104,7 +104,7 @@ public partial class BunkumHttpServer // Services
     
     public void AddService<TService>(params object?[] args) where TService : Service
     {
-        TService? service = InjectDependencies<TService>(new[] {this._logger}.Concat(args).ToArray(), new List<Func<ParameterInfo, object?>>
+        TService? service = InjectDependencies<TService>(new[] {this.Logger}.Concat(args).ToArray(), new List<Func<ParameterInfo, object?>>
         {
             CreateInjectorFromPool<TService, Service>(this._services),
             CreateInjectorFromPool<TService, Config>(this._configs),
@@ -164,7 +164,7 @@ public partial class BunkumHttpServer // Services
                 
                 if (healthCheck == null)
                 {
-                    this._logger.LogWarning(BunkumContext.Health, $"Health Check {type.Name} failed to initialize.");
+                    this.Logger.LogWarning(BunkumContext.Health, $"Health Check {type.Name} failed to initialize.");
                     continue;
                 }
                 

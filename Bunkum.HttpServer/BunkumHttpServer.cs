@@ -26,7 +26,7 @@ namespace Bunkum.HttpServer;
 public partial class BunkumHttpServer : IHotReloadable
 {
     private readonly BunkumHttpListener _listener;
-    private readonly LoggerContainer<BunkumContext> _logger;
+    public readonly LoggerContainer<BunkumContext> Logger;
     
     private IDatabaseProvider<IDatabaseContext> _databaseProvider = new DummyDatabaseProvider();
     private readonly List<Config> _configs;
@@ -36,16 +36,16 @@ public partial class BunkumHttpServer : IHotReloadable
 
     private BunkumHttpServer(bool setListener, bool logToConsole)
     {
-        this._logger = new LoggerContainer<BunkumContext>();
-        if(logToConsole) this._logger.RegisterLogger(new ConsoleLogger());
+        this.Logger = new LoggerContainer<BunkumContext>();
+        if(logToConsole) this.Logger.RegisterLogger(new ConsoleLogger());
         
-        this._logger.LogInfo(BunkumContext.Startup, $"Bunkum is storing its data at {BunkumFileSystem.DataDirectory}.");
+        this.Logger.LogInfo(BunkumContext.Startup, $"Bunkum is storing its data at {BunkumFileSystem.DataDirectory}.");
         if (!BunkumFileSystem.UsingCustomDirectory)
         {
-            this._logger.LogInfo(BunkumContext.Startup, "You can override where data is stored using the BUNKUM_DATA_FOLDER environment variable.");
+            this.Logger.LogInfo(BunkumContext.Startup, "You can override where data is stored using the BUNKUM_DATA_FOLDER environment variable.");
         }
 
-        BunkumConfig bunkumConfig = Config.LoadFromFile<BunkumConfig>("bunkum.json", this._logger);
+        BunkumConfig bunkumConfig = Config.LoadFromFile<BunkumConfig>("bunkum.json", this.Logger);
         this._configs = new List<Config>(2)
         {
             bunkumConfig,
@@ -74,8 +74,8 @@ public partial class BunkumHttpServer : IHotReloadable
     [Obsolete("This method of creating the server will not let the user configure the endpoint or it's properties.")]
     public BunkumHttpServer(Uri listenEndpoint) : this(new SocketHttpListener(listenEndpoint, false))
     {
-        this._logger.LogDebug(BunkumContext.Startup, $"Using hardcoded listen endpoint {listenEndpoint}");
-        this._logger.LogDebug(BunkumContext.Startup, "Forwarded IP will be ignored - this method is not advised");
+        this.Logger.LogDebug(BunkumContext.Startup, $"Using hardcoded listen endpoint {listenEndpoint}");
+        this.Logger.LogDebug(BunkumContext.Startup, "Forwarded IP will be ignored - this method is not advised");
     }
 
     /// <summary>
@@ -91,14 +91,14 @@ public partial class BunkumHttpServer : IHotReloadable
 
         int tasks = taskOverride ?? bunkumConfig.ThreadCount;
 
-        this._logger.LogInfo(BunkumContext.Startup, $"Blocking in multithreaded mode with {tasks} tasks");
+        this.Logger.LogInfo(BunkumContext.Startup, $"Blocking in multithreaded mode with {tasks} tasks");
 
         for (int i = 0; i < tasks; i++)
         {
             int threadN = i + 1;
             Task.Factory.StartNew(async () =>
             {
-                this._logger.LogTrace(BunkumContext.Startup, $"Spinning up task {threadN}/{tasks}");
+                this.Logger.LogTrace(BunkumContext.Startup, $"Spinning up task {threadN}/{tasks}");
                 await this.Block();
             });
         }
@@ -110,7 +110,7 @@ public partial class BunkumHttpServer : IHotReloadable
     public async Task StartAndBlockAsync()
     {
         this.RunStartupTasks();
-        this._logger.LogInfo(BunkumContext.Startup, "Blocking in single-threaded mode");
+        this.Logger.LogInfo(BunkumContext.Startup, "Blocking in single-threaded mode");
         await this.Block();
     }
 
@@ -119,43 +119,43 @@ public partial class BunkumHttpServer : IHotReloadable
         Stopwatch stopwatch = new();
         stopwatch.Start();
         
-        this._logger.LogInfo(BunkumContext.Startup, "Starting up...");
+        this.Logger.LogInfo(BunkumContext.Startup, "Starting up...");
 
         foreach (Service service in this._services)
         {
-            this._logger.LogInfo(BunkumContext.Startup, $"Initializing service {service.GetType().Name}...");
+            this.Logger.LogInfo(BunkumContext.Startup, $"Initializing service {service.GetType().Name}...");
             service.Initialize();
         }
 
         if (this._services.Count > 0)
         {
             string was = this._services.Count == 1 ? " was" : "s were";
-            this._logger.LogInfo(BunkumContext.Startup, $"{this._services.Count} service{was} initialized.");
+            this.Logger.LogInfo(BunkumContext.Startup, $"{this._services.Count} service{was} initialized.");
         }
 
-        this._logger.LogDebug(BunkumContext.Startup, "Initializing database provider...");
+        this.Logger.LogDebug(BunkumContext.Startup, "Initializing database provider...");
         this._databaseProvider.Initialize();
         
-        this._logger.LogDebug(BunkumContext.Startup, "Starting listener...");
+        this.Logger.LogDebug(BunkumContext.Startup, "Starting listener...");
         try
         {
             this._listener.StartListening();
         }
         catch(Exception e)
         {
-            this._logger.LogCritical(BunkumContext.Startup, $"An exception occured while trying to start the listener: \n{e}");
-            this._logger.LogCritical(BunkumContext.Startup, "Visit this page to view troubleshooting steps: " +
+            this.Logger.LogCritical(BunkumContext.Startup, $"An exception occured while trying to start the listener: \n{e}");
+            this.Logger.LogCritical(BunkumContext.Startup, "Visit this page to view troubleshooting steps: " +
                                                              "https://littlebigrefresh.github.io/Docs/refresh-troubleshooting");
             
-            this._logger.Dispose();
+            this.Logger.Dispose();
             BunkumConsole.WaitForInputAndExit(1);
         }
         
-        this._logger.LogDebug(BunkumContext.Startup, "Warming up database provider...");
+        this.Logger.LogDebug(BunkumContext.Startup, "Warming up database provider...");
         this._databaseProvider.Warmup();
 
         stopwatch.Stop();
-        this._logger.LogInfo(BunkumContext.Startup, $"Ready to go! Startup tasks took {stopwatch.ElapsedMilliseconds}ms.");
+        this.Logger.LogInfo(BunkumContext.Startup, $"Ready to go! Startup tasks took {stopwatch.ElapsedMilliseconds}ms.");
     }
     
     private async Task Block()
@@ -177,7 +177,7 @@ public partial class BunkumHttpServer : IHotReloadable
                 }
                 catch (Exception e)
                 {
-                    this._logger.LogError(BunkumContext.Request, $"Failed to initialize request:\n{e}");
+                    this.Logger.LogError(BunkumContext.Request, $"Failed to initialize request:\n{e}");
                     context.ResponseCode = HttpStatusCode.InternalServerError;
                     #if DEBUG
                     context.Write(e.ToString());
@@ -217,7 +217,7 @@ public partial class BunkumHttpServer : IHotReloadable
             // Setup a base middleware that calls Endpoints.
             // Passing in these parameters is a little janky in my opinion, but it gets the job done. 
             MainMiddleware mainMiddleware = new(this._endpoints,
-                this._logger,
+                this.Logger,
                 this._services,
                 this._configs);
 
@@ -247,7 +247,7 @@ public partial class BunkumHttpServer : IHotReloadable
         }
         catch (Exception e)
         {
-            this._logger.LogError(BunkumContext.Request, e.ToString());
+            this.Logger.LogError(BunkumContext.Request, e.ToString());
 
             try
             {
@@ -271,7 +271,7 @@ public partial class BunkumHttpServer : IHotReloadable
             {
                 requestStopwatch.Stop();
 
-                this._logger.LogInfo(BunkumContext.Request, $"Served request to {context.RemoteEndpoint}: " +
+                this.Logger.LogInfo(BunkumContext.Request, $"Served request to {context.RemoteEndpoint}: " +
                                                           $"{(int)context.ResponseCode} {context.ResponseCode} on " +
                                                           $"{context.Method.ToString().ToUpper()} '{context.Uri.PathAndQuery}' " +
                                                           $"({requestStopwatch.ElapsedMilliseconds}ms)");
@@ -304,12 +304,12 @@ public partial class BunkumHttpServer : IHotReloadable
         // If there's no initialization function, we can't do anything without destroying the server.
         if (this.Initialize == null)
         {
-            this._logger.LogWarning(BunkumContext.Server, "The server's configuration does not properly support hot reloading.");
-            this._logger.LogWarning(BunkumContext.Server, "To resolve this, move your initialization code into `BunkumHttpServer.Initialize`.");
+            this.Logger.LogWarning(BunkumContext.Server, "The server's configuration does not properly support hot reloading.");
+            this.Logger.LogWarning(BunkumContext.Server, "To resolve this, move your initialization code into `BunkumHttpServer.Initialize`.");
             return;
         }
         
-        this._logger.LogDebug(BunkumContext.Server, "Refreshing Bunkum's internal state for a hot reload, hold tight!");
+        this.Logger.LogDebug(BunkumContext.Server, "Refreshing Bunkum's internal state for a hot reload, hold tight!");
         Stopwatch stopwatch = new();
         stopwatch.Start();
 
@@ -330,12 +330,12 @@ public partial class BunkumHttpServer : IHotReloadable
         this.Initialize.Invoke();
         
         // Initialize the database provider
-        this._logger.LogDebug(BunkumContext.Startup, "Initializing database provider...");
+        this.Logger.LogDebug(BunkumContext.Startup, "Initializing database provider...");
         this._databaseProvider.Initialize();
-        this._logger.LogDebug(BunkumContext.Startup, "Warming up database provider...");
+        this.Logger.LogDebug(BunkumContext.Startup, "Warming up database provider...");
         this._databaseProvider.Warmup();
         
-        this._logger.LogInfo(BunkumContext.Server, $"Successfully refreshed Bunkum's internal state in {stopwatch.ElapsedMilliseconds}ms.");
+        this.Logger.LogInfo(BunkumContext.Server, $"Successfully refreshed Bunkum's internal state in {stopwatch.ElapsedMilliseconds}ms.");
     }
 
     private void AddEndpointGroup(Type type)
@@ -379,7 +379,7 @@ public partial class BunkumHttpServer : IHotReloadable
     /// <typeparam name="TConfig">An object extending <see cref="Config"/> that represents your server's configuration.</typeparam>
     public void UseJsonConfig<TConfig>(string filename) where TConfig : Config, new()
     {
-        TConfig config = Config.LoadFromFile<TConfig>(filename, this._logger);
+        TConfig config = Config.LoadFromFile<TConfig>(filename, this.Logger);
         this.UseConfig(config);
     }
 
