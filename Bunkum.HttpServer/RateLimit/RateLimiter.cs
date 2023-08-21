@@ -1,4 +1,6 @@
 using System.Net;
+using System.Reflection;
+using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.CustomHttpListener.Request;
 using Bunkum.HttpServer.RateLimit.Info;
 using Bunkum.HttpServer.Time;
@@ -37,7 +39,7 @@ public class RateLimiter : IRateLimiter
     private readonly List<RateLimitUserInfo> _userInfos = new(25);
     private readonly List<RateLimitRemoteEndpointInfo> _remoteEndpointInfos = new(25);
 
-    public bool UserViolatesRateLimit(ListenerContext context, IRateLimitUser user)
+    public bool UserViolatesRateLimit(ListenerContext context, MethodInfo? method, IRateLimitUser user)
     {
         RateLimitUserInfo? info = this._userInfos
             .FirstOrDefault(i => user.RateLimitUserIdIsEqual(i.User.RateLimitUserId));
@@ -48,10 +50,10 @@ public class RateLimiter : IRateLimiter
             this._userInfos.Add(info);
         }
 
-        return this.ViolatesRateLimit(context, info);
+        return this.ViolatesRateLimit(context, info, method);
     }
 
-    public bool RemoteEndpointViolatesRateLimit(ListenerContext context)
+    public bool RemoteEndpointViolatesRateLimit(ListenerContext context, MethodInfo? method)
     {
         IPAddress ipAddress = context.RemoteEndpoint.Address;
 
@@ -64,10 +66,10 @@ public class RateLimiter : IRateLimiter
             this._remoteEndpointInfos.Add(info);
         }
 
-        return this.ViolatesRateLimit(context, info);
+        return this.ViolatesRateLimit(context, info, method);
     }
 
-    private bool ViolatesRateLimit(ListenerContext context, IRateLimitInfo info)
+    private bool ViolatesRateLimit(ListenerContext context, IRateLimitInfo info, MethodInfo? method)
     {
         int now = this._timeProvider.Seconds;
         
@@ -78,12 +80,14 @@ public class RateLimiter : IRateLimiter
             info.RequestTimes.Clear();
         }
         
-        info.RequestTimes.RemoveAll(r => r <= now - this._settings.RequestTimeoutDuration);
+        RateLimitSettings settings = method?.GetCustomAttribute<RateLimitSettingsAttribute>()?.Settings ?? this._settings;
         
-        if (info.RequestTimes.Count + 1 > this._settings.MaxRequestAmount)
+        info.RequestTimes.RemoveAll(r => r <= now - settings.RequestTimeoutDuration);
+        
+        if (info.RequestTimes.Count + 1 > settings.MaxRequestAmount)
         {
-            info.LimitedUntil = now + this._settings.RequestBlockDuration;
-            context.ResponseHeaders.TryAdd("Retry-After", this._settings.RequestBlockDuration.ToString());
+            info.LimitedUntil = now + settings.RequestBlockDuration;
+            context.ResponseHeaders.TryAdd("Retry-After", settings.RequestBlockDuration.ToString());
             
             return true;
         }

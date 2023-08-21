@@ -32,11 +32,9 @@ public class RateLimitService : Service
         bool violated = false;
 
         if (user is IRateLimitUser rateLimitUser)
-            violated = this._rateLimiter.UserViolatesRateLimit(context, rateLimitUser);
+            violated = this._rateLimiter.UserViolatesRateLimit(context, method, rateLimitUser);
         else
-        {
-            violated = this._rateLimiter.RemoteEndpointViolatesRateLimit(context);
-        }
+            violated = this._rateLimiter.RemoteEndpointViolatesRateLimit(context, method);
 
         if (violated) return HttpStatusCode.TooManyRequests;
         return null;
