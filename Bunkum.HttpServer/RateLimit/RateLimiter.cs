@@ -41,35 +41,39 @@ public class RateLimiter : IRateLimiter
 
     public bool UserViolatesRateLimit(ListenerContext context, MethodInfo? method, IRateLimitUser user)
     {
+        RateLimitSettings settings = method?.GetCustomAttribute<RateLimitSettingsAttribute>()?.Settings ?? this._settings;
+        
         RateLimitUserInfo? info = this._userInfos
-            .FirstOrDefault(i => user.RateLimitUserIdIsEqual(i.User.RateLimitUserId));
+            .FirstOrDefault(i => user.RateLimitUserIdIsEqual(i.User.RateLimitUserId) && i.Bucket == settings.Bucket);
 
         if (info == null)
         {
-            info = new RateLimitUserInfo(user);
+            info = new RateLimitUserInfo(user, settings.Bucket);
             this._userInfos.Add(info);
         }
 
-        return this.ViolatesRateLimit(context, info, method);
+        return this.ViolatesRateLimit(context, info, settings);
     }
 
     public bool RemoteEndpointViolatesRateLimit(ListenerContext context, MethodInfo? method)
     {
         IPAddress ipAddress = context.RemoteEndpoint.Address;
+        
+        RateLimitSettings settings = method?.GetCustomAttribute<RateLimitSettingsAttribute>()?.Settings ?? this._settings;
 
         RateLimitRemoteEndpointInfo? info = this._remoteEndpointInfos
-            .FirstOrDefault(i => ipAddress.Equals(i.IpAddress));
+            .FirstOrDefault(i => ipAddress.Equals(i.IpAddress) && i.Bucket == settings.Bucket);
 
         if (info == null)
         {
-            info = new RateLimitRemoteEndpointInfo(ipAddress);
+            info = new RateLimitRemoteEndpointInfo(ipAddress, settings.Bucket);
             this._remoteEndpointInfos.Add(info);
         }
 
-        return this.ViolatesRateLimit(context, info, method);
+        return this.ViolatesRateLimit(context, info, this._settings);
     }
 
-    private bool ViolatesRateLimit(ListenerContext context, IRateLimitInfo info, MethodInfo? method)
+    private bool ViolatesRateLimit(ListenerContext context, IRateLimitInfo info, RateLimitSettings settings)
     {
         int now = this._timeProvider.Seconds;
         
@@ -79,8 +83,6 @@ public class RateLimiter : IRateLimiter
             info.LimitedUntil = 0;
             info.RequestTimes.Clear();
         }
-        
-        RateLimitSettings settings = method?.GetCustomAttribute<RateLimitSettingsAttribute>()?.Settings ?? this._settings;
         
         info.RequestTimes.RemoveAll(r => r <= now - settings.RequestTimeoutDuration);
         
