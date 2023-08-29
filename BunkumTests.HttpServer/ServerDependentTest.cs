@@ -20,7 +20,7 @@ public class ServerDependentTest
 
         BunkumHttpServer server = new(listener);
         server.AddAuthenticationService();
-        if(start) server.Start(1);
+        if(start) server.Start(0);
         
         this._stopTasks.Enqueue(() => server.Stop());
 

@@ -15,7 +15,7 @@ public class BunkumHttpMessageHandler : HttpMessageHandler
 
     protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken ct)
     {
-        return SendAsync(request, ct).Result;
+        return this.SendAsync(request, ct).Result;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,

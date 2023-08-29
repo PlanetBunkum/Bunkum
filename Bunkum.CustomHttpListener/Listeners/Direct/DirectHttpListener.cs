@@ -8,7 +8,10 @@ namespace Bunkum.CustomHttpListener.Listeners.Direct;
 
 public class DirectHttpListener : BunkumHttpListener
 {
-    private readonly Queue<DirectHttpMessage> _messages = new();
+    public Action<ListenerContext>? Callback { private get; set; }
+    
+    public DirectHttpListener(bool logToConsole = true) : base(logToConsole)
+    {}
 
     public HttpClient GetClient()
     {
@@ -20,7 +23,13 @@ public class DirectHttpListener : BunkumHttpListener
 
     internal void EnqueueMessage(DirectHttpMessage message)
     {
-        this._messages.Enqueue(message);
+        if (this.Callback == null)
+            throw new InvalidOperationException("The callback was not initialized for this listener.");
+        
+        ListenerContext? context = HandleMessage(message).Result;
+        if (context == null) return;
+        
+        this.Callback(context);
     }
 
     public override void StartListening()
@@ -28,7 +37,7 @@ public class DirectHttpListener : BunkumHttpListener
         // No initialization required
     }
 
-    private async Task<ListenerContext?> HandleMessage(DirectHttpMessage? message)
+    private static async Task<ListenerContext?> HandleMessage(DirectHttpMessage? message)
     {
         CancellationTokenSource cts = new();
         cts.CancelAfter(5_000);
@@ -82,22 +91,8 @@ public class DirectHttpListener : BunkumHttpListener
         return context;
     }
 
-    protected override async Task<ListenerContext?> WaitForConnectionAsyncInternal(CancellationToken? globalCt = null)
+    protected override Task<ListenerContext?> WaitForConnectionAsyncInternal(CancellationToken? globalCt = null)
     {
-        while (true)
-        {
-            bool gotMessage = this._messages.TryDequeue(out DirectHttpMessage? message);
-            if (gotMessage) return await this.HandleMessage(message);
-
-            if (globalCt is { IsCancellationRequested: true }) return null;
-            if (this._sleep) Thread.Sleep(10);
-        }
-    }
-
-    private readonly bool _sleep;
-
-    public DirectHttpListener(bool logToConsole = true, bool sleep = false) : base(logToConsole)
-    {
-        this._sleep = sleep;
+        return Task.FromResult<ListenerContext?>(null);
     }
 }

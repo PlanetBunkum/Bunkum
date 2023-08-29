@@ -4,6 +4,7 @@ using System.Net;
 using System.Reflection;
 using Bunkum.CustomHttpListener;
 using Bunkum.CustomHttpListener.Listeners;
+using Bunkum.CustomHttpListener.Listeners.Direct;
 using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.CustomHttpListener.Request;
 using Bunkum.HttpServer.Configuration;
@@ -69,6 +70,13 @@ public partial class BunkumHttpServer : IHotReloadable
     public BunkumHttpServer(BunkumHttpListener listener, bool logToConsole = true) : this(false, logToConsole)
     {
         this._listener = listener;
+        if (listener is DirectHttpListener directListener)
+        {
+            directListener.Callback = context =>
+            {
+                this.CompleteRequestAsync(context).Wait();
+            };
+        }
     }
 
     [Obsolete("This method of creating the server will not let the user configure the endpoint or it's properties.")]
@@ -88,6 +96,8 @@ public partial class BunkumHttpServer : IHotReloadable
 
         BunkumConfig? bunkumConfig = (BunkumConfig?)this._configs.FirstOrDefault(c => c is BunkumConfig);
         Debug.Assert(bunkumConfig != null);
+
+        if (taskOverride == 0) return;
 
         int tasks = taskOverride ?? bunkumConfig.ThreadCount;
 
@@ -164,31 +174,37 @@ public partial class BunkumHttpServer : IHotReloadable
         {
             await this._listener.WaitForConnectionAsync(async context => await Task.Factory.StartNew(async () =>
             {
-                try
-                {
-                    // Create a new lazy to get a database context, if the value is never accessed, a database instance is never passed
-                    Lazy<IDatabaseContext> database = new(this._databaseProvider.GetContext());
-
-                    // Handle the request
-                    await this.HandleRequest(context, database);
-
-                    if (database.IsValueCreated)
-                        database.Value.Dispose();
-                }
-                catch (Exception e)
-                {
-                    this.Logger.LogError(BunkumContext.Request, $"Failed to initialize request:\n{e}");
-                    context.ResponseCode = HttpStatusCode.InternalServerError;
-                    #if DEBUG
-                    context.Write(e.ToString());
-                    #else
-                    context.Write("Internal Server Error");
-                    #endif
-                }
+                await this.CompleteRequestAsync(context);
             }), this._stopToken.Token);
         }
         
         Debug.WriteLine("Block task was stopped");
+    }
+
+    internal async Task CompleteRequestAsync(ListenerContext context)
+    {
+        try
+        {
+            // Create a new lazy to get a database context, if the value is never accessed, a database instance is never passed
+            Lazy<IDatabaseContext> database = new(this._databaseProvider.GetContext());
+
+            // Handle the request
+            await this.HandleRequest(context, database);
+
+            if (database.IsValueCreated)
+                database.Value.Dispose();
+        }
+        catch (Exception e)
+        {
+            this.Logger.LogError(BunkumContext.Request, $"Failed to initialize request:\n{e}");
+            context.ResponseCode = HttpStatusCode.InternalServerError;
+            
+            #if DEBUG
+            context.Write(e.ToString());
+            #else
+            context.Write("Internal Server Error");
+            #endif
+        }
     }
     
     private readonly CancellationTokenSource _stopToken = new();
