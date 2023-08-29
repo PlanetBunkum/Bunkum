@@ -184,7 +184,7 @@ internal class MainMiddleware : IMiddleware
                             if (configToPass == null)
                             {
                                 throw new ArgumentNullException(
-                                    $"Could not find an valid config for the {paramType.Name} parameter '{param.Name}'");
+                                    $"Could not find a valid config for the {paramType.Name} parameter '{param.Name}'");
                             }
 
                             invokeList.Add(configToPass);
@@ -214,12 +214,18 @@ internal class MainMiddleware : IMiddleware
                             }
                             
                             services.Dispose();
+                            
+                            // NullabilityInfoContext isn't thread-safe, so it cant be re-used
+                            // https://stackoverflow.com/a/72586919
+                            // TODO: do benchmarks of this call to see if we should optimize
+                            bool isNullable = new NullabilityInfoContext().Create(param).WriteState == NullabilityState.Nullable;
 
                             // If our argument is still null, log a warning as a precaution.
-                            if (arg == null)
+                            // Don't consider nullable arguments for this warning
+                            if (arg == null && !isNullable)
                             {
                                 this._logger.LogWarning(BunkumContext.Request, 
-                                    $"Could not find an valid argument for the {paramType.Name} parameter '{param.Name}'. " +
+                                    $"Could not find a valid argument for the {paramType.Name} parameter '{param.Name}'. " +
                                     $"Null will be used instead.");
                             }
 
