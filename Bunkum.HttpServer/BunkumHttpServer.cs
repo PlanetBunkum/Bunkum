@@ -211,7 +211,6 @@ public partial class BunkumHttpServer : IHotReloadable
 
     /// <summary>
     /// Attempts to stop all block tasks, including those managed by the caller.
-    /// 
     /// If you are creating a server that does not span across the entire lifetime of the application, you are responsible for calling this to stop the server.
     /// </summary>
     public void Stop()
