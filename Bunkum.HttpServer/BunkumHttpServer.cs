@@ -217,6 +217,7 @@ public partial class BunkumHttpServer : IHotReloadable
     public void Stop()
     {
         this._stopToken.Cancel();
+        this.Logger.Dispose();
         BunkumHotReloadableRegistry.UnregisterReloadable(this);
     }
 
