@@ -133,12 +133,12 @@ public partial class SocketHttpListener : BunkumHttpListener
             {
                 this.Logger.LogWarning(HttpLogContext.Request, "Rejected request without Host header");
                 await context.SendResponse(HttpStatusCode.BadRequest);
+                return null;
             }
             else
             {
                 context.RequestHeaders["Host"] = "localhost";
             }
-            return null;
         }
 
         if (this._useForwardedIp && context.RequestHeaders["X-Forwarded-For"] != null)
