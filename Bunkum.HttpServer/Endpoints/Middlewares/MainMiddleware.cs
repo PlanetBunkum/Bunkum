@@ -105,6 +105,7 @@ internal class MainMiddleware : IMiddleware
                             Logger = this._logger,
                             Cookies = context.Cookies,
                             RemoteEndpoint = context.RemoteEndpoint,
+                            Version = context.Version,
                             Method = context.Method,
                             RequestHeaders = context.RequestHeaders,
                             ResponseHeaders = context.ResponseHeaders,

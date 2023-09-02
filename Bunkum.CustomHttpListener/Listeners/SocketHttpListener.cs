@@ -6,6 +6,7 @@ using System.Web;
 using Bunkum.CustomHttpListener.Extensions;
 using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.CustomHttpListener.Request;
+using HttpVersion = Bunkum.CustomHttpListener.Request.HttpVersion;
 
 namespace Bunkum.CustomHttpListener.Listeners;
 
@@ -90,7 +91,16 @@ public partial class SocketHttpListener : BunkumHttpListener
             RealRemoteEndpoint = (client.RemoteEndPoint as IPEndPoint)!,
         };
 
-        if (version != "HTTP/1.1")
+        HttpVersion httpVersion = version switch
+        {
+            "HTTP/1.0" => HttpVersion.Http1_0,
+            "HTTP/1.1" => HttpVersion.Http1_1,
+            _ => HttpVersion.Unknown,
+        };
+
+        context.Version = httpVersion;
+
+        if (httpVersion == HttpVersion.Unknown)
         {
             await context.SendResponse(HttpStatusCode.HttpVersionNotSupported);
             return null;
@@ -119,8 +129,15 @@ public partial class SocketHttpListener : BunkumHttpListener
 
         if (context.RequestHeaders["Host"] == null)
         {
-            this.Logger.LogWarning(HttpLogContext.Request, "Rejected request without Host header");
-            await context.SendResponse(HttpStatusCode.BadRequest);
+            if (httpVersion >= HttpVersion.Http1_1)
+            {
+                this.Logger.LogWarning(HttpLogContext.Request, "Rejected request without Host header");
+                await context.SendResponse(HttpStatusCode.BadRequest);
+            }
+            else
+            {
+                context.RequestHeaders["Host"] = "localhost";
+            }
             return null;
         }
 

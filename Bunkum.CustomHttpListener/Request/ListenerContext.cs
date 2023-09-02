@@ -12,6 +12,7 @@ public abstract class ListenerContext
 {
     public MemoryStream InputStream { get; internal set; } = null!;
 
+    public HttpVersion Version { get; internal set; }
     public Method Method { get; set; }
     public Uri Uri { get; set; } = null!;
 

@@ -3,8 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.HttpServer.Services;
-using Bunkum.HttpServer.Storage;
 using NotEnoughLogs;
+using HttpVersion = Bunkum.CustomHttpListener.Request.HttpVersion;
 
 namespace Bunkum.HttpServer;
 
@@ -14,6 +14,7 @@ public struct RequestContext
     public EndPoint RemoteEndpoint { get; internal set; }
     public MemoryStream RequestStream { get; internal set; }
 
+    public HttpVersion Version { get; internal set; }
     public Method Method { get; internal set; }
     public Uri Url { get; internal set; }
     
