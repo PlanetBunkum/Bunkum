@@ -135,10 +135,8 @@ public partial class SocketHttpListener : BunkumHttpListener
                 await context.SendResponse(HttpStatusCode.BadRequest);
                 return null;
             }
-            else
-            {
-                context.RequestHeaders["Host"] = "localhost";
-            }
+
+            context.RequestHeaders["Host"] = "localhost";
         }
 
         if (this._useForwardedIp && context.RequestHeaders["X-Forwarded-For"] != null)
@@ -166,8 +164,11 @@ public partial class SocketHttpListener : BunkumHttpListener
         {
             context.RemoteEndpoint = context.RealRemoteEndpoint;
         }
+
+        // skip nullable warning since we have already asserted that this header exists
+        string host = context.RequestHeaders.GetValues("Host")!.First();
         
-        context.Uri = new Uri($"http://{context.RequestHeaders["Host"]}{path}", UriKind.Absolute);
+        context.Uri = new Uri($"http://{host}{path}", UriKind.Absolute);
         
         if (context.RequestHeaders["Cookie"] != null)
         {
