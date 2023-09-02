@@ -19,6 +19,7 @@ public enum BunkumContext
     Api,
     Game,
     Matching,
+    Commands,
     
     UserContent,
     UserPhotos,
