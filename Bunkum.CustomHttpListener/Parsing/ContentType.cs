@@ -7,7 +7,7 @@ namespace Bunkum.CustomHttpListener.Parsing;
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 public enum ContentType
 {
-    [ContentType("text/html", false)] Html,
+    [ContentType("text/html; charset=utf-8", false)] Html,
     [ContentType("text/plain", false)] Plaintext,
     [ContentType("text/xml", true)] Xml,
     [ContentType("application/json", true)] Json,
