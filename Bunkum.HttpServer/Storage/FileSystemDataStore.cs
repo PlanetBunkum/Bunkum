@@ -66,7 +66,7 @@ public class FileSystemDataStore : IDataStore
     {
         try
         {
-            FileStream fileStream = File.OpenWrite(GetPath(key));
+            using FileStream fileStream = File.OpenWrite(GetPath(key));
             data.CopyTo(fileStream);
             return true;
         }
