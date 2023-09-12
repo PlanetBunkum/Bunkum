@@ -57,17 +57,13 @@ public partial class SocketHttpListener : BunkumHttpListener
         Socket client = await this._socket.AcceptAsync(globalCt ?? CancellationToken.None);
         NetworkStream stream = new(client);
 
-        CancellationTokenSource cts = new();
-        cts.CancelAfter(5_000);
-        CancellationToken ct = cts.Token;
-
         string method;
         string path;
         string version;
 
         try
         {
-            string[] requestLineSplit = await ReadRequestLine(stream, ct);
+            string[] requestLineSplit = ReadRequestLine(stream);
 
             method = requestLineSplit[0];
             path = requestLineSplit[1];
@@ -115,11 +111,8 @@ public partial class SocketHttpListener : BunkumHttpListener
         }
 
         context.Method = parsedMethod;
-
-        // ReSharper disable once MethodSupportsCancellation
-#pragma warning disable CA2016
-        await foreach ((string? key, string? value) in ReadHeaders(stream).WithCancellation(ct))
-#pragma warning restore CA2016
+        
+        foreach ((string? key, string? value) in ReadHeaders(stream))
         {
             Debug.Assert(key != null);
             Debug.Assert(value != null);
@@ -186,7 +179,7 @@ public partial class SocketHttpListener : BunkumHttpListener
         MemoryStream inputStream = new((int)context.ContentLength);
         if (context.ContentLength > 0)
         {
-            await stream.ReadIntoStreamAsync(inputStream, (int)context.ContentLength, ct);
+            stream.ReadIntoStream(inputStream, (int)context.ContentLength);
             inputStream.Seek(0, SeekOrigin.Begin);
         }
         context.InputStream = inputStream;
@@ -198,5 +191,6 @@ public partial class SocketHttpListener : BunkumHttpListener
     {
         this._socket?.Dispose();
         base.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

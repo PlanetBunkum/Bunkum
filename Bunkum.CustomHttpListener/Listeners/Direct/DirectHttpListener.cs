@@ -80,12 +80,16 @@ public class DirectHttpListener : BunkumHttpListener
             foreach (string value in values) context.RequestHeaders.Add(key, value);
         }
 
-        foreach ((string? key, string? value) in ReadCookies(context.RequestHeaders["Cookie"]))
+        string? cookieHeader = context.RequestHeaders["Cookie"];
+        if (cookieHeader != null)
         {
-            Debug.Assert(key != null);
-            Debug.Assert(value != null);
+            foreach ((string? key, string? value) in ReadCookies(context.RequestHeaders["Cookie"]))
+            {
+                Debug.Assert(key != null);
+                Debug.Assert(value != null);
 
-            context.Cookies.Add(key, value);
+                context.Cookies.Add(key, value);
+            }
         }
 
         return context;

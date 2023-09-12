@@ -16,8 +16,8 @@ public abstract class BunkumHttpListener : IDisposable
 {
     protected readonly LoggerContainer<HttpLogContext> Logger;
 
-    private const int HeaderLineLimit = 1024; // 1KB per header
-    private const int RequestLineLimit = 256; // 256 bytes
+    private const int HeaderLineLimit = 1024; // 1KB per cookieHeader
+    private const int RequestLineLimit = 256; // bytes
 
     protected BunkumHttpListener(bool logToConsole)
     {
@@ -58,48 +58,81 @@ public abstract class BunkumHttpListener : IDisposable
 
     protected abstract Task<ListenerContext?> WaitForConnectionAsyncInternal(CancellationToken? globalCt = null);
 
-    internal static IEnumerable<(string, string)> ReadCookies(string? header)
+    internal static IEnumerable<(string, string)> ReadCookies(ReadOnlySpan<char> cookieHeader)
     {
-        if (string.IsNullOrEmpty(header)) yield break;
+        List<(string key, string value)> cookies = new(10);
 
-        string[] pairs = header.Split(';');
-        foreach (string pair in pairs)
+        bool parsedName = false;
+        
+        int nameIndex = 0;
+        int dataIndex = 0;
+        int startIndex = 0;
+        
+        for (int cookieIndex = 0; cookieIndex < cookieHeader.Length; cookieIndex++)
         {
-            int index = pair.IndexOf('=');
-            if (index < 0) continue; // Pair is split by =, if we cant find it then this is obviously bad data
+            char c = cookieHeader[cookieIndex];
+            if (!parsedName)
+            {
+                if (c != '=')
+                {
+                    nameIndex = cookieIndex + 1;
+                    continue;
+                }
+                
+                parsedName = true;
+                dataIndex = cookieIndex;
+            }
 
-            string key = pair.Substring(0, index).TrimStart();
-            string value = pair.Substring(index + 1).TrimEnd();
 
-            yield return (key, value);
+            bool isLastByte = cookieIndex == cookieHeader.Length - 1;
+            if (c == ';' || isLastByte)
+            {
+                if (isLastByte) dataIndex++;
+
+                ReadOnlySpan<char> nameSlice = cookieHeader[startIndex..nameIndex].TrimStart();
+                ReadOnlySpan<char> dataSlice = cookieHeader[(nameIndex + 1)..dataIndex].TrimEnd();
+                
+                cookies.Add((nameSlice.ToString(), dataSlice.ToString()));
+                startIndex = cookieIndex + 1;
+                parsedName = false;
+            }
+            else
+            {
+                dataIndex++;
+            }
         }
+
+        return cookies;
     }
 
-    internal static async Task<string[]> ReadRequestLine(Stream stream, CancellationToken ct)
+    internal static string[] ReadRequestLine(Stream stream)
     {
         byte[] requestLineBytes = new byte[RequestLineLimit];
         // Probably breaks spec to just look for \n instead of \r\n but who cares
-        await stream.ReadIntoBufferUntilCharAsync('\n', requestLineBytes, ct);
+        stream.ReadIntoBufferUntilChar('\n', requestLineBytes);
         
         return Encoding.ASCII.GetString(requestLineBytes).Split(' ');
     }
 
-    internal static async IAsyncEnumerable<(string key, string value)> ReadHeaders(Stream stream, [EnumeratorCancellation] CancellationToken ct = default)
+    internal static IEnumerable<(string key, string value)> ReadHeaders(Stream stream)
     {
+        List<(string key, string value)> headers = new(10);
+        Span<byte> headerLineBytes = stackalloc byte[HeaderLineLimit];
         while (true)
         {
-            byte[] headerLineBytes = new byte[HeaderLineLimit];
-            int count = await stream.ReadIntoBufferUntilCharAsync('\n', headerLineBytes, ct);
+            int count = stream.ReadIntoBufferUntilChar('\n', headerLineBytes);
 
-            string headerLine = Encoding.UTF8.GetString(headerLineBytes, 0, count);
+            string headerLine = Encoding.UTF8.GetString(headerLineBytes[..count]);
             int index = headerLine.IndexOf(": ", StringComparison.Ordinal);
             if(index == -1) break; // no more headers
 
             string key = headerLine.Substring(0, index);
             string value = headerLine.Substring(index + 2).TrimEnd('\r');
 
-            yield return (key, value);
+            headers.Add((key, value));
         }
+
+        return headers;
     }
 
     public virtual void Dispose() {}

@@ -29,22 +29,19 @@ public class BunkumHttpMessageHandler : HttpMessageHandler
         reset.Wait(ct);
         stream.Position = 0;
 
-        return await ParseResponseMessage(stream, ct);
+        return ParseResponseMessage(stream);
     }
 
-    private static async Task<HttpResponseMessage> ParseResponseMessage(Stream stream, CancellationToken ct)
+    private static HttpResponseMessage ParseResponseMessage(Stream stream)
     {
-        string[] responseLine = await BunkumHttpListener.ReadRequestLine(stream, ct);
+        string[] responseLine = BunkumHttpListener.ReadRequestLine(stream);
 
         HttpStatusCode statusCode = Enum.Parse<HttpStatusCode>(responseLine[1]);
         HttpResponseMessage response = new(statusCode);
 
         string contentLengthStr = "0";
         
-        // ReSharper disable once MethodSupportsCancellation
-#pragma warning disable CA2016
-        await foreach ((string? key, string? value) in BunkumHttpListener.ReadHeaders(stream).WithCancellation(ct))
-#pragma warning restore CA2016
+        foreach ((string? key, string? value) in BunkumHttpListener.ReadHeaders(stream))
         {
             Debug.Assert(key != null);
             Debug.Assert(value != null);
@@ -61,7 +58,7 @@ public class BunkumHttpMessageHandler : HttpMessageHandler
         MemoryStream inputStream = new(count);
         if (count > 0)
         {
-            await stream.ReadIntoStreamAsync(inputStream, count, ct);
+            stream.ReadIntoStream(inputStream, count);
             inputStream.Position = 0;
         }
         
