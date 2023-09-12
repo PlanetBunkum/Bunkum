@@ -16,8 +16,14 @@ public enum Method
 
 public static class MethodUtils
 {
-    public static Method FromString(string str)
+    public static Method FromString(ReadOnlySpan<char> str)
     {
-        return Enum.GetValues<Method>().FirstOrDefault(m => m.ToString().ToUpperInvariant() == str);
+        // ReSharper disable once LoopCanBeConvertedToQuery (this literally won't compile)
+        foreach (Method m in Enum.GetValues<Method>())
+        {
+            if (m.ToString().ToUpperInvariant().AsSpan().SequenceEqual(str)) return m;
+        }
+
+        return Method.Invalid;
     }
 }

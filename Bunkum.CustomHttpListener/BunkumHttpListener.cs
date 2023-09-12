@@ -17,7 +17,9 @@ public abstract class BunkumHttpListener : IDisposable
     protected readonly LoggerContainer<HttpLogContext> Logger;
 
     private const int HeaderLineLimit = 1024; // 1KB per cookieHeader
-    private const int RequestLineLimit = 256; // bytes
+    protected const int RequestLineMethodLimit = 16; // bytes
+    protected const int RequestLinePathLimit = 128; // bytes
+    protected const int RequestLineVersionLimit = 16; // bytes
 
     protected BunkumHttpListener(bool logToConsole)
     {
@@ -105,29 +107,22 @@ public abstract class BunkumHttpListener : IDisposable
         return cookies;
     }
 
-    internal static string[] ReadRequestLine(Stream stream)
-    {
-        byte[] requestLineBytes = new byte[RequestLineLimit];
-        // Probably breaks spec to just look for \n instead of \r\n but who cares
-        stream.ReadIntoBufferUntilChar('\n', requestLineBytes);
-        
-        return Encoding.ASCII.GetString(requestLineBytes).Split(' ');
-    }
-
     internal static IEnumerable<(string key, string value)> ReadHeaders(Stream stream)
     {
         List<(string key, string value)> headers = new(10);
         Span<byte> headerLineBytes = stackalloc byte[HeaderLineLimit];
+        
         while (true)
         {
-            int count = stream.ReadIntoBufferUntilChar('\n', headerLineBytes);
+            int count = stream.ReadIntoBufferUntilChar('\r', headerLineBytes);
+            stream.ReadByte(); // Skip \n
 
             string headerLine = Encoding.UTF8.GetString(headerLineBytes[..count]);
             int index = headerLine.IndexOf(": ", StringComparison.Ordinal);
             if(index == -1) break; // no more headers
 
             string key = headerLine.Substring(0, index);
-            string value = headerLine.Substring(index + 2).TrimEnd('\r');
+            string value = headerLine.Substring(index + 2);
 
             headers.Add((key, value));
         }

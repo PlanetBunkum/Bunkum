@@ -57,23 +57,48 @@ public partial class SocketHttpListener : BunkumHttpListener
         Socket client = await this._socket.AcceptAsync(globalCt ?? CancellationToken.None);
         NetworkStream stream = new(client);
 
-        string method;
-        string path;
-        string version;
+        try
+        {
+            return this.ReadRequestIntoContext(client, stream);
+        }
+        catch (NotSupportedException e)
+        {
+            this.Logger.LogWarning(HttpLogContext.Request, $"Failed to handle request due to invalid HTTP version {e.Message}");
+            return null;
+        }
+        catch(Exception e)
+        {
+            this.Logger.LogWarning(HttpLogContext.Request, $"Failed to read request: {e}");
+            await new SocketListenerContext(client).SendResponse(HttpStatusCode.BadRequest);
+            return null;
+        }
+    }
+
+    private ListenerContext ReadRequestIntoContext(Socket client, Stream stream)
+    {
+        Span<char> method = stackalloc char[RequestLineMethodLimit];
+        Span<char> path = stackalloc char[RequestLinePathLimit];
+        Span<char> version = stackalloc char[RequestLineVersionLimit];
 
         try
         {
-            string[] requestLineSplit = ReadRequestLine(stream);
+            // Read method
+            int read = stream.ReadIntoBufferUntilChar(' ', method);
+            method = method[..read];
+            
+            // Read path
+            read = stream.ReadIntoBufferUntilChar(' ', path);
+            path = path[..read];
+            
+            // Read version
+            read = stream.ReadIntoBufferUntilChar('\r', version);
+            version = version[..read];
 
-            method = requestLineSplit[0];
-            path = requestLineSplit[1];
-            version = requestLineSplit[2].TrimEnd('\0').TrimEnd('\r');
+            stream.ReadByte(); // skip \n after \r
         }
         catch (Exception e)
         {
-            this.Logger.LogError(HttpLogContext.Request, $"Failed to read request line: {e}\n\nMaybe you tried to connect with HTTPS?");
-            await new SocketListenerContext(client).SendResponse(HttpStatusCode.BadRequest);
-            return null;
+            throw new Exception("Failed to read request line. Maybe you tried to connect with HTTPS?", e);
         }
 
         ListenerContext context = new SocketListenerContext(client)
@@ -97,20 +122,13 @@ public partial class SocketHttpListener : BunkumHttpListener
         context.Version = httpVersion;
 
         if (httpVersion == HttpVersion.Unknown)
-        {
-            await context.SendResponse(HttpStatusCode.HttpVersionNotSupported);
-            return null;
-        }
+            throw new NotSupportedException(version.ToString());
 
-        Method parsedMethod = MethodUtils.FromString(method);
-        if (parsedMethod == Method.Invalid)
+        context.Method = MethodUtils.FromString(method);
+        if (context.Method == Method.Invalid)
         {
-            this.Logger.LogWarning(HttpLogContext.Request, "Rejected request that sent invalid method " + method);
-            await context.SendResponse(HttpStatusCode.BadRequest);
-            return null;
+            throw new Exception("Rejected request that sent invalid method " + method.ToString());
         }
-
-        context.Method = parsedMethod;
         
         foreach ((string? key, string? value) in ReadHeaders(stream))
         {
@@ -124,9 +142,7 @@ public partial class SocketHttpListener : BunkumHttpListener
         {
             if (httpVersion >= HttpVersion.Http1_1)
             {
-                this.Logger.LogWarning(HttpLogContext.Request, "Rejected request without Host header");
-                await context.SendResponse(HttpStatusCode.BadRequest);
-                return null;
+                throw new Exception("Rejected request without Host header");
             }
 
             context.RequestHeaders["Host"] = "localhost";
@@ -144,9 +160,7 @@ public partial class SocketHttpListener : BunkumHttpListener
 
             if (!result)
             {
-                this.Logger.LogWarning(HttpLogContext.Request, $"Rejected request from proxy that sent invalid IP '{forwardedIp}'");
-                await context.SendResponse(HttpStatusCode.BadRequest);
-                return null;
+                throw new Exception($"Rejected request from proxy that sent invalid IP '{forwardedIp}'");
             }
             
             Debug.Assert(endPoint != null);

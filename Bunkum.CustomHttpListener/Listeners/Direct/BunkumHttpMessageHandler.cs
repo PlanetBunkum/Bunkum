@@ -34,10 +34,21 @@ public class BunkumHttpMessageHandler : HttpMessageHandler
 
     private static HttpResponseMessage ParseResponseMessage(Stream stream)
     {
-        string[] responseLine = BunkumHttpListener.ReadRequestLine(stream);
+        // Parse the response line (HTTP/1.1 200 OK)
+        // Skip version (HTTP/1.1)
+        stream.SkipBufferUntilChar(' ');
 
-        HttpStatusCode statusCode = Enum.Parse<HttpStatusCode>(responseLine[1]);
+        // status code can only be 3 bytes. 2xx, 3xx, 4xx, etc.
+        Span<char> statusBytes = stackalloc char[3];
+        stream.ReadIntoBufferUntilChar(' ', statusBytes);
+
+        ushort status = ushort.Parse(statusBytes); 
+
+        HttpStatusCode statusCode = (HttpStatusCode)status;
         HttpResponseMessage response = new(statusCode);
+        
+        // Skip to headers
+        stream.SkipBufferUntilChar('\n');
 
         string contentLengthStr = "0";
         
