@@ -26,7 +26,7 @@ public class DirectListenerContext : ListenerContext
         this._closed = true;
     }
 
-    protected override async Task SendBuffer(byte[] buffer)
+    protected override async Task SendBuffer(ArraySegment<byte> buffer)
     {
         await this._stream.WriteAsync(buffer);
     }

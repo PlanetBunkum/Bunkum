@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
+using Bunkum.CustomHttpListener.Extensions;
 using Bunkum.CustomHttpListener.Parsing;
 
 namespace Bunkum.CustomHttpListener.Request;
@@ -72,12 +73,19 @@ public abstract class ListenerContext
         if(this._responseLength != 0)
             this.ResponseHeaders.Add("Content-Length", this._responseLength.ToString());
 
-        await this.SendResponse(this.ResponseCode, this.ResponseStream.GetBuffer());
+        ArraySegment<byte> dataSlice = new(this.ResponseStream.GetBuffer(), 0, this._responseLength);
+
+        await this.SendResponse(this.ResponseCode, dataSlice);
     }
 
-    internal async Task SendResponse(HttpStatusCode code, byte[]? data = null)
+    internal async Task SendResponse(HttpStatusCode code, ArraySegment<byte>? data = null)
     {
         if (!this.CanSendData) return;
+        
+        // this is dumb and stupid
+        this.ResponseHeaders.Add("Server", "Bunkum");
+        this.ResponseHeaders.Add("Connection", "close");
+        this.ResponseHeaders.Add("Date", DateTime.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'"));
         
         List<string> response = new() { $"HTTP/1.1 {(int)code} {code.ToString()}" }; // TODO: spaced code names ("Not Found" instead of "NotFound")
         foreach ((string? key, string? value) in this.ResponseHeaders)
@@ -90,7 +98,7 @@ public abstract class ListenerContext
         response.Add("\r\n");
 
         await this.SendBufferSafe(string.Join("\r\n", response));
-        if (data != null) await this.SendBufferSafe(data);
+        if (data.HasValue) await this.SendBufferSafe(data.Value);
         
         this.CloseConnection();
     }
@@ -98,7 +106,7 @@ public abstract class ListenerContext
     protected abstract void CloseConnection();
 
     private Task SendBufferSafe(string str) => this.SendBufferSafe(Encoding.UTF8.GetBytes(str));
-    private async Task SendBufferSafe(byte[] buffer)
+    private async Task SendBufferSafe(ArraySegment<byte> buffer)
     {
         if (!this.CanSendData) return;
         
@@ -112,5 +120,5 @@ public abstract class ListenerContext
         }
     }
 
-    protected abstract Task SendBuffer(byte[] buffer);
+    protected abstract Task SendBuffer(ArraySegment<byte> buffer);
 }

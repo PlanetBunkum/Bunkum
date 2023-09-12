@@ -34,7 +34,7 @@ public class SocketListenerContext : ListenerContext
         }
     }
 
-    protected override async Task SendBuffer(byte[] buffer)
+    protected override async Task SendBuffer(ArraySegment<byte> buffer)
     {
         await this._socket.SendAsync(buffer);
     }

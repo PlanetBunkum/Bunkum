@@ -103,12 +103,6 @@ public partial class SocketHttpListener : BunkumHttpListener
 
         ListenerContext context = new SocketListenerContext(client)
         {
-            ResponseHeaders =
-            {
-                ["Server"] = "Bunkum",
-                ["Connection"] = "close",
-                ["Date"] = DateTime.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'"),
-            },
             RealRemoteEndpoint = (client.RemoteEndPoint as IPEndPoint)!,
         };
 
