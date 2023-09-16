@@ -129,10 +129,17 @@ internal class MainMiddleware : IMiddleware
                             }
 
                             if(paramType == typeof(Stream)) invokeList.Add(body);
-                            else if(paramType == typeof(string)) invokeList.Add(Encoding.Default.GetString(body.GetBuffer()));
+                            else if(paramType == typeof(string))
+                            {
+                                TrimToToFirstNullByte(body);
+                                
+                                invokeList.Add(Encoding.Default.GetString(body.ToArray()));
+                            }
                             else if(paramType == typeof(byte[])) invokeList.Add(body.GetBuffer());
                             else if(attribute.ContentType == ContentType.Xml)
                             {
+                                TrimToToFirstNullByte(body);
+                                
                                 XmlSerializer serializer = new(paramType);
                                 try
                                 {
@@ -148,10 +155,13 @@ internal class MainMiddleware : IMiddleware
                             }
                             else if (attribute.ContentType == ContentType.Json)
                             {
+                                TrimToToFirstNullByte(body);
+                                
                                 try
                                 {
-                                    string bodyStr = Encoding.Default.GetString(body.GetBuffer());
-                                    object? obj = JsonConvert.DeserializeObject(bodyStr, paramType);
+                                    JsonSerializer serializer = new();
+                                    using JsonReader reader = new JsonTextReader(new StreamReader(body));
+                                    object? obj = serializer.Deserialize(reader, paramType);
                                     if (obj == null) throw new Exception();
                                     invokeList.Add(obj);
                                 }
@@ -261,5 +271,21 @@ internal class MainMiddleware : IMiddleware
         }
 
         return null;
+    }
+
+    private static void TrimToToFirstNullByte(MemoryStream body)
+    {
+        long i = 0;
+        body.Seek(0, SeekOrigin.Begin);
+        int b;
+        while ((b = body.ReadByte()) != -1)
+        {
+            if (b == 0) break;
+
+            i += 1;
+        }
+
+        body.SetLength(i);
+        body.Seek(0, SeekOrigin.Begin);
     }
 }
