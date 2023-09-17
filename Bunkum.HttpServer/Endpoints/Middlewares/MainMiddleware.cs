@@ -160,7 +160,7 @@ internal class MainMiddleware : IMiddleware
                                 try
                                 {
                                     JsonSerializer serializer = new();
-                                    using JsonReader reader = new JsonTextReader(new StreamReader(body));
+                                    using JsonReader reader = new JsonTextReader(new StreamReader(body, null, false, -1, true));
                                     object? obj = serializer.Deserialize(reader, paramType);
                                     if (obj == null) throw new Exception();
                                     invokeList.Add(obj);
