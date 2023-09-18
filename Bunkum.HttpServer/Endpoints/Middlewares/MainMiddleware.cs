@@ -285,7 +285,10 @@ internal class MainMiddleware : IMiddleware
             i += 1;
         }
 
-        body.SetLength(i);
+        //Only call SetLength when necessary 
+        if(i != body.Length)
+            body.SetLength(i);
+        
         body.Seek(0, SeekOrigin.Begin);
     }
 }
