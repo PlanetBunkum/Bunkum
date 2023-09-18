@@ -12,4 +12,10 @@ public class TestEndpoints : EndpointGroup
     {
         return TestString;
     }
+
+    [Endpoint("/echoString")]
+    public string Echo(RequestContext context, string body)
+    {
+        return body;
+    }
 }
