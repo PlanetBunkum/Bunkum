@@ -17,6 +17,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BunkumTests.Benchmarks", "B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BunkumSampleApplication", "BunkumSampleApplication\BunkumSampleApplication.csproj", "{6A6CB1AD-C45D-44D4-8D9C-3769A058F7AE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bunkum.RealmDatabase", "Bunkum.RealmDatabase\Bunkum.RealmDatabase.csproj", "{DEE9CFC0-9529-451F-9633-AF5B49498AFB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bunkum.RealmDatabase.Test", "Bunkum.RealmDatabase.Test\Bunkum.RealmDatabase.Test.csproj", "{829D338E-79F1-4C40-8B30-8858EAD1297B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bunkum.ProfanityFilter", "Bunkum.ProfanityFilter\Bunkum.ProfanityFilter.csproj", "{F53A735B-4DC4-41BD-A512-B23D2FF7EA0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bunkum.ProfanityFilter.Test", "Bunkum.ProfanityFilter.Test\Bunkum.ProfanityFilter.Test.csproj", "{2FE2FD7C-9E39-4A72-B0D6-745F447D3030}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bunkum.AutoDiscover", "Bunkum.AutoDiscover\Bunkum.AutoDiscover.csproj", "{B6B9F1DD-7E85-402E-88A7-EF6B88E6CE9A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,5 +64,25 @@ Global
 		{6A6CB1AD-C45D-44D4-8D9C-3769A058F7AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A6CB1AD-C45D-44D4-8D9C-3769A058F7AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A6CB1AD-C45D-44D4-8D9C-3769A058F7AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEE9CFC0-9529-451F-9633-AF5B49498AFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEE9CFC0-9529-451F-9633-AF5B49498AFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEE9CFC0-9529-451F-9633-AF5B49498AFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEE9CFC0-9529-451F-9633-AF5B49498AFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{829D338E-79F1-4C40-8B30-8858EAD1297B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{829D338E-79F1-4C40-8B30-8858EAD1297B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{829D338E-79F1-4C40-8B30-8858EAD1297B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{829D338E-79F1-4C40-8B30-8858EAD1297B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F53A735B-4DC4-41BD-A512-B23D2FF7EA0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F53A735B-4DC4-41BD-A512-B23D2FF7EA0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F53A735B-4DC4-41BD-A512-B23D2FF7EA0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F53A735B-4DC4-41BD-A512-B23D2FF7EA0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FE2FD7C-9E39-4A72-B0D6-745F447D3030}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FE2FD7C-9E39-4A72-B0D6-745F447D3030}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FE2FD7C-9E39-4A72-B0D6-745F447D3030}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FE2FD7C-9E39-4A72-B0D6-745F447D3030}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6B9F1DD-7E85-402E-88A7-EF6B88E6CE9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6B9F1DD-7E85-402E-88A7-EF6B88E6CE9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6B9F1DD-7E85-402E-88A7-EF6B88E6CE9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6B9F1DD-7E85-402E-88A7-EF6B88E6CE9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
