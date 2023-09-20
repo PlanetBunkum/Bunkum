@@ -20,13 +20,22 @@ jobs:
         run: dotnet restore /property:Configuration=Release
       - name: Set VERSION variable from tag
         run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+        
       - name: Build
         run: dotnet build -c Release --no-restore /p:Version=${VERSION} /p:PackageVersion=${VERSION}
-#      - name: Test
-#        run: dotnet test -c Release --no-restore --no-build
+      - name: Test
+        run: dotnet test -c Release --no-restore --no-build
+        
       - name: Pack
         run: dotnet pack -c Release /p:Version=${VERSION} --no-restore
-      - name: Upload Package
+        
+      - name: Upload Bunkum.HttpServer
         run: dotnet nuget push Bunkum.HttpServer/bin/Release/Bunkum.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+      - name: Upload Bunkum.ProfanityFilter
+        run: dotnet nuget push Bunkum.ProfanityFilter/bin/Release/Bunkum.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+      - name: Upload Bunkum.RealmDatabase
+        run: dotnet nuget push Bunkum.RealmDatabase/bin/Release/Bunkum.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+      - name: Upload Bunkum.AutoDiscover
+        run: dotnet nuget push Bunkum.AutoDiscover/bin/Release/Bunkum.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
