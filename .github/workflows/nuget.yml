@@ -32,10 +32,10 @@ jobs:
       - name: Upload Bunkum.HttpServer
         run: dotnet nuget push Bunkum.HttpServer/bin/Release/Bunkum.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
       - name: Upload Bunkum.ProfanityFilter
-        run: dotnet nuget push Bunkum.ProfanityFilter/bin/Release/Bunkum.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+        run: dotnet nuget push Bunkum.ProfanityFilter/bin/Release/Bunkum.ProfanityFilter.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
       - name: Upload Bunkum.RealmDatabase
-        run: dotnet nuget push Bunkum.RealmDatabase/bin/Release/Bunkum.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+        run: dotnet nuget push Bunkum.RealmDatabase/bin/Release/Bunkum.RealmDatabase.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
       - name: Upload Bunkum.AutoDiscover
-        run: dotnet nuget push Bunkum.AutoDiscover/bin/Release/Bunkum.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+        run: dotnet nuget push Bunkum.AutoDiscover/bin/Release/Bunkum.AutoDiscover.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
