@@ -1,6 +1,6 @@
 namespace Bunkum.CustomHttpListener;
 
-public enum HttpLogContext
+public enum HttpLogCategory
 {
     Startup,
     Request,

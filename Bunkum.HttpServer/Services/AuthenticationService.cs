@@ -34,7 +34,7 @@ public class AuthenticationService : Service
     {
         if (this._authenticationProvider is DummyAuthenticationProvider && this._assumeAuthenticationRequired)
         {
-            this.Logger.LogWarning(BunkumContext.Startup, "The server was started with a dummy authentication provider. " +
+            this.Logger.LogWarning(BunkumCategory.Startup, "The server was started with a dummy authentication provider. " +
                                                            "If your application relies on authentication, users will always have full access.");
         }
     }

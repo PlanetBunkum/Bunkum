@@ -41,9 +41,9 @@ public abstract class BunkumHttpListener : IDisposable
             }
             catch (Exception e)
             {
-                this.Logger.LogError(HttpLogContext.Request, "Failed to handle a connection: " + e);
+                this.Logger.LogError(HttpLogCategory.Request, "Failed to handle a connection: " + e);
                 if(request != null) await request.SendResponse(HttpStatusCode.BadRequest);
-                else this.Logger.LogWarning(HttpLogContext.Request, "Couldn't inform the client of the issue due to the request being null.");
+                else this.Logger.LogWarning(HttpLogCategory.Request, "Couldn't inform the client of the issue due to the request being null.");
                 continue;
             }
             

@@ -81,7 +81,7 @@ internal class MainMiddleware : IMiddleware
                         continue;
                     }
                     
-                    this._logger.LogTrace(BunkumContext.Request, $"Handling request with {group.GetType().Name}.{method.Name}");
+                    this._logger.LogTrace(BunkumCategory.Request, $"Handling request with {group.GetType().Name}.{method.Name}");
 
                     foreach (Service service in this._services)
                     {
@@ -124,7 +124,7 @@ internal class MainMiddleware : IMiddleware
                             // Fire a bad request back if this is the case.
                             if (!context.HasBody && !method.HasCustomAttribute<AllowEmptyBodyAttribute>())
                             {
-                                this._logger.LogWarning(BunkumContext.Request, "Rejecting request due to empty body");
+                                this._logger.LogWarning(BunkumCategory.Request, "Rejecting request due to empty body");
                                 return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
                             }
 
@@ -149,7 +149,7 @@ internal class MainMiddleware : IMiddleware
                                 }
                                 catch (Exception e)
                                 {
-                                    this._logger.LogError(BunkumContext.UserContent, $"Failed to parse object data: {e}\n\nXML: {body}");
+                                    this._logger.LogError(BunkumCategory.UserContent, $"Failed to parse object data: {e}\n\nXML: {body}");
                                     return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
                                 }
                             }
@@ -167,14 +167,14 @@ internal class MainMiddleware : IMiddleware
                                 }
                                 catch (Exception e)
                                 {
-                                    this._logger.LogError(BunkumContext.UserContent, $"Failed to parse object data: {e}\n\nJSON: {body}");
+                                    this._logger.LogError(BunkumCategory.UserContent, $"Failed to parse object data: {e}\n\nJSON: {body}");
                                     return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
                                 }
                             }
                             // We can't find a valid type to send or deserialization failed
                             else
                             {
-                                this._logger.LogWarning(BunkumContext.Request, "Rejecting request, couldn't find a valid type to deserialize with");
+                                this._logger.LogWarning(BunkumCategory.Request, "Rejecting request, couldn't find a valid type to deserialize with");
                                 return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
                             }
 
@@ -235,7 +235,7 @@ internal class MainMiddleware : IMiddleware
                             // Don't consider nullable arguments for this warning
                             if (arg == null && !isNullable)
                             {
-                                this._logger.LogWarning(BunkumContext.Request, 
+                                this._logger.LogWarning(BunkumCategory.Request, 
                                     $"Could not find a valid argument for the {paramType.Name} parameter '{param.Name}'. " +
                                     $"Null will be used instead.");
                             }

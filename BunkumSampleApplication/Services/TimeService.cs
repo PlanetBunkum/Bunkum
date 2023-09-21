@@ -19,14 +19,14 @@ public class TimeService : Service
     
     public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo paramInfo, Lazy<IDatabaseContext> database)
     {
-        this.Logger.LogDebug(BunkumContext.Service, $"TimeService is attempting to pass something in for `{paramInfo.ParameterType.Name} {paramInfo.Name}`");
+        this.Logger.LogDebug(BunkumCategory.Service, $"TimeService is attempting to pass something in for `{paramInfo.ParameterType.Name} {paramInfo.Name}`");
         if (paramInfo.ParameterType == typeof(DateTimeOffset))
         {
-            this.Logger.LogDebug(BunkumContext.Service, "Matched! Passing the time in.");
+            this.Logger.LogDebug(BunkumCategory.Service, "Matched! Passing the time in.");
             return DateTimeOffset.Now;
         }
 
-        this.Logger.LogDebug(BunkumContext.Service, "No dice. Won't pass anything in for this parameter.");
+        this.Logger.LogDebug(BunkumCategory.Service, "No dice. Won't pass anything in for this parameter.");
         return base.AddParameterToEndpoint(context, paramInfo, database);
     }
 }

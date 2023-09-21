@@ -164,7 +164,7 @@ public partial class BunkumHttpServer // Services
                 
                 if (healthCheck == null)
                 {
-                    this.Logger.LogWarning(BunkumContext.Health, $"Health Check {type.Name} failed to initialize.");
+                    this.Logger.LogWarning(BunkumCategory.Health, $"Health Check {type.Name} failed to initialize.");
                     continue;
                 }
                 

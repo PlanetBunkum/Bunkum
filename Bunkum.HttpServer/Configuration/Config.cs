@@ -80,7 +80,7 @@ public abstract class Config
         }
         else
         {
-            logger?.LogInfo(BunkumContext.Configuration, $"A new {typeof(TConfig).Name} is being created at {Path.GetFullPath(filename)}.");
+            logger?.LogInfo(BunkumCategory.Configuration, $"A new {typeof(TConfig).Name} is being created at {Path.GetFullPath(filename)}.");
             config = new TConfig();
         }
         
