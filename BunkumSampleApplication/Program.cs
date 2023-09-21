@@ -8,9 +8,15 @@ using BunkumSampleApplication.Configuration;
 using BunkumSampleApplication.Endpoints;
 using BunkumSampleApplication.Middlewares;
 using BunkumSampleApplication.Services;
+using NotEnoughLogs;
+using NotEnoughLogs.Behaviour;
 
 // Initialize a Bunkum server
-BunkumHttpServer server = new();
+BunkumHttpServer server = new(new LoggerConfiguration
+{
+    Behaviour = new QueueLoggingBehaviour(),
+    MaxLevel = LogLevel.Trace,
+});
 
 // The initialize function describes what services, middlewares, and endpoints are used for this server.
 // You can technically run Add/Use methods outside of this, but it's recommended to keep them inside Initialize

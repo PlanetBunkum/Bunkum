@@ -1,10 +1,8 @@
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Bunkum.CustomHttpListener.Extensions;
 using Bunkum.CustomHttpListener.Request;
 using NotEnoughLogs;
-using NotEnoughLogs.Loggers;
 
 namespace Bunkum.CustomHttpListener;
 
@@ -14,17 +12,16 @@ namespace Bunkum.CustomHttpListener;
 /// </summary>
 public abstract class BunkumHttpListener : IDisposable
 {
-    protected readonly LoggerContainer<HttpLogContext> Logger;
+    protected readonly Logger Logger;
 
     private const int HeaderLineLimit = 1024; // 1KB per cookieHeader
     protected const int RequestLineMethodLimit = 16; // bytes
     protected const int RequestLinePathLimit = 128; // bytes
     protected const int RequestLineVersionLimit = 16; // bytes
 
-    protected BunkumHttpListener(bool logToConsole)
+    protected BunkumHttpListener(Logger logger)
     {
-        this.Logger = new LoggerContainer<HttpLogContext>();
-        if(logToConsole) this.Logger.RegisterLogger(new ConsoleLogger());
+        this.Logger = logger;
     }
 
     public abstract void StartListening();

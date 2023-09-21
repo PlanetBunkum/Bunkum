@@ -15,7 +15,7 @@ using Bunkum.HttpServer.Endpoints.Middlewares;
 using Bunkum.HttpServer.HotReload;
 using Bunkum.HttpServer.Services;
 using NotEnoughLogs;
-using NotEnoughLogs.Loggers;
+using NotEnoughLogs.Sinks;
 
 namespace Bunkum.HttpServer;
 
@@ -27,7 +27,7 @@ namespace Bunkum.HttpServer;
 public partial class BunkumHttpServer : IHotReloadable
 {
     private readonly BunkumHttpListener _listener;
-    public readonly LoggerContainer<BunkumContext> Logger;
+    public readonly Logger Logger;
     
     private IDatabaseProvider<IDatabaseContext> _databaseProvider = new DummyDatabaseProvider();
     private readonly List<Config> _configs;
@@ -35,10 +35,13 @@ public partial class BunkumHttpServer : IHotReloadable
     private readonly List<IMiddleware> _middlewares = new();
     private readonly List<Service> _services = new();
 
-    private BunkumHttpServer(bool setListener, bool logToConsole)
+    private BunkumHttpServer(bool setListener, bool logToConsole, LoggerConfiguration? configuration)
     {
-        this.Logger = new LoggerContainer<BunkumContext>();
-        if(logToConsole) this.Logger.RegisterLogger(new ConsoleLogger());
+        configuration ??= LoggerConfiguration.Default;
+        
+        List<ILoggerSink> sinks = new();
+        if(logToConsole) sinks.Add(new ConsoleSink());
+        this.Logger = new Logger(sinks, configuration);
         
         this.Logger.LogInfo(BunkumContext.Startup, $"Bunkum is storing its data at {BunkumFileSystem.DataDirectory}.");
         if (!BunkumFileSystem.UsingCustomDirectory)
@@ -55,7 +58,7 @@ public partial class BunkumHttpServer : IHotReloadable
         if (setListener)
         {
             Uri listenEndpoint = new($"http://{bunkumConfig.ListenHost}:{bunkumConfig.ListenPort}");
-            this._listener = new SocketHttpListener(listenEndpoint, bunkumConfig.UseForwardedIp);
+            this._listener = new SocketHttpListener(listenEndpoint, bunkumConfig.UseForwardedIp, this.Logger);
         }
         else
         {
@@ -65,9 +68,9 @@ public partial class BunkumHttpServer : IHotReloadable
         BunkumHotReloadableRegistry.RegisterReloadable(this);
     }
 
-    public BunkumHttpServer() : this(true, true) {}
+    public BunkumHttpServer(LoggerConfiguration? configuration = null) : this(true, true, configuration) {}
     
-    public BunkumHttpServer(BunkumHttpListener listener, bool logToConsole = true) : this(false, logToConsole)
+    public BunkumHttpServer(BunkumHttpListener listener, bool logToConsole = true, LoggerConfiguration? configuration = null) : this(false, logToConsole, configuration)
     {
         this._listener = listener;
         if (listener is DirectHttpListener directListener)
@@ -80,7 +83,7 @@ public partial class BunkumHttpServer : IHotReloadable
     }
 
     [Obsolete("This method of creating the server will not let the user configure the endpoint or it's properties.")]
-    public BunkumHttpServer(Uri listenEndpoint) : this(new SocketHttpListener(listenEndpoint, false))
+    public BunkumHttpServer(Uri listenEndpoint) : this(new SocketHttpListener(listenEndpoint, false, new Logger()))
     {
         this.Logger.LogDebug(BunkumContext.Startup, $"Using hardcoded listen endpoint {listenEndpoint}");
         this.Logger.LogDebug(BunkumContext.Startup, "Forwarded IP will be ignored - this method is not advised");

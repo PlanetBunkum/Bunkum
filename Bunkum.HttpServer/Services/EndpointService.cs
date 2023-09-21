@@ -10,7 +10,7 @@ namespace Bunkum.HttpServer.Services;
 /// </summary>
 public abstract class EndpointService : Service
 {
-    protected EndpointService(LoggerContainer<BunkumContext> logger) : base(logger)
+    protected EndpointService(Logger logger) : base(logger)
     {}
 
     public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo paramInfo, Lazy<IDatabaseContext> database)

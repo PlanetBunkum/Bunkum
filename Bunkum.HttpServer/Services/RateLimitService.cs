@@ -14,11 +14,11 @@ public class RateLimitService : Service
     private readonly IRateLimiter _rateLimiter;
     private readonly AuthenticationService _authService;
 
-    internal RateLimitService(LoggerContainer<BunkumContext> logger, AuthenticationService authService)
+    internal RateLimitService(Logger logger, AuthenticationService authService)
         : this(logger, authService, new RateLimiter())
     {}
     
-    public RateLimitService(LoggerContainer<BunkumContext> logger, AuthenticationService authService, IRateLimiter rateLimiter)
+    public RateLimitService(Logger logger, AuthenticationService authService, IRateLimiter rateLimiter)
         : base(logger)
     {
         this._rateLimiter = rateLimiter;

@@ -10,7 +10,7 @@ public class StorageService : Service
 {
     private readonly IDataStore _dataStore;
     
-    internal StorageService(LoggerContainer<BunkumContext> logger, IDataStore dataStore) : base(logger)
+    internal StorageService(Logger logger, IDataStore dataStore) : base(logger)
     {
         this._dataStore = dataStore;
     }

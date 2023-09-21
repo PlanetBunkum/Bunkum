@@ -10,7 +10,7 @@ public class HealthService : Service
 {
     private readonly List<IHealthCheck> _healthChecks;
 
-    public HealthService(LoggerContainer<BunkumContext> logger, IEnumerable<IHealthCheck> checks) : base(logger)
+    public HealthService(Logger logger, IEnumerable<IHealthCheck> checks) : base(logger)
     {
         this._healthChecks = checks.ToList();
     }

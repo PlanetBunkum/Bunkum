@@ -66,7 +66,7 @@ public abstract class Config
         File.WriteAllText(this._filename, json);
     }
 
-    public static TConfig LoadFromFile<TConfig>(string filename, LoggerContainer<BunkumContext> logger) where TConfig : Config, new()
+    public static TConfig LoadFromFile<TConfig>(string filename, Logger logger) where TConfig : Config, new()
     {
         TConfig? config;
         string? file = null;

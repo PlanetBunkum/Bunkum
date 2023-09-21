@@ -13,7 +13,7 @@ namespace Bunkum.HttpServer.Services;
 
 public class AuthenticationService : Service
 {
-    internal AuthenticationService(LoggerContainer<BunkumContext> logger,
+    internal AuthenticationService(Logger logger,
         IAuthenticationProvider<IUser, IToken>? provider = null, bool assumeAuthenticationRequired = false) : base(logger)
     {
         this._authenticationProvider = provider ?? new DummyAuthenticationProvider();

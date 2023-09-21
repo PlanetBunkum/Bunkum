@@ -3,14 +3,15 @@ using System.Net;
 using System.Web;
 using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.CustomHttpListener.Request;
+using NotEnoughLogs;
 
 namespace Bunkum.CustomHttpListener.Listeners.Direct;
 
 public class DirectHttpListener : BunkumHttpListener
 {
     public Action<ListenerContext>? Callback { private get; set; }
-    
-    public DirectHttpListener(bool logToConsole = true) : base(logToConsole)
+
+    public DirectHttpListener(Logger logger) : base(logger)
     {}
 
     public HttpClient GetClient()

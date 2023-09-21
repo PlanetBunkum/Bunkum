@@ -8,9 +8,9 @@ namespace Bunkum.HttpServer.Services;
 
 public abstract class Service
 {
-    protected readonly LoggerContainer<BunkumContext> Logger;
+    protected readonly Logger Logger;
     
-    protected internal Service(LoggerContainer<BunkumContext> logger)
+    protected internal Service(Logger logger)
     {
         this.Logger = logger;
     }

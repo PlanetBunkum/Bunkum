@@ -6,6 +6,7 @@ using System.Web;
 using Bunkum.CustomHttpListener.Extensions;
 using Bunkum.CustomHttpListener.Parsing;
 using Bunkum.CustomHttpListener.Request;
+using NotEnoughLogs;
 using HttpVersion = Bunkum.CustomHttpListener.Request.HttpVersion;
 
 namespace Bunkum.CustomHttpListener.Listeners;
@@ -19,7 +20,7 @@ public partial class SocketHttpListener : BunkumHttpListener
     [GeneratedRegex("^[a-zA-Z]+$")]
     private static partial Regex LettersRegex();
 
-    public SocketHttpListener(Uri listenEndpoint, bool useForwardedIp, bool logToConsole = true) : base(logToConsole)
+    public SocketHttpListener(Uri listenEndpoint, bool useForwardedIp, Logger logger) : base(logger)
     {
         this._listenEndpoint = listenEndpoint;
         this._useForwardedIp = useForwardedIp;

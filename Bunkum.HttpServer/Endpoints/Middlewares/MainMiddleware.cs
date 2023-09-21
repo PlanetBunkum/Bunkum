@@ -19,13 +19,13 @@ namespace Bunkum.HttpServer.Endpoints.Middlewares;
 internal class MainMiddleware : IMiddleware
 {
     private readonly List<EndpointGroup> _endpoints;
-    private readonly LoggerContainer<BunkumContext> _logger;
+    private readonly Logger _logger;
 
     private readonly List<Service> _services;
 
     private readonly List<Config> _configs;
 
-    public MainMiddleware(List<EndpointGroup> endpoints, LoggerContainer<BunkumContext> logger, List<Service> services, List<Config> configs)
+    public MainMiddleware(List<EndpointGroup> endpoints, Logger logger, List<Service> services, List<Config> configs)
     {
         this._endpoints = endpoints;
         this._logger = logger;

@@ -18,7 +18,7 @@ public struct RequestContext
     public Method Method { get; internal set; }
     public Uri Url { get; internal set; }
     
-    public LoggerContainer<BunkumContext> Logger { get; internal set; }
+    public Logger Logger { get; internal set; }
 
     public NameValueCollection QueryString { get; internal set; }
     public NameValueCollection Cookies { get; internal set; }

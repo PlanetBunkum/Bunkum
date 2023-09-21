@@ -14,7 +14,7 @@ public class TimeService : Service
 {
     // This constructor takes in the same dependencies an Endpoint can, so for example you could include ExampleConfiguration
     // as a parameter and it would be passed in. The only requirement is the logger, similar to how Endpoints require a RequestContext.
-    internal TimeService(LoggerContainer<BunkumContext> logger) : base(logger)
+    internal TimeService(Logger logger) : base(logger)
     {}
     
     public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo paramInfo, Lazy<IDatabaseContext> database)

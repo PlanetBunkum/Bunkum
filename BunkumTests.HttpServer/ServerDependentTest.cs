@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Bunkum.CustomHttpListener.Listeners.Direct;
 using Bunkum.HttpServer;
 using JetBrains.Annotations;
+using NotEnoughLogs;
 
 namespace BunkumTests.HttpServer;
 
@@ -15,7 +16,7 @@ public class ServerDependentTest
     [Pure]
     private protected (BunkumHttpServer, HttpClient) Setup(bool start = true)
     {
-        DirectHttpListener listener = new();
+        DirectHttpListener listener = new(new Logger());
         HttpClient client = listener.GetClient();
 
         BunkumHttpServer server = new(listener);

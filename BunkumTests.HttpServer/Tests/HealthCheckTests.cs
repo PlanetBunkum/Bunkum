@@ -15,7 +15,7 @@ public class HealthCheckTests
     public void HealthChecksWork(HealthStatusType type)
     {
         TestHealthCheck check = new(type);
-        LoggerContainer<BunkumContext> logger = new();
+        Logger logger = new();
         HealthService healthService = new(logger, new []{check});
 
         HealthReport report = healthService.GenerateReport();
@@ -29,7 +29,7 @@ public class HealthCheckTests
         TestHealthCheck check2 = new(Healthy);
         TestHealthCheck check3 = new(Unhealthy);
         
-        LoggerContainer<BunkumContext> logger = new();
+        Logger logger = new();
         HealthService healthService = new(logger, new []{check1, check2, check3});
 
         HealthReport report = healthService.GenerateReport();
