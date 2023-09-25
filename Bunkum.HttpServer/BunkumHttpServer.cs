@@ -12,8 +12,8 @@ using Bunkum.HttpServer.Database;
 using Bunkum.HttpServer.Database.Dummy;
 using Bunkum.HttpServer.Endpoints;
 using Bunkum.HttpServer.Endpoints.Middlewares;
-using Bunkum.HttpServer.HotReload;
 using Bunkum.HttpServer.Services;
+using EasyHotReload;
 using NotEnoughLogs;
 using NotEnoughLogs.Sinks;
 
@@ -65,7 +65,7 @@ public partial class BunkumHttpServer : IHotReloadable
             this._listener = null!;
         }
         
-        BunkumHotReloadableRegistry.RegisterReloadable(this);
+        HotReloadRegistry.RegisterReloadable(this);
     }
 
     public BunkumHttpServer(LoggerConfiguration? configuration = null) : this(true, true, configuration) {}
@@ -220,7 +220,7 @@ public partial class BunkumHttpServer : IHotReloadable
     {
         this._stopToken.Cancel();
         this.Logger.Dispose();
-        BunkumHotReloadableRegistry.UnregisterReloadable(this);
+        HotReloadRegistry.UnregisterReloadable(this);
     }
 
     private async Task HandleRequest(ListenerContext context, Lazy<IDatabaseContext> database)
