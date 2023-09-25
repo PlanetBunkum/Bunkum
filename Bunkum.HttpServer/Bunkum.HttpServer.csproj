@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>LittleBigRefresh</Authors>
     <Title>Bunkum</Title>

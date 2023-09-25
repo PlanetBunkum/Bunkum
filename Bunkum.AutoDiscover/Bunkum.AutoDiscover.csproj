@@ -7,14 +7,15 @@
     </PropertyGroup>
 
     <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <Authors>LittleBigRefresh</Authors>
         <Title>Bunkum.AutoDiscover</Title>
         <PackageId>Bunkum.AutoDiscover</PackageId>
         <Description>An implementation of AutoDiscover for Bunkum.</Description>
-        <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum.AutoDiscover</RepositoryUrl>
+        <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum.AutoDiscover</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum</PackageProjectUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>

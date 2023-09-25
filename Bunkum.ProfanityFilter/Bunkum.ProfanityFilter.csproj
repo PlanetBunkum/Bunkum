@@ -7,14 +7,15 @@
     </PropertyGroup>
 
     <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <Authors>LittleBigRefresh</Authors>
         <Title>Bunkum.ProfanityFilter</Title>
         <PackageId>Bunkum.ProfanityFilter</PackageId>
         <Description>A wrapper around Profanity.Detector for Bunkum</Description>
-        <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum.ProfanityFilter</RepositoryUrl>
+        <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum.ProfanityFilter</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum</PackageProjectUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>

@@ -11,11 +11,11 @@
         <Authors>LittleBigRefresh</Authors>
         <Title>Bunkum.RealmDatabase</Title>
         <PackageId>Bunkum.RealmDatabase</PackageId>
-        <Description>An open-source HTTP server for custom game servers built with flexibility in mind.</Description>
-        <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum.RealmDatabase</RepositoryUrl>
+        <Description>A package for Bunkum that adds native support for Realm databases.</Description>
+        <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum.RealmDatabase</PackageProjectUrl>
-        <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <PackageReadmeFile>README.md</PackageReadmeFile>
