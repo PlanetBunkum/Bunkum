@@ -298,6 +298,11 @@ public partial class BunkumHttpServer : IHotReloadable
     }
 
     private Action<BunkumHttpServer>? _initialize;
+    /// <summary>
+    /// The initialization function for the server. Called after startup and after hot reload.
+    /// You do not need to clear Bunkum's state during a hot reload - Bunkum will wipe everything for you. 
+    /// </summary>
+    /// <exception cref="InvalidOperationException">An initializer has already been declared, or the value is null.</exception>
     public Action<BunkumHttpServer>? Initialize
     {
         private get => this._initialize;
@@ -350,7 +355,11 @@ public partial class BunkumHttpServer : IHotReloadable
         this.Logger.LogInfo(BunkumCategory.Server, $"Successfully refreshed Bunkum's internal state in {stopwatch.ElapsedMilliseconds}ms.");
     }
 
-    private void AddEndpointGroup(Type type)
+    /// <summary>
+    /// Manually add a group of endpoints.
+    /// </summary>
+    /// <param name="type">The type containing the endpoints to be used.</param>
+    public void AddEndpointGroup(Type type)
     {
         EndpointGroup? doc = (EndpointGroup?)Activator.CreateInstance(type);
         Debug.Assert(doc != null);
@@ -358,8 +367,16 @@ public partial class BunkumHttpServer : IHotReloadable
         this._endpoints.Add(doc);
     }
 
+    /// <summary>
+    /// Manually add a group of endpoints.
+    /// </summary>
+    /// <typeparam name="TDoc">The type containing the endpoints to be used.</typeparam>
     public void AddEndpointGroup<TDoc>() where TDoc : EndpointGroup => this.AddEndpointGroup(typeof(TDoc));
 
+    /// <summary>
+    /// Discover all <see cref="EndpointGroup"/>s from an assembly and add them into Bunkum. 
+    /// </summary>
+    /// <param name="assembly">The assembly to scan from.</param>
     public void DiscoverEndpointsFromAssembly(Assembly assembly)
     {
         List<Type> types = assembly
@@ -372,29 +389,54 @@ public partial class BunkumHttpServer : IHotReloadable
 
     // ReSharper disable UnusedMember.Global
     // ReSharper disable MemberCanBePrivate.Global
+    
+    /// <summary>
+    /// Define a database provider to be used. Once added, it can then be passed into Endpoints.
+    /// </summary>
+    /// <param name="provider">The provider to use.</param>
     public void UseDatabaseProvider(IDatabaseProvider<IDatabaseContext> provider)
     {
         this._databaseProvider = provider;
     }
     
-    public void UseConfig(Config config)
+    /// <summary>
+    /// Adds a <see cref="Config"/> to Bunkum's internal list of configurations. These can then be passed into Endpoints or Services.
+    /// </summary>
+    /// <param name="config">An object extending <see cref="Config"/> that represents your server's configuration.</param>
+    public void AddConfig(Config config)
     {
         this._configs.Add(config);
     }
 
-    // TODO: Configuration hot reload
-    // TODO: .ini? would be helpful as it supports comments and we can document in the file itself
     /// <summary>
-    /// Defines a <see cref="Config"/> that is passed down to your endpoints.
+    /// Adds a <see cref="Config"/> to Bunkum's internal list of configurations. These can then be passed into Endpoints or Services.
+    /// </summary>
+    /// <param name="config">An object extending <see cref="Config"/> that represents your server's configuration.</param>
+    [Obsolete($"This method was renamed to {nameof(AddConfig)} for consistency. Please use the new method.")]
+    public void UseConfig(Config config) => this.AddConfig(config);
+    
+    /// <summary>
+    /// Load a <see cref="Config"/> from a .json file and add it into Bunkum's internal list of configurations, which can then be passed into Endpoints or Services.
     /// </summary>
     /// <param name="filename">What the config's filename should be stored as</param>
     /// <typeparam name="TConfig">An object extending <see cref="Config"/> that represents your server's configuration.</typeparam>
-    public void UseJsonConfig<TConfig>(string filename) where TConfig : Config, new()
+    /// <seealso cref="Config.LoadFromJsonFile"/>
+    public void AddConfigFromJsonFile<TConfig>(string filename) where TConfig : Config, new()
     {
-        TConfig config = Config.LoadFromFile<TConfig>(filename, this.Logger);
-        this.UseConfig(config);
+        TConfig config = Config.LoadFromJsonFile<TConfig>(filename, this.Logger);
+        this.AddConfig(config);
     }
 
+    /// <summary>
+    /// Load a <see cref="Config"/> from a .json file and add it into Bunkum's internal list of configurations, which can then be passed into Endpoints or Services.
+    /// </summary>
+    /// <param name="filename">What the config's filename should be stored as</param>
+    /// <typeparam name="TConfig">An object extending <see cref="Config"/> that represents your server's configuration.</typeparam>
+    /// <seealso cref="Config.LoadFromFile"/>
+    [Obsolete($"This method was renamed to {nameof(AddConfigFromJsonFile)} for consistency. Please use the new method.")]
+    public void UseJsonConfig<TConfig>(string filename) where TConfig : Config, new()
+        => this.AddConfigFromJsonFile<TConfig>(filename);
+    
     public void AddMiddleware<TMiddleware>() where TMiddleware : IMiddleware, new() => this.AddMiddleware(new TMiddleware());
     public void AddMiddleware<TMiddleware>(TMiddleware middleware) where TMiddleware : IMiddleware => this._middlewares.Add(middleware);
 }

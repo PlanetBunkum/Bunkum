@@ -66,7 +66,29 @@ public abstract class Config
         File.WriteAllText(this._filename, json);
     }
 
+    /// <summary>
+    /// Loads or creates a configuration from a .json file on disk.
+    /// </summary>
+    /// <param name="filename">What the config's filename should be stored as</param>
+    /// <param name="logger">An instance of the logger, used for debugging</param>
+    /// <typeparam name="TConfig">An object extending <see cref="Config"/> that represents your server's configuration.</typeparam>
+    /// <returns>The configuration, either freshly created or previously existing.</returns>
+    /// <exception cref="ArgumentNullException">The file could not be found or created.</exception>
+    [Obsolete($"This method was renamed to {nameof(LoadFromJsonFile)} for consistency. Please use the new method.")]
     public static TConfig LoadFromFile<TConfig>(string filename, Logger logger) where TConfig : Config, new()
+    {
+        return LoadFromJsonFile<TConfig>(filename, logger);
+    }
+
+    /// <summary>
+    /// Loads or creates a configuration from a .json file on disk.
+    /// </summary>
+    /// <param name="filename">What the config's filename should be stored as</param>
+    /// <param name="logger">An instance of the logger, used for debugging</param>
+    /// <typeparam name="TConfig">An object extending <see cref="Config"/> that represents your server's configuration.</typeparam>
+    /// <returns>The configuration, either freshly created or previously existing.</returns>
+    /// <exception cref="ArgumentNullException">The file could not be found or created.</exception>
+    public static TConfig LoadFromJsonFile<TConfig>(string filename, Logger logger) where TConfig : Config, new()
     {
         TConfig? config;
         string? file = null;
@@ -80,7 +102,7 @@ public abstract class Config
         }
         else
         {
-            logger?.LogInfo(BunkumCategory.Configuration, $"A new {typeof(TConfig).Name} is being created at {Path.GetFullPath(filename)}.");
+            logger.LogInfo(BunkumCategory.Configuration, $"A new {typeof(TConfig).Name} is being created at {Path.GetFullPath(filename)}.");
             config = new TConfig();
         }
         
