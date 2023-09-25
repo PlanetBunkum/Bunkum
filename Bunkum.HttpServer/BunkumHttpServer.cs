@@ -82,13 +82,6 @@ public partial class BunkumHttpServer : IHotReloadable
         }
     }
 
-    [Obsolete("This method of creating the server will not let the user configure the endpoint or it's properties.")]
-    public BunkumHttpServer(Uri listenEndpoint) : this(new SocketHttpListener(listenEndpoint, false, new Logger()))
-    {
-        this.Logger.LogDebug(BunkumCategory.Startup, $"Using hardcoded listen endpoint {listenEndpoint}");
-        this.Logger.LogDebug(BunkumCategory.Startup, "Forwarded IP will be ignored - this method is not advised");
-    }
-
     /// <summary>
     /// Start the server in multithreaded mode. Caller is responsible for blocking.
     /// </summary>

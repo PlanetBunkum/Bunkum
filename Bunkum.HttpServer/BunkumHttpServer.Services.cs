@@ -181,20 +181,4 @@ public partial class BunkumHttpServer // Services
         this.AddEndpointGroup<HealthCheckEndpoints>();
         this.AddService<HealthService>(checks);
     }
-
-    #region Obsolete
-    // ReSharper disable UnusedParameter.Global
-
-    [Obsolete($"Instead of using UseAuthenticationProvider, the new method is adding a {nameof(AuthenticationService)}. See AddService.", true)]
-    public void UseAuthenticationProvider(IAuthenticationProvider<IToken<IUser>, IUser> provider)
-    {
-        throw new InvalidOperationException("UseAuthenticationProvider is obsolete.");
-    }
-    
-    [Obsolete($"Instead of using UseAuthenticationProvider, the new method is adding a {nameof(StorageService)}. See AddService.", true)]
-    public void UseDataStore(IDataStore dataStore)
-    {
-        throw new InvalidOperationException("UseDataStore is obsolete.");
-    }
-    #endregion
 }

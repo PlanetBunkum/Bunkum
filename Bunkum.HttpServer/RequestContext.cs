@@ -25,10 +25,4 @@ public struct RequestContext
     
     public NameValueCollection RequestHeaders { get; internal set; }
     public Dictionary<string, string> ResponseHeaders { get; internal set; }
-
-    private const string ObsoleteServiceMessage = $"This method of accessing services is deprecated. Use a `{nameof(EndpointService)}` instead.";
-
-    [Obsolete(ObsoleteServiceMessage, true)]
-    // ReSharper disable once UnusedMember.Global
-    public IEnumerable<Service> Services => throw new Exception(ObsoleteServiceMessage);
 }
