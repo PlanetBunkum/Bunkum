@@ -304,8 +304,8 @@ public partial class BunkumHttpServer : IHotReloadable
         }
     }
 
-    private Action? _initialize;
-    public Action? Initialize
+    private Action<BunkumHttpServer>? _initialize;
+    public Action<BunkumHttpServer>? Initialize
     {
         private get => this._initialize;
         set
@@ -314,7 +314,7 @@ public partial class BunkumHttpServer : IHotReloadable
             if (value == null) throw new InvalidOperationException("Cannot set a null initializer");
             this._initialize = value;
             
-            this._initialize.Invoke();
+            this._initialize.Invoke(this);
         }
     }
 
@@ -346,7 +346,7 @@ public partial class BunkumHttpServer : IHotReloadable
         this._databaseProvider.Dispose();
         
         // Refresh internal state using (potentially new) initialization function
-        this.Initialize.Invoke();
+        this.Initialize.Invoke(this);
         
         // Initialize the database provider
         this.Logger.LogDebug(BunkumCategory.Startup, "Initializing database provider...");
