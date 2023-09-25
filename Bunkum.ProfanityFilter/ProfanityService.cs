@@ -8,7 +8,7 @@ namespace Bunkum.ProfanityFilter;
 
 public class ProfanityService : EndpointService
 {
-    internal ProfanityService(LoggerContainer<BunkumContext> logger, string[] allowList, string[] extraDenyList) : base(logger)
+    internal ProfanityService(Logger logger, string[] allowList, string[] extraDenyList) : base(logger)
     {
         this._profanityFilter = new Filter();
         

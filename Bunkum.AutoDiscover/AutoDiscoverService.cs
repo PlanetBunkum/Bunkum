@@ -11,7 +11,7 @@ public class AutoDiscoverService : Service
 {
     private readonly AutoDiscoverConfig _config;
 
-    public AutoDiscoverService(LoggerContainer<BunkumContext> logger, AutoDiscoverConfig config) : base(logger)
+    public AutoDiscoverService(Logger logger, AutoDiscoverConfig config) : base(logger)
     {
         this._config = config;
     }

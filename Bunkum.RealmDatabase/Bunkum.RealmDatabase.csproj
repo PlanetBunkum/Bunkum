@@ -33,8 +33,12 @@
     </Target>
 
     <ItemGroup>
-      <PackageReference Include="Bunkum" Version="3.5.0" />
       <PackageReference Include="Realm" Version="11.5.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Bunkum.CustomHttpListener\Bunkum.CustomHttpListener.csproj" />
+      <ProjectReference Include="..\Bunkum.HttpServer\Bunkum.HttpServer.csproj" />
     </ItemGroup>
 
 </Project>

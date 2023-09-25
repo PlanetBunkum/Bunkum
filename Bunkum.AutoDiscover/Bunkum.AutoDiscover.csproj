@@ -27,14 +27,14 @@
         <None Include="..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Bunkum.CustomHttpListener\Bunkum.CustomHttpListener.csproj" />
+      <ProjectReference Include="..\Bunkum.HttpServer\Bunkum.HttpServer.csproj" />
+    </ItemGroup>
+
     <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
         <ItemGroup>
             <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
         </ItemGroup>
     </Target>
-
-    <ItemGroup>
-      <PackageReference Include="Bunkum" Version="3.5.0" />
-    </ItemGroup>
-
 </Project>
