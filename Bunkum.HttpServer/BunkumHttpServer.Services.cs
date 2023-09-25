@@ -120,7 +120,7 @@ public partial class BunkumHttpServer // Services
         this._services.Add(service);
     }
 
-    public void AddAuthenticationService(IAuthenticationProvider<IUser, IToken>? provider = null,
+    public void AddAuthenticationService(IAuthenticationProvider<IToken<IUser>, IUser>? provider = null,
         bool assumeAuthenticationRequired = false)
     {
         this.AddService<AuthenticationService>(provider, assumeAuthenticationRequired);
@@ -186,7 +186,7 @@ public partial class BunkumHttpServer // Services
     // ReSharper disable UnusedParameter.Global
 
     [Obsolete($"Instead of using UseAuthenticationProvider, the new method is adding a {nameof(AuthenticationService)}. See AddService.", true)]
-    public void UseAuthenticationProvider(IAuthenticationProvider<IUser, IToken> provider)
+    public void UseAuthenticationProvider(IAuthenticationProvider<IToken<IUser>, IUser> provider)
     {
         throw new InvalidOperationException("UseAuthenticationProvider is obsolete.");
     }

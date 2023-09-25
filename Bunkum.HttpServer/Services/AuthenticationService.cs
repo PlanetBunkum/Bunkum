@@ -14,7 +14,7 @@ namespace Bunkum.HttpServer.Services;
 public class AuthenticationService : Service
 {
     internal AuthenticationService(Logger logger,
-        IAuthenticationProvider<IUser, IToken>? provider = null, bool assumeAuthenticationRequired = false) : base(logger)
+        IAuthenticationProvider<IToken<IUser>, IUser>? provider = null, bool assumeAuthenticationRequired = false) : base(logger)
     {
         this._authenticationProvider = provider ?? new DummyAuthenticationProvider();
         this._assumeAuthenticationRequired = assumeAuthenticationRequired;
@@ -28,7 +28,7 @@ public class AuthenticationService : Service
     /// <seealso cref="IAuthenticationProvider{TUser, TToken}"/>
     /// <seealso cref="AuthenticationAttribute"/>
     private readonly bool _assumeAuthenticationRequired;
-    private readonly IAuthenticationProvider<IUser, IToken> _authenticationProvider;
+    private readonly IAuthenticationProvider<IToken<IUser>, IUser> _authenticationProvider;
 
     public override void Initialize()
     {
@@ -40,18 +40,18 @@ public class AuthenticationService : Service
     }
     
     // Cache user objects by the context to avoid double lookups
-    private readonly Dictionary<ListenerContext, IUser?> _userCache = new();
+    private readonly Dictionary<ListenerContext, IToken<IUser>?> _tokenCache = new();
 
     public override Response? OnRequestHandled(ListenerContext context, MethodInfo method, Lazy<IDatabaseContext> database)
     {
         if (!(method.GetCustomAttribute<AuthenticationAttribute>()?.Required ?? this._assumeAuthenticationRequired)) return null;
         
         // Don't need to look in cache, this is the first time we are looking for a user.
-        IUser? user = this._authenticationProvider.AuthenticateUser(context, database);
+        IToken<IUser>? token = this._authenticationProvider.AuthenticateToken(context, database);
+        
+        this._tokenCache.Add(context, token);
             
-        this._userCache.Add(context, user);
-            
-        if (user == null)
+        if (token == null)
             return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.Forbidden);
 
         return null;
@@ -60,27 +60,30 @@ public class AuthenticationService : Service
     public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo paramInfo, Lazy<IDatabaseContext> database)
     {
         Type paramType = paramInfo.ParameterType;
-        
-        if(paramType.IsAssignableTo(typeof(IUser)))
-            return this.AuthenticateUser(context, database, true);
 
-        if (paramType.IsAssignableTo(typeof(IToken)))
-            return this._authenticationProvider.AuthenticateToken(context, database);
+        if (paramType.IsAssignableTo(typeof(IToken<IUser>)))
+            return this.AuthenticateToken(context, database, true);
 
-        this._userCache.Remove(context);
+        if (paramType.IsAssignableTo(typeof(IUser)))
+        {
+            IToken<IUser>? token = this.AuthenticateToken(context, database, true);
+            if (token != null) return token.User;
+        }
+
+        this._tokenCache.Remove(context);
         return null;
     }
 
-    public IUser? AuthenticateUser(ListenerContext context, Lazy<IDatabaseContext> database, bool remove = false)
+    public IToken<IUser>? AuthenticateToken(ListenerContext context, Lazy<IDatabaseContext> database, bool remove = false)
     {
         // Look for the user in the cache.
         // ReSharper disable once InvertIf
-        if (this._userCache.TryGetValue(context, out IUser? user))
+        if (this._tokenCache.TryGetValue(context, out IToken<IUser>? user))
         {
-            if(remove) this._userCache.Remove(context);
+            if(remove) this._tokenCache.Remove(context);
             return user;
         }
             
-        return this._authenticationProvider.AuthenticateUser(context, database);
+        return this._authenticationProvider.AuthenticateToken(context, database);
     }
 }

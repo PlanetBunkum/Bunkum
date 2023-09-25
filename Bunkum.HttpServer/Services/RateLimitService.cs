@@ -27,7 +27,7 @@ public class RateLimitService : Service
 
     public override Response? OnRequestHandled(ListenerContext context, MethodInfo method, Lazy<IDatabaseContext> database)
     {
-        IUser? user = this._authService.AuthenticateUser(context, database);
+        IUser? user = this._authService.AuthenticateToken(context, database)?.User;
 
         bool violated = false;
 
