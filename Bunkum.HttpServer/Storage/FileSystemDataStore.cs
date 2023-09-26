@@ -7,6 +7,11 @@ namespace Bunkum.HttpServer.Storage;
 public class FileSystemDataStore : IDataStore
 {
     private static readonly string DataStoreDirectory = Path.Combine(BunkumFileSystem.DataDirectory, "dataStore" + Path.DirectorySeparatorChar);
+    /// <summary>
+    /// Whether or not to protect against path traversal.
+    /// These protections are enabled by default, but this can be disabled for (minuscule) performance improvements.
+    /// </summary>
+    public bool EnableTraversalSafety { get; init; } = true;
 
     /// <summary>
     /// Instantiates the DataStore. This constructor creates a dataStore directory if it does not exist.
@@ -17,15 +22,27 @@ public class FileSystemDataStore : IDataStore
             Directory.CreateDirectory(DataStoreDirectory);
     }
 
-    private static string GetPath(string key)
+    /// <summary>
+    /// Instantiates the DataStore. This constructor creates a dataStore directory if it does not exist.
+    /// </summary>
+    /// <param name="enableTraversalSafety">Whether or not to protect against path traversal.</param>
+    public FileSystemDataStore(bool enableTraversalSafety)
     {
-        if (!key.Contains('/')) return DataStoreDirectory + key;
+        this.EnableTraversalSafety = enableTraversalSafety;
+    }
+
+    private string GetPath(string key)
+    {
+        if (!key.Contains('/')) return this.GetFullPathFromKey(key);
         
+        // normalize file paths
         if (Path.DirectorySeparatorChar != '/') 
             key = key.Replace('/', Path.DirectorySeparatorChar);
 
         string[] dirs = key.Split(Path.DirectorySeparatorChar);
         string path = DataStoreDirectory;
+        
+        // create non-existing directory tree
         for (int i = 0; i < dirs.Length - 1; i++)
         {
             string dir = dirs[i];
@@ -36,18 +53,31 @@ public class FileSystemDataStore : IDataStore
                 Directory.CreateDirectory(path);
         }
 
-        return DataStoreDirectory + key;
+        return this.GetFullPathFromKey(key);
+    }
+
+    private string GetFullPathFromKey(string key)
+    {
+        string path = DataStoreDirectory + key;
+        
+        // If traversal safety is disabled, then we just use the concatenated key
+        if (!this.EnableTraversalSafety) return path;
+        
+        string fullPath = Path.GetFullPath(path); // Resolve the path
+        if (!fullPath.StartsWith(DataStoreDirectory)) throw new FormatException("This key lands outside of the dataStore directory. It's likely this is path traversal.");
+
+        return fullPath;
     }
 
     /// <inheritdoc />
-    public bool ExistsInStore(string key) => File.Exists(GetPath(key));
+    public bool ExistsInStore(string key) => File.Exists(this.GetPath(key));
 
     /// <inheritdoc />
     public bool WriteToStore(string key, byte[] data)
     {
         try
         {
-            File.WriteAllBytes(GetPath(key), data);
+            File.WriteAllBytes(this.GetPath(key), data);
             return true;
         }
         catch
@@ -57,13 +87,13 @@ public class FileSystemDataStore : IDataStore
     }
 
     /// <inheritdoc />
-    public byte[] GetDataFromStore(string key) => File.ReadAllBytes(GetPath(key));
+    public byte[] GetDataFromStore(string key) => File.ReadAllBytes(this.GetPath(key));
     /// <inheritdoc />
     public bool RemoveFromStore(string key)
     {
         if (!this.ExistsInStore(key)) return false;
         
-        File.Delete(GetPath(key));
+        File.Delete(this.GetPath(key));
         return true;
     }
 
@@ -79,7 +109,7 @@ public class FileSystemDataStore : IDataStore
     {
         try
         {
-            using FileStream fileStream = File.OpenWrite(GetPath(key));
+            using FileStream fileStream = File.OpenWrite(this.GetPath(key));
             data.CopyTo(fileStream);
             return true;
         }
@@ -92,13 +122,13 @@ public class FileSystemDataStore : IDataStore
     /// <inheritdoc />
     public Stream OpenWriteStream(string key)
     {
-        return File.OpenWrite(GetPath(key));
+        return File.OpenWrite(this.GetPath(key));
     }
 
     /// <inheritdoc />
     public Stream GetStreamFromStore(string key)
     {
-        FileStream stream = File.OpenRead(GetPath(key));
+        FileStream stream = File.OpenRead(this.GetPath(key));
         return stream;
     }
 }

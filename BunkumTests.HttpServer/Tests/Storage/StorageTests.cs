@@ -1,7 +1,7 @@
 using System.Text;
 using Bunkum.HttpServer.Storage;
 
-namespace BunkumTests.HttpServer.Tests;
+namespace BunkumTests.HttpServer.Tests.Storage;
 
 #pragma warning disable NUnit2045
 

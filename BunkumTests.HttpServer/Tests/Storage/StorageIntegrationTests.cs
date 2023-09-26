@@ -3,7 +3,7 @@ using Bunkum.HttpServer;
 using Bunkum.HttpServer.Storage;
 using BunkumTests.HttpServer.Endpoints;
 
-namespace BunkumTests.HttpServer.Tests;
+namespace BunkumTests.HttpServer.Tests.Storage;
 
 public class StorageIntegrationTests : ServerDependentTest
 {
