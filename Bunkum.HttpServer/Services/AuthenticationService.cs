@@ -14,7 +14,7 @@ namespace Bunkum.HttpServer.Services;
 public class AuthenticationService : Service
 {
     internal AuthenticationService(Logger logger,
-        IAuthenticationProvider<IToken<IUser>, IUser>? provider = null, bool assumeAuthenticationRequired = false) : base(logger)
+        IAuthenticationProvider<IToken<IUser>>? provider = null, bool assumeAuthenticationRequired = false) : base(logger)
     {
         this._authenticationProvider = provider ?? new DummyAuthenticationProvider();
         this._assumeAuthenticationRequired = assumeAuthenticationRequired;
@@ -22,13 +22,13 @@ public class AuthenticationService : Service
     
     /// <summary>
     /// Is authentication required for your endpoints?
-    /// If true, clients will receive 403 if your <see cref="IAuthenticationProvider{TUser,TToken}"/> does not return a user.
+    /// If true, clients will receive 403 if your <see cref="IAuthenticationProvider{TToken}"/> does not return a user.
     /// If false, endpoints will work as normal.
     /// </summary>
-    /// <seealso cref="IAuthenticationProvider{TUser, TToken}"/>
+    /// <seealso cref="IAuthenticationProvider{TToken}"/>
     /// <seealso cref="AuthenticationAttribute"/>
     private readonly bool _assumeAuthenticationRequired;
-    private readonly IAuthenticationProvider<IToken<IUser>, IUser> _authenticationProvider;
+    private readonly IAuthenticationProvider<IToken<IUser>> _authenticationProvider;
 
     public override void Initialize()
     {

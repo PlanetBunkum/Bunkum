@@ -120,7 +120,7 @@ public partial class BunkumHttpServer // Services
         this._services.Add(service);
     }
 
-    public void AddAuthenticationService(IAuthenticationProvider<IToken<IUser>, IUser>? provider = null,
+    public void AddAuthenticationService(IAuthenticationProvider<IToken<IUser>>? provider = null,
         bool assumeAuthenticationRequired = false)
     {
         this.AddService<AuthenticationService>(provider, assumeAuthenticationRequired);
