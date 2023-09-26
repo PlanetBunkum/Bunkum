@@ -15,12 +15,10 @@ public class StorageService : Service
         this._dataStore = dataStore;
     }
 
-    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo paramInfo, Lazy<IDatabaseContext> database)
+    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo parameter, Lazy<IDatabaseContext> database)
     {
-        if (paramInfo.ParameterType.IsAssignableTo(typeof(IDataStore)))
-        {
+        if(ParameterBasedFrom<IDataStore>(parameter))
             return this._dataStore;
-        }
 
         return null;
     }

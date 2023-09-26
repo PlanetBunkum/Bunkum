@@ -42,6 +42,7 @@ public class AuthenticationService : Service
     // Cache user objects by the context to avoid double lookups
     private readonly Dictionary<ListenerContext, IToken<IUser>?> _tokenCache = new();
 
+    /// <inheritdoc />
     public override Response? OnRequestHandled(ListenerContext context, MethodInfo method, Lazy<IDatabaseContext> database)
     {
         if (!(method.GetCustomAttribute<AuthenticationAttribute>()?.Required ?? this._assumeAuthenticationRequired)) return null;
@@ -57,16 +58,15 @@ public class AuthenticationService : Service
         return null;
     }
 
-    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo paramInfo, Lazy<IDatabaseContext> database)
+    /// <inheritdoc />
+    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo parameter, Lazy<IDatabaseContext> database)
     {
-        Type paramType = paramInfo.ParameterType;
+        if(ParameterBasedFrom<IToken<IUser>>(parameter))
+            return this.AuthenticateToken(context, database);
 
-        if (paramType.IsAssignableTo(typeof(IToken<IUser>)))
-            return this.AuthenticateToken(context, database, true);
-
-        if (paramType.IsAssignableTo(typeof(IUser)))
+        if (ParameterBasedFrom<IUser>(parameter))
         {
-            IToken<IUser>? token = this.AuthenticateToken(context, database, true);
+            IToken<IUser>? token = this.AuthenticateToken(context, database);
             if (token != null) return token.User;
         }
 

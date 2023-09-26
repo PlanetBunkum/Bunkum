@@ -15,17 +15,17 @@ public class HealthService : Service
         this._healthChecks = checks.ToList();
     }
 
-    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo paramInfo, Lazy<IDatabaseContext> database)
+    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo parameter, Lazy<IDatabaseContext> database)
     {
         // Only pass into endpoint inside Bunkum
-        Assembly declaringAssembly = paramInfo.Member.DeclaringType!.Assembly;
+        Assembly declaringAssembly = parameter.Member.DeclaringType!.Assembly;
         if (declaringAssembly.Equals(Assembly.GetAssembly(typeof(HealthService))))
         {
-            if (paramInfo.ParameterType.IsAssignableFrom(typeof(HealthReport)))
+            if (parameter.ParameterType.IsAssignableFrom(typeof(HealthReport)))
                 return this.GenerateReport();
         }
 
-        return base.AddParameterToEndpoint(context, paramInfo, database);
+        return base.AddParameterToEndpoint(context, parameter, database);
     }
 
     public HealthReport GenerateReport()

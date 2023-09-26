@@ -17,16 +17,16 @@ public class TimeService : Service
     internal TimeService(Logger logger) : base(logger)
     {}
     
-    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo paramInfo, Lazy<IDatabaseContext> database)
+    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo parameter, Lazy<IDatabaseContext> database)
     {
-        this.Logger.LogDebug(BunkumCategory.Service, $"TimeService is attempting to pass something in for `{paramInfo.ParameterType.Name} {paramInfo.Name}`");
-        if (paramInfo.ParameterType == typeof(DateTimeOffset))
+        this.Logger.LogDebug(BunkumCategory.Service, $"TimeService is attempting to pass something in for `{parameter.ParameterType.Name} {parameter.Name}`");
+        if (parameter.ParameterType == typeof(DateTimeOffset))
         {
             this.Logger.LogDebug(BunkumCategory.Service, "Matched! Passing the time in.");
             return DateTimeOffset.Now;
         }
 
         this.Logger.LogDebug(BunkumCategory.Service, "No dice. Won't pass anything in for this parameter.");
-        return base.AddParameterToEndpoint(context, paramInfo, database);
+        return base.AddParameterToEndpoint(context, parameter, database);
     }
 }

@@ -17,8 +17,8 @@ public class RateLimitService : Service
     internal RateLimitService(Logger logger, AuthenticationService authService)
         : this(logger, authService, new RateLimiter())
     {}
-    
-    public RateLimitService(Logger logger, AuthenticationService authService, IRateLimiter rateLimiter)
+
+    internal RateLimitService(Logger logger, AuthenticationService authService, IRateLimiter rateLimiter)
         : base(logger)
     {
         this._rateLimiter = rateLimiter;

@@ -12,10 +12,11 @@ public abstract class EndpointService : Service
 {
     protected EndpointService(Logger logger) : base(logger)
     {}
-
-    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo paramInfo, Lazy<IDatabaseContext> database)
+    
+    /// <inheritdoc/>
+    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo parameter, Lazy<IDatabaseContext> database)
     {
-        if (paramInfo.ParameterType.IsAssignableTo(this.GetType()))
+        if (parameter.ParameterType.IsAssignableTo(this.GetType()))
             return this;
 
         return null;
