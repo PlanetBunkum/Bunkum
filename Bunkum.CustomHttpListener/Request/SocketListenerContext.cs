@@ -9,7 +9,7 @@ public class SocketListenerContext : ListenerContext
     private bool _socketClosed;
     private bool SocketClosed => this._socketClosed || !this._socket.Connected;
     
-    internal SocketListenerContext(Socket socket)
+    public SocketListenerContext(Socket socket)
     {
         this._socket = socket;
     }

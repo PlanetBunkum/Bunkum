@@ -10,9 +10,9 @@ namespace Bunkum.CustomHttpListener.Request;
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
 public abstract class ListenerContext
 {
-    public MemoryStream InputStream { get; internal set; } = null!;
+    public MemoryStream InputStream { get; set; } = null!;
 
-    public HttpVersion Version { get; internal set; }
+    public HttpVersion Version { get; set; }
     public Method Method { get; set; }
     public Uri Uri { get; set; } = null!;
 
@@ -20,7 +20,7 @@ public abstract class ListenerContext
     public readonly Dictionary<string, string> ResponseHeaders = new();
 
     public readonly NameValueCollection Cookies = new();
-    public NameValueCollection Query { get; internal set; } = null!;
+    public NameValueCollection Query { get; set; } = null!;
 
     /// <summary>
     /// The actual endpoint this request originated from, ignoring BunkumConfig.UseForwardedIp.
@@ -77,7 +77,7 @@ public abstract class ListenerContext
         await this.SendResponse(this.ResponseCode, dataSlice);
     }
 
-    internal async Task SendResponse(HttpStatusCode code, ArraySegment<byte>? data = null)
+    public async Task SendResponse(HttpStatusCode code, ArraySegment<byte>? data = null)
     {
         if (!this.CanSendData) return;
         
