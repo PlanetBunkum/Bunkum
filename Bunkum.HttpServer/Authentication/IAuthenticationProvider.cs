@@ -1,5 +1,3 @@
-using System.Net;
-using System.Reflection;
 using Bunkum.CustomHttpListener.Request;
 using Bunkum.HttpServer.Database;
 

@@ -1,5 +1,4 @@
-﻿using Bunkum.HttpServer;
-using Bunkum.HttpServer.Services;
+﻿using Bunkum.HttpServer.Services;
 using NotEnoughLogs;
 using ProfanityFilter.Interfaces;
 using Filter = ProfanityFilter.ProfanityFilter;

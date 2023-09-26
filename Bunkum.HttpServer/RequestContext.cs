@@ -2,7 +2,6 @@ using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using Bunkum.CustomHttpListener.Parsing;
-using Bunkum.HttpServer.Services;
 using NotEnoughLogs;
 using HttpVersion = Bunkum.CustomHttpListener.Request.HttpVersion;
 

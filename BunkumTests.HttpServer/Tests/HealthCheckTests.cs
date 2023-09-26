@@ -1,4 +1,3 @@
-using Bunkum.HttpServer;
 using Bunkum.HttpServer.Health;
 using BunkumTests.HttpServer.Health;
 using NotEnoughLogs;

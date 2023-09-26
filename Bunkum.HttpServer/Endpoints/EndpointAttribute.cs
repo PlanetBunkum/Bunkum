@@ -1,8 +1,6 @@
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Web;
 using Bunkum.CustomHttpListener.Parsing;
-using Bunkum.HttpServer.Responses;
 using JetBrains.Annotations;
 
 namespace Bunkum.HttpServer.Endpoints;

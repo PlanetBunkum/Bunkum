@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
-using Bunkum.CustomHttpListener.Extensions;
 using Bunkum.CustomHttpListener.Parsing;
 
 namespace Bunkum.CustomHttpListener.Request;

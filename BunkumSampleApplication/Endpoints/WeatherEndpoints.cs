@@ -5,7 +5,6 @@ using Bunkum.HttpServer.Endpoints;
 using Bunkum.HttpServer.Storage;
 using BunkumSampleApplication.Configuration;
 using BunkumSampleApplication.Models;
-using BunkumSampleApplication.Services;
 
 namespace BunkumSampleApplication.Endpoints;
 
