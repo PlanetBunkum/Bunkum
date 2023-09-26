@@ -1,15 +1,15 @@
 namespace Bunkum.AutoDiscover;
 
-public struct AutoDiscoverConfig
+internal struct AutoDiscoverConfig
 {
-    public readonly string ServerBrand;
-    public readonly string BaseEndpoint;
-    public readonly bool UsesCustomDigestKey;
+    internal readonly string ServerBrand;
+    internal readonly string BaseEndpoint;
+    internal readonly bool UsesCustomDigestKey;
 
-    public AutoDiscoverConfig(string serverBrand, string baseEndpoint, bool usesCustomDigestKey)
+    internal AutoDiscoverConfig(string serverBrand, string baseEndpoint, bool usesCustomDigestKey)
     {
-        ServerBrand = serverBrand;
-        BaseEndpoint = baseEndpoint;
-        UsesCustomDigestKey = usesCustomDigestKey;
+        this.ServerBrand = serverBrand;
+        this.BaseEndpoint = baseEndpoint;
+        this.UsesCustomDigestKey = usesCustomDigestKey;
     }
 }
