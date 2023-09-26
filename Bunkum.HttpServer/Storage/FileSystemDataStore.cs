@@ -3,6 +3,9 @@ namespace Bunkum.HttpServer.Storage;
 /// <summary>
 /// A <see cref="IDataStore"/> that operates on the file system.
 /// </summary>
+/// <remarks>
+/// This data store tries to protect against path traversal by default. You can disable this with a boolean in the constructor.
+/// </remarks>
 /// <seealso cref="BunkumFileSystem"/>
 public class FileSystemDataStore : IDataStore
 {
@@ -11,7 +14,7 @@ public class FileSystemDataStore : IDataStore
     /// Whether or not to protect against path traversal.
     /// These protections are enabled by default, but this can be disabled for (minuscule) performance improvements.
     /// </summary>
-    public bool EnableTraversalSafety { get; init; } = true;
+    private bool EnableTraversalSafety { get; init; } = true;
 
     /// <summary>
     /// Instantiates the DataStore. This constructor creates a dataStore directory if it does not exist.
