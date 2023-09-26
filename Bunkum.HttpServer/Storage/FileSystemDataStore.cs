@@ -1,9 +1,16 @@
 namespace Bunkum.HttpServer.Storage;
 
+/// <summary>
+/// A <see cref="IDataStore"/> that operates on the file system.
+/// </summary>
+/// <seealso cref="BunkumFileSystem"/>
 public class FileSystemDataStore : IDataStore
 {
     private static readonly string DataStoreDirectory = Path.Combine(BunkumFileSystem.DataDirectory, "dataStore" + Path.DirectorySeparatorChar);
 
+    /// <summary>
+    /// Instantiates the DataStore. This constructor creates a dataStore directory if it does not exist.
+    /// </summary>
     public FileSystemDataStore()
     {
         if (!Directory.Exists(DataStoreDirectory))
@@ -31,9 +38,11 @@ public class FileSystemDataStore : IDataStore
 
         return DataStoreDirectory + key;
     }
-    
+
+    /// <inheritdoc />
     public bool ExistsInStore(string key) => File.Exists(GetPath(key));
 
+    /// <inheritdoc />
     public bool WriteToStore(string key, byte[] data)
     {
         try
@@ -47,7 +56,9 @@ public class FileSystemDataStore : IDataStore
         }
     }
 
+    /// <inheritdoc />
     public byte[] GetDataFromStore(string key) => File.ReadAllBytes(GetPath(key));
+    /// <inheritdoc />
     public bool RemoveFromStore(string key)
     {
         if (!this.ExistsInStore(key)) return false;
@@ -56,12 +67,14 @@ public class FileSystemDataStore : IDataStore
         return true;
     }
 
+    /// <inheritdoc />
     public string[] GetKeysFromStore() =>
         Directory.GetFiles(DataStoreDirectory, "*", SearchOption.AllDirectories)
             .Select(key => key.Replace(DataStoreDirectory, string.Empty))
             .Select(key => key.Replace(Path.DirectorySeparatorChar, '/'))
             .ToArray();
 
+    /// <inheritdoc />
     public bool WriteToStoreFromStream(string key, Stream data)
     {
         try
@@ -76,11 +89,13 @@ public class FileSystemDataStore : IDataStore
         }
     }
 
+    /// <inheritdoc />
     public Stream OpenWriteStream(string key)
     {
         return File.OpenWrite(GetPath(key));
     }
 
+    /// <inheritdoc />
     public Stream GetStreamFromStore(string key)
     {
         FileStream stream = File.OpenRead(GetPath(key));
