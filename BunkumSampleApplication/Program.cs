@@ -15,7 +15,11 @@ using NotEnoughLogs.Behaviour;
 BunkumHttpServer server = new(new LoggerConfiguration
 {
     Behaviour = new QueueLoggingBehaviour(),
+    #if DEBUG
     MaxLevel = LogLevel.Trace,
+    #else
+    MaxLevel = LogLevel.Info,
+    #endif
 });
 
 // The initialize function describes what services, middlewares, and endpoints are used for this server.
@@ -53,7 +57,7 @@ server.Initialize = s =>
     // Let's add some configuration. This is a built in helper function that uses Newtonsoft.JSON to load a config.
     // You can also do this with Config.LoadFromFile<TConfig>(filename).
     // This configuration is then exposed to endpoints and services. 
-    s.UseJsonConfig<ExampleConfiguration>("example.json");
+    s.AddConfigFromJsonFile<ExampleConfiguration>("example.json");
     
     // Finally, let's add a service. Services can do basically anything, including adding things for dependency injection into endpoints,
     // running code before middlewares, etc.
