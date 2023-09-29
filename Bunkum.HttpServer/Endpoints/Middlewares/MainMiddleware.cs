@@ -132,7 +132,6 @@ internal class MainMiddleware : IMiddleware
                             else if(paramType == typeof(string))
                             {
                                 TrimToToFirstNullByte(body);
-                                
                                 invokeList.Add(Encoding.Default.GetString(body.ToArray()));
                             }
                             else if(paramType == typeof(byte[])) invokeList.Add(body.GetBuffer());
@@ -254,18 +253,31 @@ internal class MainMiddleware : IMiddleware
 
                     object? val = method.Invoke(group, invokeList.ToArray());
 
+                    Response returnedResponse;
+
                     // ReSharper disable once ConvertSwitchStatementToSwitchExpression
                     switch (val)
                     {
                         case null:
-                            return new Response(Array.Empty<byte>(), attribute.ContentType, nullCode);
+                            returnedResponse = new Response(Array.Empty<byte>(), attribute.ContentType, nullCode);
+                            break;
                         case Response response:
-                            return response;
+                            returnedResponse = response;
+                            break;
                         case byte[] data:
-                            return new Response(data, attribute.ContentType, okCode);
+                            returnedResponse = new Response(data, attribute.ContentType, okCode);
+                            break;
                         default:
-                            return new Response(val, attribute.ContentType, okCode);
+                            returnedResponse = new Response(val, attribute.ContentType, okCode);
+                            break;
                     }
+                    
+                    foreach (Service service in this._services)
+                    {
+                        service.AfterRequestHandled(context, returnedResponse, method, database);
+                    }
+
+                    return returnedResponse;
                 }
             }
         }
@@ -273,7 +285,7 @@ internal class MainMiddleware : IMiddleware
         return null;
     }
 
-    private static void TrimToToFirstNullByte(MemoryStream body)
+    private static void TrimToToFirstNullByte(Stream body)
     {
         long i = 0;
         body.Seek(0, SeekOrigin.Begin);

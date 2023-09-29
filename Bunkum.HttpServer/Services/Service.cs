@@ -30,6 +30,12 @@ public abstract class Service
     {
         return null;
     }
+    
+    /// <summary>
+    /// Runs after the request has been handled by the main middleware.
+    /// </summary>
+    public virtual void AfterRequestHandled(ListenerContext context, Response response, MethodInfo method, Lazy<IDatabaseContext> database)
+    {}
 
     /// <summary>
     /// Called when the endpoint is looking for a custom parameter. You can provide one using this method.
