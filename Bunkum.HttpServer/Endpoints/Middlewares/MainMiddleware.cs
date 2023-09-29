@@ -73,14 +73,9 @@ internal class MainMiddleware : IMiddleware
 
                 foreach (EndpointAttribute attribute in attributes)
                 {
-                    if (!attribute.UriMatchesRoute(
-                            context.Uri,
-                            context.Method,
-                            out Dictionary<string, string> parameters))
-                    {
+                    if (!attribute.UriMatchesRoute(context.Uri, context.Method, out Dictionary<string, string> parameters))
                         continue;
-                    }
-                    
+
                     this._logger.LogTrace(BunkumCategory.Request, $"Handling request with {group.GetType().Name}.{method.Name}");
 
                     foreach (Service service in this._services)
@@ -107,88 +102,9 @@ internal class MainMiddleware : IMiddleware
                     };
 
                     // Next, lets iterate through the method's arguments and add some based on what we find.
-                    foreach (ParameterInfo param in method.GetParameters().Skip(1)) // Skip the request context.
                     {
-                        Type paramType = param.ParameterType;
-
-                        // Pass in the request body as a parameter
-                        if (param.Name == "body")
-                        {
-                            // If the request has no body and we have a body parameter,
-                            // then it's probably safe to assume it's required unless otherwise explicitly stated.
-                            // Fire a bad request back if this is the case.
-                            if (!context.HasBody && !method.HasCustomAttribute<AllowEmptyBodyAttribute>())
-                            {
-                                this._logger.LogWarning(BunkumCategory.Request, "Rejecting request due to empty body");
-                                return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
-                            }
-
-                            if (!this.TryAddBodyToInvocation(attribute, paramType, body, invokeList))
-                            {
-                                return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
-                            }
-                        }
-                        else if(paramType.IsAssignableTo(typeof(IDatabaseContext)))
-                        {
-                            // Pass in a database context if the endpoint needs one.
-                            invokeList.Add(database.Value);
-                        }
-                        else if (paramType.IsAssignableTo(typeof(Config)))
-                        {
-                            Config? configToPass = this._configs.FirstOrDefault(config => paramType == config.GetType());
-
-                            if (configToPass == null)
-                            {
-                                throw new ArgumentNullException(
-                                    $"Could not find a valid config for the {paramType.Name} parameter '{param.Name}'");
-                            }
-
-                            invokeList.Add(configToPass);
-                        }
-                        else if (paramType == typeof(string))
-                        {
-                            // Attempt to pass in a route parameter based on the method parameter's name
-                            invokeList.Add(parameters!.GetValueOrDefault(param.Name));
-                        }
-                        else if (paramType == typeof(int) || paramType == typeof(int?))
-                        {
-                            // Also try to pass in a route parameter for integers
-                            string? strParam = parameters!.GetValueOrDefault(param.Name);
-                            bool intParsed = int.TryParse(strParam, out int intParam);
-                            invokeList.Add(intParsed ? intParam : null); // check result, intParam will be null
-                        }
-                        else
-                        {
-                            // Ask all services to try to provide an argument for this parameter.
-                            object? arg = null;
-                            
-                            List<Service>.Enumerator services = this._services.GetEnumerator();
-                            while (arg == null)
-                            {
-                                if (!services.MoveNext()) break;
-                                arg = services.Current.AddParameterToEndpoint(context, param, database);
-                            }
-                            
-                            services.Dispose();
-                            
-                            // NullabilityInfoContext isn't thread-safe, so it cant be re-used
-                            // https://stackoverflow.com/a/72586919
-                            // TODO: do benchmarks of this call to see if we should optimize
-                            bool isNullable = new NullabilityInfoContext().Create(param).WriteState == NullabilityState.Nullable;
-
-                            // If our argument is still null, log a warning as a precaution.
-                            // Don't consider nullable arguments for this warning
-                            if (arg == null && !isNullable)
-                            {
-                                this._logger.LogWarning(BunkumCategory.Request, 
-                                    $"Could not find a valid argument for the {paramType.Name} parameter '{param.Name}'. " +
-                                    $"Null will be used instead.");
-                            }
-
-                            // Add the arg even if null, as even if we don't know what this param is or what to do with it,
-                            // it's probably better than not calling the endpoint and throwing an exception causing things to explode.
-                            invokeList.Add(arg);
-                        }
+                        Response? response = this.InjectParametersIntoEndpointInvocation(context, method, attribute, body, parameters, database, invokeList);
+                        if (response != null) return response;
                     }
 
                     long? cacheSeconds;
@@ -245,6 +161,101 @@ internal class MainMiddleware : IMiddleware
                 return new Response(val, attribute.ContentType, okCode);
             }
         }
+    }
+
+    private Response? InjectParametersIntoEndpointInvocation(ListenerContext context,
+        MethodInfo method,
+        EndpointAttribute attribute,
+        MemoryStream body,
+        IReadOnlyDictionary<string, string> parameters,
+        Lazy<IDatabaseContext> database,
+        ICollection<object?> invokeList)
+    {
+        foreach (ParameterInfo param in method.GetParameters().Skip(1)) // Skip the request context.
+        {
+            Type paramType = param.ParameterType;
+
+            // Pass in the request body as a parameter
+            if (param.Name == "body")
+            {
+                // If the request has no body and we have a body parameter,
+                // then it's probably safe to assume it's required unless otherwise explicitly stated.
+                // Fire a bad request back if this is the case.
+                if (!context.HasBody && !method.HasCustomAttribute<AllowEmptyBodyAttribute>())
+                {
+                    this._logger.LogWarning(BunkumCategory.Request, "Rejecting request due to empty body");
+                    return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
+                }
+
+                if (!this.TryAddBodyToInvocation(attribute, paramType, body, invokeList))
+                {
+                    return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
+                }
+            }
+            else if(paramType.IsAssignableTo(typeof(IDatabaseContext)))
+            {
+                // Pass in a database context if the endpoint needs one.
+                invokeList.Add(database.Value);
+            }
+            else if (paramType.IsAssignableTo(typeof(Config)))
+            {
+                Config? configToPass = this._configs.FirstOrDefault(config => paramType == config.GetType());
+
+                if (configToPass == null)
+                {
+                    throw new ArgumentNullException(
+                        $"Could not find a valid config for the {paramType.Name} parameter '{param.Name}'");
+                }
+
+                invokeList.Add(configToPass);
+            }
+            else if (paramType == typeof(string))
+            {
+                // Attempt to pass in a route parameter based on the method parameter's name
+                invokeList.Add(parameters!.GetValueOrDefault(param.Name));
+            }
+            else if (paramType == typeof(int) || paramType == typeof(int?))
+            {
+                // Also try to pass in a route parameter for integers
+                string? strParam = parameters!.GetValueOrDefault(param.Name);
+                bool intParsed = int.TryParse(strParam, out int intParam);
+                invokeList.Add(intParsed ? intParam : null); // check result, intParam will be null
+            }
+            else
+            {
+                // Ask all services to try to provide an argument for this parameter.
+                object? arg = null;
+                            
+                List<Service>.Enumerator services = this._services.GetEnumerator();
+                while (arg == null)
+                {
+                    if (!services.MoveNext()) break;
+                    arg = services.Current.AddParameterToEndpoint(context, param, database);
+                }
+                            
+                services.Dispose();
+                            
+                // NullabilityInfoContext isn't thread-safe, so it cant be re-used
+                // https://stackoverflow.com/a/72586919
+                // TODO: do benchmarks of this call to see if we should optimize
+                bool isNullable = new NullabilityInfoContext().Create(param).WriteState == NullabilityState.Nullable;
+
+                // If our argument is still null, log a warning as a precaution.
+                // Don't consider nullable arguments for this warning
+                if (arg == null && !isNullable)
+                {
+                    this._logger.LogWarning(BunkumCategory.Request, 
+                        $"Could not find a valid argument for the {paramType.Name} parameter '{param.Name}'. " +
+                        $"Null will be used instead.");
+                }
+
+                // Add the arg even if null, as even if we don't know what this param is or what to do with it,
+                // it's probably better than not calling the endpoint and throwing an exception causing things to explode.
+                invokeList.Add(arg);
+            }
+        }
+
+        return null;
     }
 
     private bool TryAddBodyToInvocation(EndpointAttribute attribute, Type paramType, MemoryStream body, ICollection<object?> invokeList)
