@@ -89,12 +89,6 @@ internal class MainMiddleware : IMiddleware
                         if (response != null) return response;
                     }
 
-                    HttpStatusCode nullCode = method.GetCustomAttribute<NullStatusCodeAttribute>()?.StatusCode ??
-                                                  HttpStatusCode.NotFound;
-                    
-                    HttpStatusCode okCode = method.GetCustomAttribute<SuccessStatusCodeAttribute>()?.StatusCode ??
-                                              HttpStatusCode.OK;
-
                     // Build list to invoke endpoint method with
                     List<object?> invokeList = new() { 
                         new RequestContext // 1st argument is always the request context. This is fact, and is backed by an analyzer.
@@ -252,25 +246,7 @@ internal class MainMiddleware : IMiddleware
                     }
 
                     object? val = method.Invoke(group, invokeList.ToArray());
-
-                    Response returnedResponse;
-
-                    // ReSharper disable once ConvertSwitchStatementToSwitchExpression
-                    switch (val)
-                    {
-                        case null:
-                            returnedResponse = new Response(Array.Empty<byte>(), attribute.ContentType, nullCode);
-                            break;
-                        case Response response:
-                            returnedResponse = response;
-                            break;
-                        case byte[] data:
-                            returnedResponse = new Response(data, attribute.ContentType, okCode);
-                            break;
-                        default:
-                            returnedResponse = new Response(val, attribute.ContentType, okCode);
-                            break;
-                    }
+                    Response returnedResponse = GenerateResponseFromEndpoint(val, attribute, method);
                     
                     foreach (Service service in this._services)
                     {
@@ -283,6 +259,40 @@ internal class MainMiddleware : IMiddleware
         }
 
         return null;
+    }
+
+    private static Response GenerateResponseFromEndpoint(object? val, EndpointAttribute attribute, MethodInfo method)
+    {
+        // ReSharper disable once ConvertSwitchStatementToSwitchExpression
+        switch (val)
+        {
+            case null:
+            {
+                HttpStatusCode nullCode = method.GetCustomAttribute<NullStatusCodeAttribute>()?.StatusCode ??
+                                          HttpStatusCode.NotFound;
+                return new Response(Array.Empty<byte>(), attribute.ContentType, nullCode);
+            }
+            case Response response:
+            {
+                return response;
+            }
+            case HttpStatusCode statusCode:
+            {
+                return statusCode;
+            }
+            case byte[] data:
+            {
+                HttpStatusCode okCode = method.GetCustomAttribute<SuccessStatusCodeAttribute>()?.StatusCode ??
+                                        HttpStatusCode.OK;
+                return new Response(data, attribute.ContentType, okCode);
+            }
+            default:
+            {
+                HttpStatusCode okCode = method.GetCustomAttribute<SuccessStatusCodeAttribute>()?.StatusCode ??
+                                        HttpStatusCode.OK;
+                return new Response(val, attribute.ContentType, okCode);
+            }
+        }
     }
 
     private static void TrimToToFirstNullByte(Stream body)
