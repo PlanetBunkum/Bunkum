@@ -1,8 +1,8 @@
 using System.Reflection;
-using Bunkum.CustomHttpListener.Request;
-using Bunkum.HttpServer;
-using Bunkum.HttpServer.Database;
-using Bunkum.HttpServer.Services;
+using Bunkum.Core;
+using Bunkum.Core.Database;
+using Bunkum.Core.Listener.Request;
+using Bunkum.Core.Services;
 using NotEnoughLogs;
 
 namespace BunkumSampleApplication.Services;

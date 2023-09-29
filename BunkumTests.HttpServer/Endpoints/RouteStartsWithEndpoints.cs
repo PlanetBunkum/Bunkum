@@ -1,5 +1,5 @@
-using Bunkum.HttpServer;
-using Bunkum.HttpServer.Endpoints;
+using Bunkum.Core;
+using Bunkum.Core.Endpoints;
 using JetBrains.Annotations;
 
 namespace BunkumTests.HttpServer.Endpoints;

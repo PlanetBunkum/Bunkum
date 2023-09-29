@@ -1,4 +1,4 @@
-using Bunkum.HttpServer.RateLimit;
+using Bunkum.Core.RateLimit;
 
 namespace BunkumTests.HttpServer.Tests.RateLimit;
 

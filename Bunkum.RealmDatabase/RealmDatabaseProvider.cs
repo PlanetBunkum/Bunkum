@@ -1,5 +1,5 @@
-﻿using Bunkum.HttpServer;
-using Bunkum.HttpServer.Database;
+﻿using Bunkum.Core;
+using Bunkum.Core.Database;
 using Realms;
 
 namespace Bunkum.RealmDatabase;

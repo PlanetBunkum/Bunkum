@@ -1,5 +1,5 @@
 using System.Xml.Serialization;
-using Bunkum.HttpServer;
+using Bunkum.Core;
 using BunkumTests.HttpServer.Endpoints;
 using Newtonsoft.Json;
 

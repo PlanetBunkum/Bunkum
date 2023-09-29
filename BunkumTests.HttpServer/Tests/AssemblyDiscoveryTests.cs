@@ -1,5 +1,5 @@
 using System.Net;
-using Bunkum.HttpServer;
+using Bunkum.Core;
 
 namespace BunkumTests.HttpServer.Tests;
 

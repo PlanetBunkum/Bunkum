@@ -1,4 +1,4 @@
-using Bunkum.HttpServer.Storage;
+using Bunkum.Core.Storage;
 
 namespace BunkumTests.HttpServer.Tests.Storage;
 

@@ -1,7 +1,7 @@
-using Bunkum.CustomHttpListener.Parsing;
-using Bunkum.HttpServer;
-using Bunkum.HttpServer.Authentication.Dummy;
-using Bunkum.HttpServer.Endpoints;
+using Bunkum.Core;
+using Bunkum.Core.Authentication.Dummy;
+using Bunkum.Core.Endpoints;
+using Bunkum.Core.Listener.Parsing;
 
 namespace BunkumTests.HttpServer.Endpoints;
 

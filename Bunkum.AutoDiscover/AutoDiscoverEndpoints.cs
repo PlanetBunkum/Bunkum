@@ -1,7 +1,7 @@
-using Bunkum.CustomHttpListener.Parsing;
-using Bunkum.HttpServer;
-using Bunkum.HttpServer.Configuration;
-using Bunkum.HttpServer.Endpoints;
+using Bunkum.Core;
+using Bunkum.Core.Configuration;
+using Bunkum.Core.Endpoints;
+using Bunkum.Core.Listener.Parsing;
 
 namespace Bunkum.AutoDiscover;
 

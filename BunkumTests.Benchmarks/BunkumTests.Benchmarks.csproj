@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Bunkum.HttpServer\Bunkum.HttpServer.csproj" />
+      <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
       <ProjectReference Include="..\BunkumTests.HttpServer\BunkumTests.HttpServer.csproj" />
     </ItemGroup>
 

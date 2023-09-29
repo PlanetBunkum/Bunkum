@@ -1,6 +1,6 @@
-using Bunkum.CustomHttpListener.Request;
-using Bunkum.HttpServer.Database;
-using Bunkum.HttpServer.Endpoints.Middlewares;
+using Bunkum.Core.Database;
+using Bunkum.Core.Endpoints.Middlewares;
+using Bunkum.Core.Listener.Request;
 
 namespace BunkumTests.HttpServer.Middlewares;
 

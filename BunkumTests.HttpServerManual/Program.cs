@@ -1,5 +1,6 @@
-﻿using Bunkum.HttpServer;
+﻿using Bunkum.Core;
 using BunkumTests.HttpServer;
+using BunkumConsole = Bunkum.Core.BunkumConsole;
 
 BunkumConsole.AllocateConsole();
 

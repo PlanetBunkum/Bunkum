@@ -8,8 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Bunkum.CustomHttpListener\Bunkum.CustomHttpListener.csproj" />
-      <ProjectReference Include="..\Bunkum.HttpServer\Bunkum.HttpServer.csproj" />
+      <ProjectReference Include="..\Bunkum.Core.Listener\Bunkum.Core.Listener.csproj" />
+      <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
 
 
     </ItemGroup>

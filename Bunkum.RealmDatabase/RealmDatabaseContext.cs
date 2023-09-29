@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Bunkum.HttpServer.Database;
+using Bunkum.Core.Database;
 using Realms;
 
 namespace Bunkum.RealmDatabase;

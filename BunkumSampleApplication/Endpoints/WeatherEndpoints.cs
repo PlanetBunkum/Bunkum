@@ -1,8 +1,8 @@
-using Bunkum.CustomHttpListener.Parsing;
-using Bunkum.HttpServer;
-using Bunkum.HttpServer.Database.Dummy;
-using Bunkum.HttpServer.Endpoints;
-using Bunkum.HttpServer.Storage;
+using Bunkum.Core;
+using Bunkum.Core.Database.Dummy;
+using Bunkum.Core.Endpoints;
+using Bunkum.Core.Listener.Parsing;
+using Bunkum.Core.Storage;
 using BunkumSampleApplication.Configuration;
 using BunkumSampleApplication.Models;
 

@@ -1,7 +1,7 @@
 using System.Net;
-using Bunkum.HttpServer;
-using Bunkum.HttpServer.RateLimit;
-using Bunkum.HttpServer.Services;
+using Bunkum.Core;
+using Bunkum.Core.RateLimit;
+using Bunkum.Core.Services;
 using BunkumTests.HttpServer.Endpoints;
 using BunkumTests.HttpServer.Time;
 

@@ -1,4 +1,4 @@
-﻿using Bunkum.HttpServer;
+﻿using Bunkum.Core;
 using Bunkum.ProfanityFilter;
 using Bunkum.ProfanityFilter.Test;
 

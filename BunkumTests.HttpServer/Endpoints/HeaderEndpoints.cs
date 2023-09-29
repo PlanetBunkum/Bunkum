@@ -1,6 +1,6 @@
 using System.Net;
-using Bunkum.HttpServer;
-using Bunkum.HttpServer.Endpoints;
+using Bunkum.Core;
+using Bunkum.Core.Endpoints;
 
 namespace BunkumTests.HttpServer.Endpoints;
 

@@ -1,4 +1,4 @@
-using Bunkum.HttpServer;
+using Bunkum.Core;
 using BunkumTests.HttpServer.Endpoints;
 using BunkumTests.HttpServer.Middlewares;
 

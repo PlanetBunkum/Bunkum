@@ -1,4 +1,4 @@
-using Bunkum.HttpServer.Time;
+using Bunkum.Core.Time;
 
 namespace BunkumTests.HttpServer.Time;
 

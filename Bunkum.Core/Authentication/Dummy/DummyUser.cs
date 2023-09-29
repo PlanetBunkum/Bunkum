@@ -1,0 +1,20 @@
+using Bunkum.Core.RateLimit;
+using Newtonsoft.Json;
+
+namespace Bunkum.Core.Authentication.Dummy;
+
+public class DummyUser : IRateLimitUser
+{
+    [JsonProperty("userId")]
+    public ulong UserId { get; set; } = 1;
+    [JsonProperty("username")]
+    public string Username { get; set; } = "Dummy";
+
+    public bool RateLimitUserIdIsEqual(object obj)
+    {
+        return this.UserId == (ulong)obj;
+    }
+
+    [JsonIgnore]
+    public object RateLimitUserId => this.UserId;
+}

@@ -1,9 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.Reflection;
-using Bunkum.HttpServer;
-using Bunkum.HttpServer.Database.Dummy;
-using Bunkum.HttpServer.Storage;
+using Bunkum.Core;
+using Bunkum.Core.Database.Dummy;
+using Bunkum.Core.Storage;
 using BunkumSampleApplication.Configuration;
 using BunkumSampleApplication.Endpoints;
 using BunkumSampleApplication.Middlewares;

@@ -1,4 +1,4 @@
-using Bunkum.HttpServer.Database;
+using Bunkum.Core.Database;
 
 namespace BunkumTests.HttpServer.Database;
 

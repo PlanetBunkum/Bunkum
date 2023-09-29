@@ -1,8 +1,8 @@
 using System.Net;
-using Bunkum.CustomHttpListener.Parsing;
-using Bunkum.HttpServer;
-using Bunkum.HttpServer.Endpoints;
-using Bunkum.HttpServer.Responses;
+using Bunkum.Core;
+using Bunkum.Core.Endpoints;
+using Bunkum.Core.Listener.Parsing;
+using Bunkum.Core.Responses;
 using BunkumTests.HttpServer.Tests;
 
 namespace BunkumTests.HttpServer.Endpoints;
