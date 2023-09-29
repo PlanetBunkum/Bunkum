@@ -114,7 +114,8 @@ internal class MainMiddleware : IMiddleware
                         // Pass in the request body as a parameter
                         if (param.Name == "body")
                         {
-                            // If the request has no body and we have a body parameter, then it's probably safe to assume it's required unless otherwise explicitly stated.
+                            // If the request has no body and we have a body parameter,
+                            // then it's probably safe to assume it's required unless otherwise explicitly stated.
                             // Fire a bad request back if this is the case.
                             if (!context.HasBody && !method.HasCustomAttribute<AllowEmptyBodyAttribute>())
                             {
@@ -122,61 +123,12 @@ internal class MainMiddleware : IMiddleware
                                 return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
                             }
 
-                            if(paramType == typeof(Stream)) invokeList.Add(body);
-                            else if(paramType == typeof(string))
+                            if (!this.TryAddBodyToInvocation(attribute, paramType, body, invokeList))
                             {
-                                TrimToToFirstNullByte(body);
-                                invokeList.Add(Encoding.Default.GetString(body.ToArray()));
-                            }
-                            else if(paramType == typeof(byte[])) invokeList.Add(body.GetBuffer());
-                            else if(attribute.ContentType == ContentType.Xml)
-                            {
-                                TrimToToFirstNullByte(body);
-                                
-                                XmlSerializer serializer = new(paramType);
-                                try
-                                {
-                                    object? obj = serializer.Deserialize(new StreamReader(body));
-                                    if (obj == null) throw new Exception();
-                                    invokeList.Add(obj);
-                                }
-                                catch (Exception e)
-                                {
-                                    this._logger.LogError(BunkumCategory.UserContent, $"Failed to parse object data: {e}\n\nXML: {body}");
-                                    return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
-                                }
-                            }
-                            else if (attribute.ContentType == ContentType.Json)
-                            {
-                                TrimToToFirstNullByte(body);
-                                
-                                try
-                                {
-                                    JsonSerializer serializer = new();
-                                    using JsonReader reader = new JsonTextReader(new StreamReader(body, null, false, -1, true));
-                                    object? obj = serializer.Deserialize(reader, paramType);
-                                    if (obj == null) throw new Exception();
-                                    invokeList.Add(obj);
-                                }
-                                catch (Exception e)
-                                {
-                                    this._logger.LogError(BunkumCategory.UserContent, $"Failed to parse object data: {e}\n\nJSON: {body}");
-                                    return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
-                                }
-                            }
-                            // We can't find a valid type to send or deserialization failed
-                            else
-                            {
-                                this._logger.LogWarning(BunkumCategory.Request, "Rejecting request, couldn't find a valid type to deserialize with");
                                 return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
                             }
-
-                            body.Seek(0, SeekOrigin.Begin);
-
-                            continue;
                         }
-
-                        if(paramType.IsAssignableTo(typeof(IDatabaseContext)))
+                        else if(paramType.IsAssignableTo(typeof(IDatabaseContext)))
                         {
                             // Pass in a database context if the endpoint needs one.
                             invokeList.Add(database.Value);
@@ -293,6 +245,62 @@ internal class MainMiddleware : IMiddleware
                 return new Response(val, attribute.ContentType, okCode);
             }
         }
+    }
+
+    private bool TryAddBodyToInvocation(EndpointAttribute attribute, Type paramType, MemoryStream body, ICollection<object?> invokeList)
+    {
+        if (paramType == typeof(Stream)) invokeList.Add(body);
+        else if (paramType == typeof(string))
+        {
+            TrimToToFirstNullByte(body);
+            invokeList.Add(Encoding.Default.GetString(body.ToArray()));
+        }
+        else if (paramType == typeof(byte[])) invokeList.Add(body.GetBuffer());
+        else if (attribute.ContentType == ContentType.Xml)
+        {
+            TrimToToFirstNullByte(body);
+
+            XmlSerializer serializer = new(paramType);
+            try
+            {
+                object? obj = serializer.Deserialize(new StreamReader(body));
+                if (obj == null) throw new Exception();
+                invokeList.Add(obj);
+            }
+            catch (Exception e)
+            {
+                this._logger.LogError(BunkumCategory.UserContent, $"Failed to parse object data: {e}\n\nXML: {body}");
+                return false;
+            }
+        }
+        else if (attribute.ContentType == ContentType.Json)
+        {
+            TrimToToFirstNullByte(body);
+
+            try
+            {
+                JsonSerializer serializer = new();
+                using JsonReader reader = new JsonTextReader(new StreamReader(body, null, false, -1, true));
+                object? obj = serializer.Deserialize(reader, paramType);
+                if (obj == null) throw new Exception();
+                invokeList.Add(obj);
+            }
+            catch (Exception e)
+            {
+                this._logger.LogError(BunkumCategory.UserContent, $"Failed to parse object data: {e}\n\nJSON: {body}");
+                return false;
+            }
+        }
+        // We can't find a valid type to send or deserialization failed
+        else
+        {
+            this._logger.LogWarning(BunkumCategory.Request,
+                "Rejecting request, couldn't find a valid type to deserialize with");
+            return false;
+        }
+
+        body.Seek(0, SeekOrigin.Begin);
+        return true;
     }
 
     private static void TrimToToFirstNullByte(Stream body)
