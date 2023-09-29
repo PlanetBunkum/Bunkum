@@ -5,7 +5,7 @@ namespace Bunkum.Core.Endpoints;
 /// If true, clients will receive 403 if your <see cref="IAuthenticationProvider{TUser}"/> does not return a user.
 /// If false, endpoints will work as normal.
 /// <br/>
-/// Default depends on the value set for <see cref="BunkumHttpServer.AssumeAuthenticationRequired"/>.
+/// Default depends on the value set for <see cref="BunkumServer.AssumeAuthenticationRequired"/>.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public class AuthenticationAttribute : Attribute

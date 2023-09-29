@@ -17,7 +17,7 @@ public static class BunkumServerExtensions
     /// A boolean, when true it represents that the LBP server will only accept the digest key <c>CustomServerDigest</c>.
     /// Otherwise, the server is using the default digest key.
     /// </param>
-    public static void AddAutoDiscover(this BunkumHttpServer server, string serverBrand, string baseEndpoint,
+    public static void AddAutoDiscover(this BunkumServer server, string serverBrand, string baseEndpoint,
         bool usesCustomDigestKey = false)
     {
         AutoDiscoverConfig config = new(serverBrand, baseEndpoint, usesCustomDigestKey);

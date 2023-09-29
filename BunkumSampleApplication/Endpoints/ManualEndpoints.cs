@@ -6,5 +6,5 @@ namespace BunkumSampleApplication.Endpoints;
 public class ManualEndpoints : EndpointGroup
 {
     public string ManuallyAddedEndpoint(RequestContext context) =>
-        "This endpoint was added manually by BunkumHttpServer.AddEndpointGroup";
+        "This endpoint was added manually by BunkumServer.AddEndpointGroup";
 }

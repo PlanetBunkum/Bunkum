@@ -10,7 +10,7 @@ public class NullByteRemoval : ServerDependentTest
     [Test]
     public async Task TestNullByteRemovalString()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<BodyEndpoints>();
 
         HttpRequestMessage request = new(HttpMethod.Post, "/body/string");
@@ -27,7 +27,7 @@ public class NullByteRemoval : ServerDependentTest
     [Test]
     public async Task TestNullByteRemovalJson()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<BodyEndpoints>();
 
         BodyEndpoints.Serializable obj = new()
@@ -49,7 +49,7 @@ public class NullByteRemoval : ServerDependentTest
     [Test]
     public async Task TestNullByteRemovalXml()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<BodyEndpoints>();
 
         BodyEndpoints.Serializable obj = new()
@@ -75,7 +75,7 @@ public class NullByteRemoval : ServerDependentTest
     [Test]
     public async Task TestNullByteRemovalByteArray()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<BodyEndpoints>();
 
         const string str = "BeforeNull\0AfterNull\0\0";

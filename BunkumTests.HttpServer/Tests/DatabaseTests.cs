@@ -9,7 +9,7 @@ public class DatabaseTests : ServerDependentTest
     [Test]
     public async Task PassesInDatabase()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<DatabaseEndpoints>();
 
         HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/db/null"));
@@ -23,7 +23,7 @@ public class DatabaseTests : ServerDependentTest
     [Test]
     public async Task GetsValueFromDatabase()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<DatabaseEndpoints>();
 
         HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/db/value"));

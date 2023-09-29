@@ -24,9 +24,9 @@ namespace Bunkum.Core;
 /// </summary>
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-public partial class BunkumHttpServer : IHotReloadable
+public partial class BunkumServer : IHotReloadable
 {
-    private readonly BunkumHttpListener _listener;
+    private readonly BunkumListener _listener;
     public readonly Logger Logger;
     
     private IDatabaseProvider<IDatabaseContext> _databaseProvider = new DummyDatabaseProvider();
@@ -35,7 +35,7 @@ public partial class BunkumHttpServer : IHotReloadable
     private readonly List<IMiddleware> _middlewares = new();
     private readonly List<Service> _services = new();
 
-    private BunkumHttpServer(bool setListener, bool logToConsole, LoggerConfiguration? configuration)
+    private BunkumServer(bool setListener, bool logToConsole, LoggerConfiguration? configuration)
     {
         configuration ??= LoggerConfiguration.Default;
         
@@ -49,7 +49,7 @@ public partial class BunkumHttpServer : IHotReloadable
             this.Logger.LogInfo(BunkumCategory.Startup, "You can override where data is stored using the BUNKUM_DATA_FOLDER environment variable.");
         }
 
-        BunkumConfig bunkumConfig = Config.LoadFromFile<BunkumConfig>("bunkum.json", this.Logger);
+        BunkumConfig bunkumConfig = Config.LoadFromJsonFile<BunkumConfig>("bunkum.json", this.Logger);
         this._configs = new List<Config>(2)
         {
             bunkumConfig,
@@ -58,7 +58,7 @@ public partial class BunkumHttpServer : IHotReloadable
         if (setListener)
         {
             Uri listenEndpoint = new($"http://{bunkumConfig.ListenHost}:{bunkumConfig.ListenPort}");
-            this._listener = new SocketHttpListener(listenEndpoint, bunkumConfig.UseForwardedIp, this.Logger);
+            this._listener = new SocketListener(listenEndpoint, bunkumConfig.UseForwardedIp, this.Logger);
         }
         else
         {
@@ -68,12 +68,12 @@ public partial class BunkumHttpServer : IHotReloadable
         HotReloadRegistry.RegisterReloadable(this);
     }
 
-    public BunkumHttpServer(LoggerConfiguration? configuration = null) : this(true, true, configuration) {}
+    public BunkumServer(LoggerConfiguration? configuration = null) : this(true, true, configuration) {}
     
-    public BunkumHttpServer(BunkumHttpListener listener, bool logToConsole = true, LoggerConfiguration? configuration = null) : this(false, logToConsole, configuration)
+    public BunkumServer(BunkumListener listener, bool logToConsole = true, LoggerConfiguration? configuration = null) : this(false, logToConsole, configuration)
     {
         this._listener = listener;
-        if (listener is DirectHttpListener directListener)
+        if (listener is DirectListener directListener)
         {
             directListener.Callback = context =>
             {
@@ -297,13 +297,13 @@ public partial class BunkumHttpServer : IHotReloadable
         }
     }
 
-    private Action<BunkumHttpServer>? _initialize;
+    private Action<BunkumServer>? _initialize;
     /// <summary>
     /// The initialization function for the server. Called after startup and after hot reload.
     /// You do not need to clear Bunkum's state during a hot reload - Bunkum will wipe everything for you. 
     /// </summary>
     /// <exception cref="InvalidOperationException">An initializer has already been declared, or the value is null.</exception>
-    public Action<BunkumHttpServer>? Initialize
+    public Action<BunkumServer>? Initialize
     {
         private get => this._initialize;
         set
@@ -322,7 +322,7 @@ public partial class BunkumHttpServer : IHotReloadable
         if (this.Initialize == null)
         {
             this.Logger.LogWarning(BunkumCategory.Server, "The server's configuration does not properly support hot reloading.");
-            this.Logger.LogWarning(BunkumCategory.Server, "To resolve this, move your initialization code into `BunkumHttpServer.Initialize`.");
+            this.Logger.LogWarning(BunkumCategory.Server, "To resolve this, move your initialization code into `{0}.{1}`.", nameof(BunkumServer), nameof(this.Initialize));
             return;
         }
         
@@ -420,7 +420,7 @@ public partial class BunkumHttpServer : IHotReloadable
     /// </summary>
     /// <param name="filename">What the config's filename should be stored as</param>
     /// <typeparam name="TConfig">An object extending <see cref="Config"/> that represents your server's configuration.</typeparam>
-    /// <seealso cref="Config.LoadFromJsonFile"/>
+    /// <seealso cref="Config.LoadFromJsonFile{TConfig}"/>
     public void AddConfigFromJsonFile<TConfig>(string filename) where TConfig : Config, new()
     {
         TConfig config = Config.LoadFromJsonFile<TConfig>(filename, this.Logger);
@@ -432,7 +432,7 @@ public partial class BunkumHttpServer : IHotReloadable
     /// </summary>
     /// <param name="filename">What the config's filename should be stored as</param>
     /// <typeparam name="TConfig">An object extending <see cref="Config"/> that represents your server's configuration.</typeparam>
-    /// <seealso cref="Config.LoadFromFile"/>
+    /// <seealso cref="Config.LoadFromJsonFile{TConfig}"/>
     [Obsolete($"This method was renamed to {nameof(AddConfigFromJsonFile)} for consistency. Please use the new method.")]
     public void UseJsonConfig<TConfig>(string filename) where TConfig : Config, new()
         => this.AddConfigFromJsonFile<TConfig>(filename);

@@ -10,7 +10,7 @@ public class StorageIntegrationTests : ServerDependentTest
     [Test]
     public async Task PutsAndGetsData()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<StorageEndpoints>();
         server.AddStorageService<InMemoryDataStore>();
         

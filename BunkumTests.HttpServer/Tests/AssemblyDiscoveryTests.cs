@@ -8,7 +8,7 @@ public class AssemblyDiscoveryTests : ServerDependentTest
     [Test]
     public void CanDiscoverFromThisAssembly()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         
         HttpResponseMessage msg = client.Send(new HttpRequestMessage(HttpMethod.Get, "/"));
         Assert.That(msg.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));

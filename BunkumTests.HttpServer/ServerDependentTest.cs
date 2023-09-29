@@ -14,12 +14,12 @@ public class ServerDependentTest
     private readonly ConcurrentQueue<Action> _stopTasks = new();
 
     [Pure]
-    private protected (BunkumHttpServer, HttpClient) Setup(bool start = true)
+    private protected (BunkumServer, HttpClient) Setup(bool start = true)
     {
-        DirectHttpListener listener = new(new Logger());
+        DirectListener listener = new(new Logger());
         HttpClient client = listener.GetClient();
 
-        BunkumHttpServer server = new(listener);
+        BunkumServer server = new(listener);
         server.AddAuthenticationService();
         if(start) server.Start(0);
         

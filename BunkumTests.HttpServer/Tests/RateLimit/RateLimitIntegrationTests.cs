@@ -15,7 +15,7 @@ public class RateLimitIntegrationTests : ServerDependentTest
         MockTimeProvider timeProvider = new();
         RateLimiter rateLimiter = new(timeProvider);
         
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<TestEndpoints>();
         server.AddService<RateLimitService>(rateLimiter);
         
@@ -33,7 +33,7 @@ public class RateLimitIntegrationTests : ServerDependentTest
         MockTimeProvider timeProvider = new();
         RateLimiter rateLimiter = new(timeProvider);
         
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<TestEndpoints>();
         server.AddService<RateLimitService>(rateLimiter);
 
@@ -54,7 +54,7 @@ public class RateLimitIntegrationTests : ServerDependentTest
         MockTimeProvider timeProvider = new();
         RateLimiter rateLimiter = new(timeProvider);
         
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<TestEndpoints>();
         server.AddService<RateLimitService>(rateLimiter);
 
@@ -78,7 +78,7 @@ public class RateLimitIntegrationTests : ServerDependentTest
         MockTimeProvider timeProvider = new();
         RateLimiter rateLimiter = new(timeProvider);
         
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<TestEndpoints>();
         server.AddService<RateLimitService>(rateLimiter);
 

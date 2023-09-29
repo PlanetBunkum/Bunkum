@@ -42,7 +42,7 @@ public class RoutingTests : ServerDependentTest
     [Test]
     public async Task ReturnsCorrectEndpointWhenBothStartWithSameName()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<RouteStartsWithEndpoints>();
         
         HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/sw/asdf"));
@@ -61,7 +61,7 @@ public class RoutingTests : ServerDependentTest
     // ReSharper restore StringLiteralTypo
     public async Task GetsRouteParameter(string text)
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<RouteParameterEndpoints>();
         
         HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/param/" + text));
@@ -82,7 +82,7 @@ public class RoutingTests : ServerDependentTest
     // ReSharper restore StringLiteralTypo
     public async Task GetsInlineRouteParameter(string text)
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<RouteParameterEndpoints>();
         
         HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/inlineParam/inline" + text));
@@ -96,7 +96,7 @@ public class RoutingTests : ServerDependentTest
     [Test]
     public async Task GetsMultipleRouteParameters()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<RouteParameterEndpoints>();
         
         HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/params/asdf/fdsa"));

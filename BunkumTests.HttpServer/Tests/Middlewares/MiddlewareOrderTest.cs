@@ -9,7 +9,7 @@ public class MiddlewareOrderTest : ServerDependentTest
     [Test]
     public async Task MiddlewaresOrderCorrectly()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddMiddleware<MiddlewareA>();
         server.AddMiddleware<MiddlewareB>(); // Adding MiddlewareB encapsulates MiddlewareA
         server.AddEndpointGroup<TestEndpoints>();

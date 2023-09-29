@@ -2,7 +2,7 @@
 using Bunkum.ProfanityFilter;
 using Bunkum.ProfanityFilter.Test;
 
-BunkumHttpServer server = new();
+BunkumServer server = new();
 server.AddProfanityService();
 
 server.AddEndpointGroup<FilterEndpoints>();

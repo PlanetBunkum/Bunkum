@@ -9,7 +9,7 @@ public class AuthenticationTests : ServerDependentTest
     [Test]
     public async Task WorksWhenAuthenticated()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<AuthenticationEndpoints>();
         
         HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/auth"));
@@ -24,7 +24,7 @@ public class AuthenticationTests : ServerDependentTest
     [Test]
     public async Task FailsWhenNotAuthenticated()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<AuthenticationEndpoints>();
         
         client.DefaultRequestHeaders.Add("dummy-skip-auth", "true");
@@ -36,7 +36,7 @@ public class AuthenticationTests : ServerDependentTest
     [Test]
     public async Task TokenWorksWhenAuthenticated()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<AuthenticationEndpoints>();
         
         HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/token"));
@@ -51,7 +51,7 @@ public class AuthenticationTests : ServerDependentTest
     [Test]
     public async Task TokenFailsWhenNotAuthenticated()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<AuthenticationEndpoints>();
         
         client.DefaultRequestHeaders.Add("dummy-skip-auth", "true");

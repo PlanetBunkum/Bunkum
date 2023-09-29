@@ -7,11 +7,11 @@ using NotEnoughLogs;
 
 namespace Bunkum.Core.Listener.Listeners.Direct;
 
-public class DirectHttpListener : BunkumHttpListener
+public class DirectListener : BunkumListener
 {
     public Action<ListenerContext>? Callback { private get; set; }
 
-    public DirectHttpListener(Logger logger) : base(logger)
+    public DirectListener(Logger logger) : base(logger)
     {}
 
     public HttpClient GetClient()

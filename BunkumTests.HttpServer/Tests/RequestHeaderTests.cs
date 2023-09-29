@@ -8,7 +8,7 @@ public class RequestHeaderTests : ServerDependentTest
     [Test]
     public async Task ParsesHeadersCorrectly()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<HeaderEndpoints>();
 
         client.DefaultRequestHeaders.TryAddWithoutValidation("X-Test-Header", "test");
@@ -19,7 +19,7 @@ public class RequestHeaderTests : ServerDependentTest
     [Test]
     public async Task ParsesCookiesCorrectly()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<HeaderEndpoints>();
 
         client.DefaultRequestHeaders.TryAddWithoutValidation("Cookie", "cookie=test;cookie2=test2");

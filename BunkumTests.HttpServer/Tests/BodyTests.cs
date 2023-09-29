@@ -12,7 +12,7 @@ public class BodyTests : ServerDependentTest
     [TestCase("/body/stream")]
     public async Task CorrectResponseForAllTypes(string endpoint)
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<BodyEndpoints>();
         
         HttpResponseMessage msg = await client.PostAsync(endpoint, new StringContent("works"));
@@ -26,7 +26,7 @@ public class BodyTests : ServerDependentTest
     [Test]
     public async Task ReturnsBadRequestOnNoData()
     {
-        (BunkumHttpServer server, HttpClient client) = this.Setup();
+        (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<BodyEndpoints>();
         
         HttpResponseMessage msg = await client.PostAsync("/body/string", null);

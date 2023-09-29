@@ -10,7 +10,7 @@ namespace Bunkum.Core.Listener;
 /// A custom HTTP socket listener used by Bunkum's HTTP server.
 /// This probably isn't what you're looking for. 
 /// </summary>
-public abstract class BunkumHttpListener : IDisposable
+public abstract class BunkumListener : IDisposable
 {
     /// <summary>
     /// The logger.
@@ -38,7 +38,7 @@ public abstract class BunkumHttpListener : IDisposable
     /// Instantiates the listener, passing in the logger.
     /// </summary>
     /// <param name="logger">The logger to use for this listener.</param>
-    protected BunkumHttpListener(Logger logger)
+    protected BunkumListener(Logger logger)
     {
         this.Logger = logger;
     }

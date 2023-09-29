@@ -15,7 +15,7 @@ namespace Bunkum.Core;
 
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-public partial class BunkumHttpServer // Services
+public partial class BunkumServer // Services
 {
     #region Dependency Injection
 

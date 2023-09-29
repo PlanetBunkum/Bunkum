@@ -4,7 +4,7 @@ using BunkumConsole = Bunkum.Core.BunkumConsole;
 
 BunkumConsole.AllocateConsole();
 
-BunkumHttpServer server = new();
+BunkumServer server = new();
 server.Initialize = s =>
 {
     s.AddHealthCheckService();
