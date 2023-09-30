@@ -1,5 +1,5 @@
 using System.Reflection;
-using Bunkum.Core.Listener.Request;
+using Bunkum.Listener.Request;
 
 namespace Bunkum.Core.RateLimit;
 

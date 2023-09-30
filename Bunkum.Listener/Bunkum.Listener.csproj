@@ -5,8 +5,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <AssemblyName>Bunkum.Core.Listener</AssemblyName>
-        <RootNamespace>Bunkum.Core.Listener</RootNamespace>
+        <AssemblyName>Bunkum.Listener</AssemblyName>
+        <RootNamespace>Bunkum.Listener</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

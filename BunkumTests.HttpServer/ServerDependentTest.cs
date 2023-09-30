@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Bunkum.Core;
-using Bunkum.Core.Listener.Listeners.Direct;
+using Bunkum.Listener.Listeners.Direct;
 using JetBrains.Annotations;
 using NotEnoughLogs;
 

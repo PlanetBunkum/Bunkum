@@ -1,6 +1,6 @@
 using BenchmarkDotNet.Attributes;
 using Bunkum.Core;
-using Bunkum.Core.Listener.Listeners.Direct;
+using Bunkum.Listener.Listeners.Direct;
 using BunkumTests.HttpServer.Endpoints;
 using NotEnoughLogs;
 

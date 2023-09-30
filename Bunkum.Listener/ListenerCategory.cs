@@ -1,4 +1,4 @@
-namespace Bunkum.Core.Listener;
+namespace Bunkum.Listener;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 public enum ListenerCategory

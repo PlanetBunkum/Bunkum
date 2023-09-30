@@ -1,7 +1,7 @@
 using System.Reflection;
 using Bunkum.Core.Database;
-using Bunkum.Core.Listener.Request;
 using Bunkum.Core.Responses;
+using Bunkum.Listener.Request;
 using NotEnoughLogs;
 
 namespace Bunkum.Core.Services;

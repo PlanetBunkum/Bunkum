@@ -1,6 +1,6 @@
 using System.Net.Sockets;
 
-namespace Bunkum.Core.Listener.Request;
+namespace Bunkum.Listener.Request;
 
 public class SocketListenerContext : ListenerContext
 {

@@ -1,5 +1,5 @@
 using Bunkum.Core.Endpoints;
-using Bunkum.Core.Listener.Protocol;
+using Bunkum.Listener.Protocol;
 
 namespace Bunkum.Core.Health.Endpoints;
 

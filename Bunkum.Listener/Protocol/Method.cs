@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace Bunkum.Core.Listener.Protocol;
+namespace Bunkum.Listener.Protocol;
 
 public record Method(string Value)
 {

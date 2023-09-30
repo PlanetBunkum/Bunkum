@@ -1,5 +1,5 @@
 using Bunkum.Core.Database;
-using Bunkum.Core.Listener.Request;
+using Bunkum.Listener.Request;
 
 namespace Bunkum.Core.Authentication.Dummy;
 

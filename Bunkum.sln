@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BunkumTests.HttpServer", "B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BunkumTests.HttpServerManual", "BunkumTests.HttpServerManual\BunkumTests.HttpServerManual.csproj", "{B3667C3A-FB7A-43A2-A447-1B6F27BCC8C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bunkum.Core.Listener", "Bunkum.Core.Listener\Bunkum.Core.Listener.csproj", "{4A5BC9E5-E7AF-4F0B-B9FE-2BC0E4A6D8D1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bunkum.Listener", "Bunkum.Listener\Bunkum.Listener.csproj", "{4A5BC9E5-E7AF-4F0B-B9FE-2BC0E4A6D8D1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BunkumTests.Benchmarks", "BunkumTests.Benchmarks\BunkumTests.Benchmarks.csproj", "{09433A85-130A-42ED-9DDE-320F45080392}"
 EndProject

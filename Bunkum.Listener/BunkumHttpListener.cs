@@ -1,9 +1,8 @@
 using System.Text;
-using Bunkum.Core.Listener.Extensions;
-using Bunkum.Core.Listener.Request;
+using Bunkum.Listener.Extensions;
 using NotEnoughLogs;
 
-namespace Bunkum.Core.Listener;
+namespace Bunkum.Listener;
 
 public abstract class BunkumHttpListener : BunkumListener
 {

@@ -1,10 +1,8 @@
 using System.Net;
-using System.Text;
-using Bunkum.Core.Listener.Extensions;
-using Bunkum.Core.Listener.Request;
+using Bunkum.Listener.Request;
 using NotEnoughLogs;
 
-namespace Bunkum.Core.Listener;
+namespace Bunkum.Listener;
 
 /// <summary>
 /// A custom HTTP socket listener used by Bunkum's HTTP server.

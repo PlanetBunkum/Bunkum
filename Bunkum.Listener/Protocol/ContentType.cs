@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace Bunkum.Core.Listener.Protocol;
+namespace Bunkum.Listener.Protocol;
 
 /// <summary>
 /// A MIME content-type.

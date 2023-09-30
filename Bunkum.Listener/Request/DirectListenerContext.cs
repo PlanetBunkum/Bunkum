@@ -1,4 +1,4 @@
-namespace Bunkum.Core.Listener.Request;
+namespace Bunkum.Listener.Request;
 
 public class DirectListenerContext : ListenerContext
 {

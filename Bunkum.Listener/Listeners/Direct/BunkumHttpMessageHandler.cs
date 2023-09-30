@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Net;
-using Bunkum.Core.Listener.Extensions;
+using Bunkum.Listener.Extensions;
 
-namespace Bunkum.Core.Listener.Listeners.Direct;
+namespace Bunkum.Listener.Listeners.Direct;
 
 public class BunkumHttpMessageHandler : HttpMessageHandler
 {

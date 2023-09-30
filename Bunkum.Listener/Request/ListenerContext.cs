@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
-using Bunkum.Core.Listener.Protocol;
+using Bunkum.Listener.Protocol;
 
-namespace Bunkum.Core.Listener.Request;
+namespace Bunkum.Listener.Request;
 
 /// <summary>
 /// The listener's context for a request. Controls the request and its data.

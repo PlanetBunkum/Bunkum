@@ -3,14 +3,13 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Web;
-using Bunkum.Core.Listener.Extensions;
-using Bunkum.Core.Listener.Parsing;
-using Bunkum.Core.Listener.Protocol;
-using Bunkum.Core.Listener.Request;
+using Bunkum.Listener.Extensions;
+using Bunkum.Listener.Protocol;
+using Bunkum.Listener.Request;
 using NotEnoughLogs;
-using HttpVersion = Bunkum.Core.Listener.Request.HttpVersion;
+using HttpVersion = Bunkum.Listener.Request.HttpVersion;
 
-namespace Bunkum.Core.Listener.Listeners;
+namespace Bunkum.Listener.Listeners;
 
 public partial class SocketHttpListener : BunkumHttpListener
 {

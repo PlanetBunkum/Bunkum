@@ -2,7 +2,7 @@ using System.Text;
 using System.Xml.Serialization;
 using Bunkum.Core;
 using Bunkum.Core.Endpoints;
-using Bunkum.Core.Listener.Protocol;
+using Bunkum.Listener.Protocol;
 using Newtonsoft.Json;
 
 namespace BunkumTests.HttpServer.Endpoints;

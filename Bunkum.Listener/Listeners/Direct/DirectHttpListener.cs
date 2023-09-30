@@ -1,12 +1,11 @@
 using System.Diagnostics;
 using System.Net;
 using System.Web;
-using Bunkum.Core.Listener.Parsing;
-using Bunkum.Core.Listener.Protocol;
-using Bunkum.Core.Listener.Request;
+using Bunkum.Listener.Protocol;
+using Bunkum.Listener.Request;
 using NotEnoughLogs;
 
-namespace Bunkum.Core.Listener.Listeners.Direct;
+namespace Bunkum.Listener.Listeners.Direct;
 
 public class DirectHttpListener : BunkumHttpListener
 {

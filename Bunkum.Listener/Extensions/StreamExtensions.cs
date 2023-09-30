@@ -1,4 +1,4 @@
-namespace Bunkum.Core.Listener.Extensions;
+namespace Bunkum.Listener.Extensions;
 
 internal static class StreamExtensions
 {

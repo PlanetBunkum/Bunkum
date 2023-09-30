@@ -45,7 +45,7 @@
       <OutputItemType>Analyzer</OutputItemType>
       <IncludeAssets>Bunkum.Analyzers.dll</IncludeAssets>
     </ProjectReference>
-    <ProjectReference Include="..\Bunkum.Core.Listener\Bunkum.Core.Listener.csproj">
+    <ProjectReference Include="..\Bunkum.Listener\Bunkum.Listener.csproj">
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
       <IncludeAssets>Bunkum.CustomHttpListener.dll</IncludeAssets>
     </ProjectReference>

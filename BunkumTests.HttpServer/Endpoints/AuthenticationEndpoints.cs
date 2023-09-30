@@ -1,7 +1,7 @@
 using Bunkum.Core;
 using Bunkum.Core.Authentication.Dummy;
 using Bunkum.Core.Endpoints;
-using Bunkum.Core.Listener.Protocol;
+using Bunkum.Listener.Protocol;
 
 namespace BunkumTests.HttpServer.Endpoints;
 

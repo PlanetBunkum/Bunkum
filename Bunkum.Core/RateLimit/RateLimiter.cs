@@ -1,8 +1,8 @@
 using System.Net;
 using System.Reflection;
-using Bunkum.Core.Listener.Request;
 using Bunkum.Core.RateLimit.Info;
 using Bunkum.Core.Time;
+using Bunkum.Listener.Request;
 
 namespace Bunkum.Core.RateLimit;
 

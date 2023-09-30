@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Web;
-using Bunkum.Core.Listener.Protocol;
-using Bunkum.Core.Listener.Parsing;
+using Bunkum.Listener.Protocol;
 using JetBrains.Annotations;
 
 namespace Bunkum.Core.Endpoints;

@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Bunkum.Core.Listener\Bunkum.Core.Listener.csproj" />
+      <ProjectReference Include="..\Bunkum.Listener\Bunkum.Listener.csproj" />
       <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
 
 

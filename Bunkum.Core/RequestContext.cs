@@ -1,9 +1,9 @@
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using Bunkum.Core.Listener.Protocol;
+using Bunkum.Listener.Protocol;
 using NotEnoughLogs;
-using HttpVersion = Bunkum.Core.Listener.Request.HttpVersion;
+using HttpVersion = Bunkum.Listener.Request.HttpVersion;
 
 namespace Bunkum.Core;
 

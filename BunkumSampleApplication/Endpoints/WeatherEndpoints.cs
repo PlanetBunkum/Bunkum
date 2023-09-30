@@ -1,8 +1,8 @@
 using Bunkum.Core;
 using Bunkum.Core.Database.Dummy;
 using Bunkum.Core.Endpoints;
-using Bunkum.Core.Listener.Protocol;
 using Bunkum.Core.Storage;
+using Bunkum.Listener.Protocol;
 using BunkumSampleApplication.Configuration;
 using BunkumSampleApplication.Models;
 

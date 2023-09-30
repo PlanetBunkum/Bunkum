@@ -1,6 +1,6 @@
 using System.Reflection;
-using Bunkum.Core.Listener.Request;
 using Bunkum.Core.RateLimit;
+using Bunkum.Listener.Request;
 using BunkumTests.HttpServer.Time;
 
 namespace BunkumTests.HttpServer.Tests.RateLimit;

@@ -1,7 +1,7 @@
 using System.Net;
 using Bunkum.Core;
 using Bunkum.Core.Endpoints;
-using Bunkum.Core.Listener.Protocol;
+using Bunkum.Listener.Protocol;
 
 namespace Bunkum.ProfanityFilter.Test;
 

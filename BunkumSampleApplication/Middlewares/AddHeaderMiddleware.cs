@@ -1,6 +1,6 @@
 using Bunkum.Core.Database;
 using Bunkum.Core.Endpoints.Middlewares;
-using Bunkum.Core.Listener.Request;
+using Bunkum.Listener.Request;
 
 namespace BunkumSampleApplication.Middlewares;
 
