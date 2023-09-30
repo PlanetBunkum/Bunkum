@@ -8,15 +8,12 @@ using Bunkum.Core.Listener.Parsing;
 namespace Bunkum.Core.Listener.Request;
 
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
-public abstract class ListenerContext<TStatusCode, TProtocolVersion, TProtocolMethod>
-    where TStatusCode : Enum
-    where TProtocolVersion : Enum
-    where TProtocolMethod : Enum
+public abstract class ListenerContext
 {
     public MemoryStream InputStream { get; set; } = null!;
 
-    public TProtocolVersion Version { get; set; }
-    public TProtocolMethod Method { get; set; }
+    public HttpVersion Version { get; set; }
+    public Method Method { get; set; }
     public Uri Uri { get; set; } = null!;
 
     public readonly NameValueCollection RequestHeaders = new();
@@ -51,7 +48,7 @@ public abstract class ListenerContext<TStatusCode, TProtocolVersion, TProtocolMe
     protected abstract bool CanSendData { get; }
 
     // Response
-    public TStatusCode ResponseCode;
+    public HttpStatusCode ResponseCode = HttpStatusCode.OK;
     public ContentType? ResponseType;
 
     private int _responseLength;
@@ -80,12 +77,35 @@ public abstract class ListenerContext<TStatusCode, TProtocolVersion, TProtocolMe
         await this.SendResponse(this.ResponseCode, dataSlice);
     }
 
-    public abstract Task SendResponse(TStatusCode code, ArraySegment<byte>? data = null);
+    public async Task SendResponse(HttpStatusCode code, ArraySegment<byte>? data = null)
+    {
+        if (!this.CanSendData) return;
+        
+        // this is dumb and stupid
+        this.ResponseHeaders.Add("Server", "Bunkum");
+        this.ResponseHeaders.Add("Connection", "close");
+        this.ResponseHeaders.Add("Date", DateTime.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'"));
+        
+        List<string> response = new() { $"HTTP/1.1 {(int)code} {code.ToString()}" }; // TODO: spaced code names ("Not Found" instead of "NotFound")
+        foreach ((string? key, string? value) in this.ResponseHeaders)
+        {
+            Debug.Assert(key != null);
+            Debug.Assert(value != null);
+            
+            response.Add($"{key}: {value}");
+        }
+        response.Add("\r\n");
+
+        await this.SendBufferSafe(string.Join("\r\n", response));
+        if (data.HasValue) await this.SendBufferSafe(data.Value);
+        
+        this.CloseConnection();
+    }
 
     protected abstract void CloseConnection();
 
-    protected Task SendBufferSafe(string str) => this.SendBufferSafe(Encoding.UTF8.GetBytes(str));
-    protected async Task SendBufferSafe(ArraySegment<byte> buffer)
+    private Task SendBufferSafe(string str) => this.SendBufferSafe(Encoding.UTF8.GetBytes(str));
+    private async Task SendBufferSafe(ArraySegment<byte> buffer)
     {
         if (!this.CanSendData) return;
         
@@ -100,7 +120,4 @@ public abstract class ListenerContext<TStatusCode, TProtocolVersion, TProtocolMe
     }
 
     protected abstract Task SendBuffer(ArraySegment<byte> buffer);
-
-    public abstract Task HandleNoEndpoint();
-    public abstract Task HandleInvalidRequest();
 }

@@ -4,13 +4,12 @@ using Bunkum.Core;
 using Bunkum.Core.Endpoints;
 using Bunkum.Core.Listener.Parsing;
 using Newtonsoft.Json;
-using HttpMethod = Bunkum.Core.Listener.Parsing.HttpMethod;
 
 namespace BunkumTests.HttpServer.Endpoints;
 
 public class BodyEndpoints : EndpointGroup
 {
-    [Endpoint("/body/string", HttpMethod.Post)]
+    [Endpoint("/body/string", Method.Post)]
     public string String(RequestContext context, string body)
     {
         return body;
@@ -23,25 +22,25 @@ public class BodyEndpoints : EndpointGroup
         public string Field = "";
     }
     
-    [Endpoint("/body/json", HttpMethod.Post, ContentType.Json)]
+    [Endpoint("/body/json", Method.Post, ContentType.Json)]
     public Serializable Json(RequestContext context, Serializable body)
     {
         return body;
     }
     
-    [Endpoint("/body/xml", HttpMethod.Post, ContentType.Xml)]
+    [Endpoint("/body/xml", Method.Post, ContentType.Xml)]
     public Serializable Xml(RequestContext context, Serializable body)
     {
         return body;
     }
     
-    [Endpoint("/body/byteArray", HttpMethod.Post)]
+    [Endpoint("/body/byteArray", Method.Post)]
     public string ByteArray(RequestContext context, byte[] body)
     {
         return Encoding.Default.GetString(body);
     }
     
-    [Endpoint("/body/stream", HttpMethod.Post)]
+    [Endpoint("/body/stream", Method.Post)]
     public string Stream(RequestContext context, Stream body)
     {
         MemoryStream stream = (MemoryStream)body;

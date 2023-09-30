@@ -1,15 +1,14 @@
 using System.Diagnostics;
 using System.Net;
 using Bunkum.Core.Listener.Extensions;
-using HttpListenerContext = Bunkum.Core.Listener.Request.Http.HttpListenerContext;
 
 namespace Bunkum.Core.Listener.Listeners.Direct;
 
 public class BunkumHttpMessageHandler : HttpMessageHandler
 {
-    private readonly DirectHttpListener _listener;
+    private readonly DirectListener _listener;
 
-    public BunkumHttpMessageHandler(DirectHttpListener listener)
+    public BunkumHttpMessageHandler(DirectListener listener)
     {
         this._listener = listener;
     }
@@ -53,7 +52,7 @@ public class BunkumHttpMessageHandler : HttpMessageHandler
 
         string contentLengthStr = "0";
         
-        foreach ((string? key, string? value) in BunkumHttpListener.ReadHeaders(stream))
+        foreach ((string? key, string? value) in BunkumListener.ReadHeaders(stream))
         {
             Debug.Assert(key != null);
             Debug.Assert(value != null);

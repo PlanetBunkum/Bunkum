@@ -28,7 +28,7 @@ BunkumServer server = new(new LoggerConfiguration
 server.Initialize = s =>
 {
     // Discover all 'endpoints' from the assembly we're currently running - BunkumSampleApplication
-    // This httpMethod looks for methods in the given extending EndpointGroup, and makes them routable to Bunkum.
+    // This method looks for methods in the given extending EndpointGroup, and makes them routable to Bunkum.
     // If you've used ASP.NET before, Endpoints are essentially 
     s.DiscoverEndpointsFromAssembly(Assembly.GetExecutingAssembly());
     

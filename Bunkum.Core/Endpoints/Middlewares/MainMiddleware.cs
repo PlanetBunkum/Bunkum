@@ -84,7 +84,7 @@ internal class MainMiddleware : IMiddleware
                         if (response != null) return response;
                     }
 
-                    // Build list to invoke endpoint httpMethod with
+                    // Build list to invoke endpoint method with
                     List<object?> invokeList = new() { 
                         new RequestContext // 1st argument is always the request context. This is fact, and is backed by an analyzer.
                         {
@@ -95,13 +95,13 @@ internal class MainMiddleware : IMiddleware
                             Cookies = context.Cookies,
                             RemoteEndpoint = context.RemoteEndpoint,
                             Version = context.Version,
-                            HttpMethod = context.Method,
+                            Method = context.Method,
                             RequestHeaders = context.RequestHeaders,
                             ResponseHeaders = context.ResponseHeaders,
                         },
                     };
 
-                    // Next, lets iterate through the httpMethod's arguments and add some based on what we find.
+                    // Next, lets iterate through the method's arguments and add some based on what we find.
                     {
                         Response? response = this.InjectParametersIntoEndpointInvocation(context, method, attribute, body, parameters, database, invokeList);
                         if (response != null) return response;
@@ -211,7 +211,7 @@ internal class MainMiddleware : IMiddleware
             }
             else if (paramType == typeof(string))
             {
-                // Attempt to pass in a route parameter based on the httpMethod parameter's name
+                // Attempt to pass in a route parameter based on the method parameter's name
                 invokeList.Add(parameters!.GetValueOrDefault(param.Name));
             }
             else if (paramType == typeof(int) || paramType == typeof(int?))

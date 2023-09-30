@@ -3,8 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using Bunkum.Core.Listener.Parsing;
 using NotEnoughLogs;
-using HttpMethod = Bunkum.Core.Listener.Parsing.HttpMethod;
-using HttpVersion = Bunkum.Core.Listener.Request.Http.HttpVersion;
+using HttpVersion = Bunkum.Core.Listener.Request.HttpVersion;
 
 namespace Bunkum.Core;
 
@@ -15,7 +14,7 @@ public struct RequestContext
     public MemoryStream RequestStream { get; internal set; }
 
     public HttpVersion Version { get; internal set; }
-    public HttpMethod HttpMethod { get; internal set; }
+    public Method Method { get; internal set; }
     public Uri Url { get; internal set; }
     
     public Logger Logger { get; internal set; }

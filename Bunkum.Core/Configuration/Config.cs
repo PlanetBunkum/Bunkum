@@ -74,7 +74,7 @@ public abstract class Config
     /// <typeparam name="TConfig">An object extending <see cref="Config"/> that represents your server's configuration.</typeparam>
     /// <returns>The configuration, either freshly created or previously existing.</returns>
     /// <exception cref="ArgumentNullException">The file could not be found or created.</exception>
-    [Obsolete($"This httpMethod was renamed to {nameof(LoadFromJsonFile)} for consistency. Please use the new httpMethod.")]
+    [Obsolete($"This method was renamed to {nameof(LoadFromJsonFile)} for consistency. Please use the new method.")]
     public static TConfig LoadFromFile<TConfig>(string filename, Logger logger) where TConfig : Config, new()
     {
         return LoadFromJsonFile<TConfig>(filename, logger);

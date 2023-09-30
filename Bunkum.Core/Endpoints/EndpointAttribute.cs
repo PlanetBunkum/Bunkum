@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Web;
 using Bunkum.Core.Listener.Parsing;
 using JetBrains.Annotations;
-using HttpMethod = Bunkum.Core.Listener.Parsing.HttpMethod;
 
 namespace Bunkum.Core.Endpoints;
 
@@ -13,7 +12,7 @@ public class EndpointAttribute : Attribute
     public readonly string FullRoute;
     private readonly Dictionary<int, RouteParam> _parameterIndexes = new();
 
-    public readonly HttpMethod HttpMethod;
+    public readonly Method Method;
     public readonly ContentType ContentType;
 
     private struct RouteParam
@@ -28,9 +27,9 @@ public class EndpointAttribute : Attribute
         }
     }
 
-    public EndpointAttribute(string route, HttpMethod httpMethod = HttpMethod.Get, ContentType contentType = ContentType.Plaintext)
+    public EndpointAttribute(string route, Method method = Method.Get, ContentType contentType = ContentType.Plaintext)
     {
-        this.HttpMethod = httpMethod;
+        this.Method = method;
         this.ContentType = contentType;
 
         // Skip scanning for parameters if the route obviously doesn't contain one
@@ -88,21 +87,21 @@ public class EndpointAttribute : Attribute
         this.FullRoute = fullRoute;
     }
 
-    public EndpointAttribute(string route, ContentType contentType, HttpMethod httpMethod = HttpMethod.Get)
-        : this(route, httpMethod, contentType)
+    public EndpointAttribute(string route, ContentType contentType, Method method = Method.Get)
+        : this(route, method, contentType)
     {
         
     }
 
     [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
-    public bool UriMatchesRoute(Uri? uri, HttpMethod httpMethod, out Dictionary<string, string> parameters)
+    public bool UriMatchesRoute(Uri? uri, Method method, out Dictionary<string, string> parameters)
     {
         parameters = new Dictionary<string, string>();
         if (uri == null) return false;
         
         string path = uri.AbsolutePath;
 
-        if (httpMethod != this.HttpMethod) return false;
+        if (method != this.Method) return false;
         if (this.FullRoute == path) return true;
         if (this._parameterIndexes.Count != 0)
         {

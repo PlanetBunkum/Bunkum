@@ -1,6 +1,6 @@
 namespace Bunkum.Core.Listener.Parsing;
 
-public enum HttpMethod
+public enum Method
 {
     Invalid,
     Get,
@@ -16,14 +16,14 @@ public enum HttpMethod
 
 public static class MethodUtils
 {
-    public static HttpMethod FromString(ReadOnlySpan<char> str)
+    public static Method FromString(ReadOnlySpan<char> str)
     {
         // ReSharper disable once LoopCanBeConvertedToQuery (this literally won't compile)
-        foreach (HttpMethod m in Enum.GetValues<HttpMethod>())
+        foreach (Method m in Enum.GetValues<Method>())
         {
             if (m.ToString().ToUpperInvariant().AsSpan().SequenceEqual(str)) return m;
         }
 
-        return HttpMethod.Invalid;
+        return Method.Invalid;
     }
 }

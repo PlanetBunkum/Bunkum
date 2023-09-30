@@ -38,7 +38,7 @@ public abstract class Service
     {}
 
     /// <summary>
-    /// Called when the endpoint is looking for a custom parameter. You can provide one using this httpMethod.
+    /// Called when the endpoint is looking for a custom parameter. You can provide one using this method.
     /// </summary>
     /// <param name="context">The context of the request.</param>
     /// <param name="parameter">Information about the parameter being processed.</param>
