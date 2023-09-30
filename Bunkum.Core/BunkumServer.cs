@@ -8,8 +8,6 @@ using Bunkum.Core.Database.Dummy;
 using Bunkum.Core.Endpoints;
 using Bunkum.Core.Endpoints.Middlewares;
 using Bunkum.Core.Listener;
-using Bunkum.Core.Listener.Listeners;
-using Bunkum.Core.Listener.Listeners.Direct;
 using Bunkum.Core.Listener.Parsing;
 using Bunkum.Core.Listener.Request;
 using Bunkum.Core.Services;
@@ -24,8 +22,12 @@ namespace Bunkum.Core;
 /// </summary>
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-public partial class BunkumServer<TBunkumListener> : IHotReloadable
-    where TBunkumListener : BunkumListener
+public abstract partial class BunkumServer<TBunkumListener, TListenerContext, TStatusCode, TProtocolVersion, TProtocolMethod> : IHotReloadable
+    where TBunkumListener : BunkumListener<TListenerContext, TStatusCode, TProtocolVersion, TProtocolMethod>
+    where TListenerContext : ListenerContext<TStatusCode, TProtocolVersion, TProtocolMethod>
+    where TStatusCode : Enum
+    where TProtocolVersion : Enum
+    where TProtocolMethod : Enum
 {
     private readonly TBunkumListener _listener;
     public readonly Logger Logger;
@@ -36,7 +38,7 @@ public partial class BunkumServer<TBunkumListener> : IHotReloadable
     private readonly List<IMiddleware> _middlewares = new();
     private readonly List<Service> _services = new();
 
-    private BunkumServer(bool setListener, bool logToConsole, LoggerConfiguration? configuration)
+    public BunkumServer(bool logToConsole, LoggerConfiguration? configuration)
     {
         configuration ??= LoggerConfiguration.Default;
         
@@ -55,33 +57,11 @@ public partial class BunkumServer<TBunkumListener> : IHotReloadable
         {
             bunkumConfig,
         };
-
-        if (setListener)
-        {
-            Uri listenEndpoint = new($"http://{bunkumConfig.ListenHost}:{bunkumConfig.ListenPort}");
-            this._listener = new SocketHttpListener(listenEndpoint, bunkumConfig.UseForwardedIp, this.Logger);
-        }
-        else
-        {
-            this._listener = null!;
-        }
         
         HotReloadRegistry.RegisterReloadable(this);
     }
 
-    public BunkumServer(LoggerConfiguration? configuration = null) : this(true, true, configuration) {}
-    
-    public BunkumServer(TBunkumListener listener, bool logToConsole = true, LoggerConfiguration? configuration = null) : this(false, logToConsole, configuration)
-    {
-        this._listener = listener;
-        if (listener is DirectHttpListener directListener)
-        {
-            directListener.Callback = context =>
-            {
-                this.CompleteRequestAsync(context).Wait();
-            };
-        }
-    }
+    public BunkumServer(LoggerConfiguration? configuration = null) : this(true, configuration) {}
 
     /// <summary>
     /// Start the server in multithreaded mode. Caller is responsible for blocking.
@@ -180,7 +160,9 @@ public partial class BunkumServer<TBunkumListener> : IHotReloadable
         Debug.WriteLine("Block task was stopped");
     }
 
-    internal async Task CompleteRequestAsync(ListenerContext context)
+    protected abstract void HandleRequestError(TListenerContext context, Exception? e);
+
+    internal async Task CompleteRequestAsync(TListenerContext context)
     {
         try
         {
@@ -196,13 +178,7 @@ public partial class BunkumServer<TBunkumListener> : IHotReloadable
         catch (Exception e)
         {
             this.Logger.LogError(BunkumCategory.Request, $"Failed to initialize request:\n{e}");
-            context.ResponseCode = HttpStatusCode.InternalServerError;
-            
-            #if DEBUG
-            context.Write(e.ToString());
-            #else
-            context.Write("Internal Server Error");
-            #endif
+            this.HandleRequestError(context, e);
         }
     }
     
@@ -219,7 +195,7 @@ public partial class BunkumServer<TBunkumListener> : IHotReloadable
         HotReloadRegistry.UnregisterReloadable(this);
     }
 
-    private async Task HandleRequest(ListenerContext context, Lazy<IDatabaseContext> database)
+    private async Task HandleRequest(TListenerContext context, Lazy<IDatabaseContext> database)
     {
         Stopwatch requestStopwatch = new();
         requestStopwatch.Start();
@@ -266,14 +242,7 @@ public partial class BunkumServer<TBunkumListener> : IHotReloadable
 
             try
             {
-                context.ResponseType = ContentType.Plaintext;
-                context.ResponseCode = HttpStatusCode.InternalServerError;
-
-#if DEBUG
-                context.Write(e.ToString());
-#else
-                context.Write("Internal Server Error");
-#endif
+                this.HandleRequestError(context, e);
             }
             catch
             {
@@ -300,13 +269,13 @@ public partial class BunkumServer<TBunkumListener> : IHotReloadable
         }
     }
 
-    private Action<BunkumServer>? _initialize;
+    private Action<BunkumServer<TBunkumListener, TListenerContext, TStatusCode, TProtocolVersion, TProtocolMethod>>? _initialize;
     /// <summary>
     /// The initialization function for the server. Called after startup and after hot reload.
     /// You do not need to clear Bunkum's state during a hot reload - Bunkum will wipe everything for you. 
     /// </summary>
     /// <exception cref="InvalidOperationException">An initializer has already been declared, or the value is null.</exception>
-    public Action<BunkumServer>? Initialize
+    public Action<BunkumServer<TBunkumListener, TListenerContext, TStatusCode, TProtocolVersion, TProtocolMethod>>? Initialize
     {
         private get => this._initialize;
         set
@@ -325,7 +294,7 @@ public partial class BunkumServer<TBunkumListener> : IHotReloadable
         if (this.Initialize == null)
         {
             this.Logger.LogWarning(BunkumCategory.Server, "The server's configuration does not properly support hot reloading.");
-            this.Logger.LogWarning(BunkumCategory.Server, "To resolve this, move your initialization code into `{0}.{1}`.", nameof(BunkumServer), nameof(this.Initialize));
+            this.Logger.LogWarning(BunkumCategory.Server, "To resolve this, move your initialization code into `{0}.{1}`.", this.GetType().Name, nameof(this.Initialize));
             return;
         }
         

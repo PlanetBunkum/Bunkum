@@ -12,7 +12,7 @@ using NotEnoughLogs;
 using NotEnoughLogs.Behaviour;
 
 // Initialize a Bunkum server
-BunkumServer server = new(new LoggerConfiguration
+BunkumHttpServer server = new(new LoggerConfiguration
 {
     Behaviour = new QueueLoggingBehaviour(),
     #if DEBUG
