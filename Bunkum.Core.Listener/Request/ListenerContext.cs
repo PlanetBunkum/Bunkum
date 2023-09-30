@@ -7,18 +7,45 @@ using Bunkum.Core.Listener.Parsing;
 
 namespace Bunkum.Core.Listener.Request;
 
+/// <summary>
+/// The listener's context for a request. Controls the request and its data.
+/// </summary>
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
 public abstract class ListenerContext
 {
+    /// <summary>
+    /// The body of the request as a stream.
+    /// </summary>
     public MemoryStream InputStream { get; set; } = null!;
 
+    /// <summary>
+    /// The protocol version the request is using.
+    /// </summary>
     public HttpVersion Version { get; set; }
+    
+    /// <summary>
+    /// The protocol method the request is using.
+    /// </summary>
     public Method Method { get; set; }
+    
+    /// <summary>
+    /// The location/endpoint the client is going to.
+    /// </summary>
     public Uri Uri { get; set; } = null!;
 
+    /// <summary>
+    /// The request's headers
+    /// </summary>
     public readonly NameValueCollection RequestHeaders = new();
+    
+    /// <summary>
+    /// The response's headers
+    /// </summary>
     public readonly Dictionary<string, string> ResponseHeaders = new();
 
+    /// <summary>
+    /// Cookies shared between the server and client
+    /// </summary>
     public readonly NameValueCollection Cookies = new();
     public NameValueCollection Query { get; set; } = null!;
 
@@ -33,6 +60,9 @@ public abstract class ListenerContext
     /// </summary>
     public IPEndPoint RemoteEndpoint = null!;
 
+    /// <summary>
+    /// The length of the request body.
+    /// </summary>
     public virtual long ContentLength
     {
         get
@@ -43,27 +73,56 @@ public abstract class ListenerContext
         }
     }
 
+    /// <summary>
+    /// Whether or not the request has a body.
+    /// </summary>
     public bool HasBody => this.ContentLength > 0;
     
+    /// <summary>
+    /// Can we currently send data back to the client?
+    /// </summary>
     protected abstract bool CanSendData { get; }
 
     // Response
+    
+    /// <summary>
+    /// The status code to respond with.
+    /// </summary>
     public HttpStatusCode ResponseCode = HttpStatusCode.OK;
+    
+    /// <summary>
+    /// The type of content we are responding with.
+    /// </summary>
     public ContentType? ResponseType;
 
     private int _responseLength;
 
     // ReSharper disable once MemberCanBePrivate.Global
+    
+    /// <summary>
+    /// The response we are about to send.
+    /// </summary>
     public MemoryStream ResponseStream { get; } = new();
 
+    /// <summary>
+    /// Writes a string to the response stream.
+    /// </summary>
+    /// <param name="str">The string to write.</param>
     public void Write(string str) => this.Write(Encoding.Default.GetBytes(str));
     
+    /// <summary>
+    /// Writes a byte array to the response stream.
+    /// </summary>
+    /// <param name="buffer">The byte array to write.</param>
     public void Write(byte[] buffer)
     {
         this.ResponseStream.Write(buffer);
         this._responseLength += buffer.Length;
     }
 
+    /// <summary>
+    /// Finish up the response, and close the connection.
+    /// </summary>
     public async Task FlushResponseAndClose()
     {
         if (this.ResponseType != null)
@@ -77,6 +136,11 @@ public abstract class ListenerContext
         await this.SendResponse(this.ResponseCode, dataSlice);
     }
 
+    /// <summary>
+    /// Send our response headers, status code, and close the connection.  
+    /// </summary>
+    /// <param name="code"></param>
+    /// <param name="data"></param>
     public async Task SendResponse(HttpStatusCode code, ArraySegment<byte>? data = null)
     {
         if (!this.CanSendData) return;
@@ -102,6 +166,9 @@ public abstract class ListenerContext
         this.CloseConnection();
     }
 
+    /// <summary>
+    /// Closes the connection we made. Called after a request has been processed, and after the response has been sent.
+    /// </summary>
     protected abstract void CloseConnection();
 
     private Task SendBufferSafe(string str) => this.SendBufferSafe(Encoding.UTF8.GetBytes(str));
@@ -119,5 +186,9 @@ public abstract class ListenerContext
         }
     }
 
+    /// <summary>
+    /// Sends data directly to the client.
+    /// </summary>
+    /// <param name="buffer">The data to send.</param>
     protected abstract Task SendBuffer(ArraySegment<byte> buffer);
 }
