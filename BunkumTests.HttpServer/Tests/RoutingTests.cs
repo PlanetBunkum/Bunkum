@@ -3,6 +3,7 @@ using Bunkum.Core;
 using Bunkum.Core.Endpoints;
 using Bunkum.Core.Listener.Parsing;
 using BunkumTests.HttpServer.Endpoints;
+using HttpMethod = Bunkum.Core.Listener.Parsing.HttpMethod;
 
 namespace BunkumTests.HttpServer.Tests;
 
@@ -14,7 +15,7 @@ public class RoutingTests : ServerDependentTest
         EndpointAttribute attribute = new("/1234/1234");
         
         Assert.That(attribute.FullRoute, Is.EqualTo("/1234/1234"));
-        bool matches = attribute.UriMatchesRoute(new Uri("/1234/1234"), Method.Get, out Dictionary<string, string> parameters);
+        bool matches = attribute.UriMatchesRoute(new Uri("/1234/1234"), HttpMethod.Get, out Dictionary<string, string> parameters);
         
         Assert.Multiple(() =>
         {
@@ -30,7 +31,7 @@ public class RoutingTests : ServerDependentTest
         
         Assert.That(attribute.FullRoute, Is.EqualTo("/1234/1234/_"));
         
-        bool matches = attribute.UriMatchesRoute(new Uri("/1234/1234/asdf"), Method.Get, out Dictionary<string, string> parameters);
+        bool matches = attribute.UriMatchesRoute(new Uri("/1234/1234/asdf"), HttpMethod.Get, out Dictionary<string, string> parameters);
         Assert.Multiple(() =>
         {
             Assert.That(matches, Is.True);
@@ -45,10 +46,10 @@ public class RoutingTests : ServerDependentTest
         (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<RouteStartsWithEndpoints>();
         
-        HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/sw/asdf"));
+        HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(System.Net.Http.HttpMethod.Get, "/sw/asdf"));
         Assert.That(await msg.Content.ReadAsStringAsync(), Is.EqualTo("asdf"));
         
-        msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/sw/a"));
+        msg = await client.SendAsync(new HttpRequestMessage(System.Net.Http.HttpMethod.Get, "/sw/a"));
         Assert.That(await msg.Content.ReadAsStringAsync(), Is.EqualTo("a"));
     }
 
@@ -64,7 +65,7 @@ public class RoutingTests : ServerDependentTest
         (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<RouteParameterEndpoints>();
         
-        HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/param/" + text));
+        HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(System.Net.Http.HttpMethod.Get, "/param/" + text));
         Assert.Multiple(async () =>
         {
             Assert.That(msg.StatusCode, Is.EqualTo(HttpStatusCode.OK));
@@ -85,7 +86,7 @@ public class RoutingTests : ServerDependentTest
         (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<RouteParameterEndpoints>();
         
-        HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/inlineParam/inline" + text));
+        HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(System.Net.Http.HttpMethod.Get, "/inlineParam/inline" + text));
         Assert.Multiple(async () =>
         {
             Assert.That(msg.StatusCode, Is.EqualTo(HttpStatusCode.OK));
@@ -99,7 +100,7 @@ public class RoutingTests : ServerDependentTest
         (BunkumServer server, HttpClient client) = this.Setup();
         server.AddEndpointGroup<RouteParameterEndpoints>();
         
-        HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/params/asdf/fdsa"));
+        HttpResponseMessage msg = await client.SendAsync(new HttpRequestMessage(System.Net.Http.HttpMethod.Get, "/params/asdf/fdsa"));
         Assert.Multiple(async () =>
         {
             Assert.That(msg.StatusCode, Is.EqualTo(HttpStatusCode.OK));

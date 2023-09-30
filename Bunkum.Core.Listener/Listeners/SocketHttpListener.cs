@@ -7,11 +7,13 @@ using Bunkum.Core.Listener.Extensions;
 using Bunkum.Core.Listener.Parsing;
 using Bunkum.Core.Listener.Request;
 using NotEnoughLogs;
-using HttpVersion = Bunkum.Core.Listener.Request.HttpVersion;
+using HttpListenerContext = Bunkum.Core.Listener.Request.Http.HttpListenerContext;
+using HttpMethod = Bunkum.Core.Listener.Parsing.HttpMethod;
+using HttpVersion = Bunkum.Core.Listener.Request.Http.HttpVersion;
 
 namespace Bunkum.Core.Listener.Listeners;
 
-public partial class SocketListener : BunkumListener
+public partial class SocketHttpListener : BunkumHttpListener
 {
     private Socket? _socket;
     private readonly Uri _listenEndpoint;
@@ -20,7 +22,7 @@ public partial class SocketListener : BunkumListener
     [GeneratedRegex("^[a-zA-Z]+$")]
     private static partial Regex LettersRegex();
 
-    public SocketListener(Uri listenEndpoint, bool useForwardedIp, Logger logger) : base(logger)
+    public SocketHttpListener(Uri listenEndpoint, bool useForwardedIp, Logger logger) : base(logger)
     {
         this._listenEndpoint = listenEndpoint;
         this._useForwardedIp = useForwardedIp;
@@ -50,7 +52,7 @@ public partial class SocketListener : BunkumListener
         this.Logger.LogInfo(HttpLogCategory.Startup, "Listening...");
     }
 
-    protected override async Task<ListenerContext?> WaitForConnectionAsyncInternal(CancellationToken? globalCt = null)
+    protected override async Task<HttpListenerContext?> WaitForConnectionAsyncInternal(CancellationToken? globalCt = null)
     {
         if (this._socket == null)
             throw new InvalidOperationException("Cannot wait for a connection when we are not listening");
@@ -70,12 +72,12 @@ public partial class SocketListener : BunkumListener
         catch(Exception e)
         {
             this.Logger.LogWarning(HttpLogCategory.Request, $"Failed to read request: {e}");
-            await new SocketListenerContext(client).SendResponse(HttpStatusCode.BadRequest);
+            await new SocketHttpListenerContext(client).SendResponse(HttpStatusCode.BadRequest);
             return null;
         }
     }
 
-    private ListenerContext ReadRequestIntoContext(Socket client, Stream stream)
+    private HttpListenerContext ReadRequestIntoContext(Socket client, Stream stream)
     {
         Span<char> method = stackalloc char[RequestLineMethodLimit];
         Span<char> path = stackalloc char[RequestLinePathLimit];
@@ -102,7 +104,7 @@ public partial class SocketListener : BunkumListener
             throw new Exception("Failed to read request line. Maybe you tried to connect with HTTPS?", e);
         }
 
-        ListenerContext context = new SocketListenerContext(client)
+        HttpListenerContext context = new SocketHttpListenerContext(client)
         {
             RealRemoteEndpoint = (client.RemoteEndPoint as IPEndPoint)!,
         };
@@ -120,7 +122,7 @@ public partial class SocketListener : BunkumListener
             throw new NotSupportedException(version.ToString());
 
         context.Method = MethodUtils.FromString(method);
-        if (context.Method == Method.Invalid)
+        if (context.Method == HttpMethod.Invalid)
         {
             throw new Exception("Rejected request that sent invalid method " + method.ToString());
         }

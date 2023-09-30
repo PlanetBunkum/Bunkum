@@ -1,15 +1,16 @@
 using System.Net.Sockets;
+using Bunkum.Core.Listener.Request.Http;
 
 namespace Bunkum.Core.Listener.Request;
 
-public class SocketListenerContext : ListenerContext
+public class SocketHttpListenerContext : HttpListenerContext
 {
     private readonly Socket _socket;
     
     private bool _socketClosed;
     private bool SocketClosed => this._socketClosed || !this._socket.Connected;
     
-    public SocketListenerContext(Socket socket)
+    public SocketHttpListenerContext(Socket socket)
     {
         this._socket = socket;
     }

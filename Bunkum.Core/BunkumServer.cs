@@ -24,9 +24,10 @@ namespace Bunkum.Core;
 /// </summary>
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-public partial class BunkumServer : IHotReloadable
+public partial class BunkumServer<TBunkumListener> : IHotReloadable
+    where TBunkumListener : BunkumListener
 {
-    private readonly BunkumListener _listener;
+    private readonly TBunkumListener _listener;
     public readonly Logger Logger;
     
     private IDatabaseProvider<IDatabaseContext> _databaseProvider = new DummyDatabaseProvider();
@@ -58,7 +59,7 @@ public partial class BunkumServer : IHotReloadable
         if (setListener)
         {
             Uri listenEndpoint = new($"http://{bunkumConfig.ListenHost}:{bunkumConfig.ListenPort}");
-            this._listener = new SocketListener(listenEndpoint, bunkumConfig.UseForwardedIp, this.Logger);
+            this._listener = new SocketHttpListener(listenEndpoint, bunkumConfig.UseForwardedIp, this.Logger);
         }
         else
         {
@@ -70,10 +71,10 @@ public partial class BunkumServer : IHotReloadable
 
     public BunkumServer(LoggerConfiguration? configuration = null) : this(true, true, configuration) {}
     
-    public BunkumServer(BunkumListener listener, bool logToConsole = true, LoggerConfiguration? configuration = null) : this(false, logToConsole, configuration)
+    public BunkumServer(TBunkumListener listener, bool logToConsole = true, LoggerConfiguration? configuration = null) : this(false, logToConsole, configuration)
     {
         this._listener = listener;
-        if (listener is DirectListener directListener)
+        if (listener is DirectHttpListener directListener)
         {
             directListener.Callback = context =>
             {
@@ -414,7 +415,7 @@ public partial class BunkumServer : IHotReloadable
     /// Adds a <see cref="Config"/> to Bunkum's internal list of configurations. These can then be passed into Endpoints or Services.
     /// </summary>
     /// <param name="config">An object extending <see cref="Config"/> that represents your server's configuration.</param>
-    [Obsolete($"This method was renamed to {nameof(AddConfig)} for consistency. Please use the new method.")]
+    [Obsolete($"This httpMethod was renamed to {nameof(AddConfig)} for consistency. Please use the new httpMethod.")]
     public void UseConfig(Config config) => this.AddConfig(config);
     
     /// <summary>
@@ -435,7 +436,7 @@ public partial class BunkumServer : IHotReloadable
     /// <param name="filename">What the config's filename should be stored as</param>
     /// <typeparam name="TConfig">An object extending <see cref="Config"/> that represents your server's configuration.</typeparam>
     /// <seealso cref="Config.LoadFromJsonFile{TConfig}"/>
-    [Obsolete($"This method was renamed to {nameof(AddConfigFromJsonFile)} for consistency. Please use the new method.")]
+    [Obsolete($"This httpMethod was renamed to {nameof(AddConfigFromJsonFile)} for consistency. Please use the new httpMethod.")]
     public void UseJsonConfig<TConfig>(string filename) where TConfig : Config, new()
         => this.AddConfigFromJsonFile<TConfig>(filename);
     

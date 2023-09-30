@@ -8,7 +8,7 @@ namespace BunkumTests.HttpServer.Tests.RateLimit;
 [Parallelizable]
 public class RateLimitTests
 {
-    private static readonly ListenerContext Ctx = new DirectListenerContext();
+    private static readonly ListenerContext Ctx = new DirectHttpListenerContext();
 
     [Test]
     public void AllowsSingleRequest()

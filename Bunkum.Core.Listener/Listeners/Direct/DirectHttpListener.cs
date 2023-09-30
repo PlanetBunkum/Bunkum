@@ -4,14 +4,15 @@ using System.Web;
 using Bunkum.Core.Listener.Parsing;
 using Bunkum.Core.Listener.Request;
 using NotEnoughLogs;
+using HttpListenerContext = Bunkum.Core.Listener.Request.Http.HttpListenerContext;
 
 namespace Bunkum.Core.Listener.Listeners.Direct;
 
-public class DirectListener : BunkumListener
+public class DirectHttpListener : BunkumHttpListener
 {
-    public Action<ListenerContext>? Callback { private get; set; }
+    public Action<HttpListenerContext>? Callback { private get; set; }
 
-    public DirectListener(Logger logger) : base(logger)
+    public DirectHttpListener(Logger logger) : base(logger)
     {}
 
     public HttpClient GetClient()
@@ -27,7 +28,7 @@ public class DirectListener : BunkumListener
         if (this.Callback == null)
             throw new InvalidOperationException("The callback was not initialized for this listener.");
         
-        ListenerContext? context = HandleMessage(message).Result;
+        HttpListenerContext? context = HandleMessage(message).Result;
         if (context == null) return;
         
         this.Callback(context);
@@ -38,7 +39,7 @@ public class DirectListener : BunkumListener
         // No initialization required
     }
 
-    private static async Task<ListenerContext?> HandleMessage(DirectHttpMessage? message)
+    private static async Task<HttpListenerContext?> HandleMessage(DirectHttpMessage? message)
     {
         CancellationTokenSource cts = new();
         cts.CancelAfter(5_000);
@@ -64,7 +65,7 @@ public class DirectListener : BunkumListener
             stream = new MemoryStream(0);
         }
 
-        ListenerContext context = new DirectListenerContext(message.Stream, message.Reset)
+        HttpListenerContext context = new DirectHttpListenerContext(message.Stream, message.Reset)
         {
             Uri = message.Message.RequestUri!,
             Method = MethodUtils.FromString(message.Message.Method.Method),
@@ -96,8 +97,8 @@ public class DirectListener : BunkumListener
         return context;
     }
 
-    protected override Task<ListenerContext?> WaitForConnectionAsyncInternal(CancellationToken? globalCt = null)
+    protected override Task<HttpListenerContext?> WaitForConnectionAsyncInternal(CancellationToken? globalCt = null)
     {
-        return Task.FromResult<ListenerContext?>(null);
+        return Task.FromResult<HttpListenerContext?>(null);
     }
 }
