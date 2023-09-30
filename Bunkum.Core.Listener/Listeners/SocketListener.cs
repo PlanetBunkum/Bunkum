@@ -25,7 +25,7 @@ public partial class SocketListener : BunkumListener
         this._listenEndpoint = listenEndpoint;
         this._useForwardedIp = useForwardedIp;
         
-        this.Logger.LogInfo(HttpLogCategory.Startup, "Internal server is listening at URL " + listenEndpoint);
+        this.Logger.LogInfo(ListenerCategory.Startup, "Internal server is listening at URL " + listenEndpoint);
     }
     
     public override void StartListening()
@@ -47,7 +47,7 @@ public partial class SocketListener : BunkumListener
         this._socket.Bind(listenEndpoint);
         this._socket.Listen(128);
         
-        this.Logger.LogInfo(HttpLogCategory.Startup, "Listening...");
+        this.Logger.LogInfo(ListenerCategory.Startup, "Listening...");
     }
 
     protected override async Task<ListenerContext?> WaitForConnectionAsyncInternal(CancellationToken? globalCt = null)
@@ -64,12 +64,12 @@ public partial class SocketListener : BunkumListener
         }
         catch (NotSupportedException e)
         {
-            this.Logger.LogWarning(HttpLogCategory.Request, $"Failed to handle request due to invalid HTTP version {e.Message}");
+            this.Logger.LogWarning(ListenerCategory.Request, $"Failed to handle request due to invalid HTTP version {e.Message}");
             return null;
         }
         catch(Exception e)
         {
-            this.Logger.LogWarning(HttpLogCategory.Request, $"Failed to read request: {e}");
+            this.Logger.LogWarning(ListenerCategory.Request, $"Failed to read request: {e}");
             await new SocketListenerContext(client).SendResponse(HttpStatusCode.BadRequest);
             return null;
         }

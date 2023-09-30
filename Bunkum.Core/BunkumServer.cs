@@ -20,7 +20,7 @@ using NotEnoughLogs.Sinks;
 namespace Bunkum.Core;
 
 /// <summary>
-/// The main class representing a Bunkum HTTP server and it's configuration.
+/// The main class representing a Bunkum HTTP server and its configuration.
 /// </summary>
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
