@@ -1,4 +1,4 @@
-using Bunkum.Core.Health;
+using Bunkum.HealthChecks;
 
 namespace BunkumTests.HttpServer.Health;
 

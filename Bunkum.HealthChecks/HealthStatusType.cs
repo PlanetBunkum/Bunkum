@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Bunkum.Core.Health;
+namespace Bunkum.HealthChecks;
 
 /// <summary>
 /// An indicator indicating the status of a service.

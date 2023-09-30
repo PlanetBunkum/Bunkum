@@ -1,4 +1,4 @@
-namespace Bunkum.Core.Health.Reports;
+namespace Bunkum.HealthChecks.Reports;
 
 public class GeneralHealthCheck : IHealthCheck
 {

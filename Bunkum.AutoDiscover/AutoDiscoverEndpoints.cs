@@ -2,6 +2,7 @@ using Bunkum.Core;
 using Bunkum.Core.Configuration;
 using Bunkum.Core.Endpoints;
 using Bunkum.Listener.Protocol;
+using Bunkum.Protocols.Http;
 
 namespace Bunkum.AutoDiscover;
 

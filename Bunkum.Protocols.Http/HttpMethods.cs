@@ -1,4 +1,6 @@
-namespace Bunkum.Listener.Protocol;
+using Bunkum.Listener.Protocol;
+
+namespace Bunkum.Protocols.Http;
 
 /// <summary>
 /// A collection of <see cref="Method"/>s for use with the HTTP protocol.

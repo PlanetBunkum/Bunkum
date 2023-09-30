@@ -4,7 +4,7 @@ using Bunkum.Core.Services;
 using Bunkum.Listener.Request;
 using NotEnoughLogs;
 
-namespace Bunkum.Core.Health;
+namespace Bunkum.HealthChecks;
 
 public class HealthService : Service
 {

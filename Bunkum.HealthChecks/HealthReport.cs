@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Bunkum.Core.Health;
+namespace Bunkum.HealthChecks;
 
 /// <summary>
 /// A report summarizing all health checks.

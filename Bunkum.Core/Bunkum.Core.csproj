@@ -55,6 +55,10 @@
     <None Include="..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
   
+  <ItemGroup>
+    <Folder Include="Health\" />
+  </ItemGroup>
+  
   
   <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
     <ItemGroup>

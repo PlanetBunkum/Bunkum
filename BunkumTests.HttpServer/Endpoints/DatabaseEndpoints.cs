@@ -1,6 +1,7 @@
 using Bunkum.Core;
 using Bunkum.Core.Database.Dummy;
 using Bunkum.Core.Endpoints;
+using Bunkum.Protocols.Http;
 using BunkumTests.HttpServer.Database;
 
 namespace BunkumTests.HttpServer.Endpoints;

@@ -1,7 +1,7 @@
-using Bunkum.Core.Health;
+using Bunkum.HealthChecks;
 using BunkumTests.HttpServer.Health;
 using NotEnoughLogs;
-using static Bunkum.Core.Health.HealthStatusType;
+using static Bunkum.HealthChecks.HealthStatusType;
 
 namespace BunkumTests.HttpServer.Tests;
 

@@ -1,7 +1,9 @@
+using Bunkum.Core;
 using Bunkum.Core.Endpoints;
 using Bunkum.Listener.Protocol;
+using Bunkum.Protocols.Http;
 
-namespace Bunkum.Core.Health.Endpoints;
+namespace Bunkum.HealthChecks.Endpoints;
 
 internal class HealthCheckEndpoints : EndpointGroup
 {

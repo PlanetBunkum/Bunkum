@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Bunkum.Core.Database;
-using Bunkum.Core.Health;
-using static Bunkum.Core.Health.HealthStatusType;
+using Bunkum.HealthChecks;
+using static Bunkum.HealthChecks.HealthStatusType;
 
 namespace Bunkum.RealmDatabase;
 

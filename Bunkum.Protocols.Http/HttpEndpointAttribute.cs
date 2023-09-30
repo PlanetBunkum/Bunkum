@@ -1,6 +1,7 @@
+using Bunkum.Core.Endpoints;
 using Bunkum.Listener.Protocol;
 
-namespace Bunkum.Core.Endpoints;
+namespace Bunkum.Protocols.Http;
 
 public class HttpEndpointAttribute : EndpointAttribute
 {

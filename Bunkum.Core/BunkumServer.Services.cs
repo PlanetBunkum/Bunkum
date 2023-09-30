@@ -2,9 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Bunkum.Core.Authentication;
 using Bunkum.Core.Configuration;
-using Bunkum.Core.Health;
-using Bunkum.Core.Health.Endpoints;
-using Bunkum.Core.Health.Reports;
 using Bunkum.Core.RateLimit;
 using Bunkum.Core.Services;
 using Bunkum.Core.Storage;
@@ -20,11 +17,11 @@ public partial class BunkumServer // Services
     #region Dependency Injection
 
     [Pure]
-    private static TObject? InjectDependencies<TObject>(object?[] args, IEnumerable<Func<ParameterInfo, object?>> injectorLists) where TObject : class 
+    public static TObject? InjectDependencies<TObject>(object?[] args, IEnumerable<Func<ParameterInfo, object?>> injectorLists) where TObject : class 
         => InjectDependencies<TObject>(typeof(TObject), args, injectorLists);
 
     [Pure]
-    private static TObject? InjectDependencies<TObject>(Type type, object?[] args, IEnumerable<Func<ParameterInfo, object?>> injectorLists) where TObject : class
+    public static TObject? InjectDependencies<TObject>(Type type, object?[] args, IEnumerable<Func<ParameterInfo, object?>> injectorLists) where TObject : class
     {
         List<object?> fullArgs = args.ToList();
         
@@ -75,7 +72,7 @@ public partial class BunkumServer // Services
         return service;
     }
     
-    private static object? InjectFromPool<TObject, TInjected>(ParameterInfo info, IEnumerable<TInjected> pool)
+    public static object? InjectFromPool<TObject, TInjected>(ParameterInfo info, IEnumerable<TInjected> pool)
     {
         // Attempt to find dependencies on other services and inject them.
         if (!info.ParameterType.IsAssignableTo(typeof(TInjected))) return null;
@@ -87,17 +84,17 @@ public partial class BunkumServer // Services
         return injected;
     }
     
-    private static object? InjectFromObject<TInjected>(ParameterInfo info, TInjected obj)
+    public static object? InjectFromObject<TInjected>(ParameterInfo info, TInjected obj)
     {
         // Attempt to find dependencies on other services and inject them.
         if (!info.ParameterType.IsAssignableTo(typeof(TInjected))) return null;
         return obj;
     }
     
-    private static Func<ParameterInfo, object?> CreateInjectorFromPool<TObject, TInjected>(IEnumerable<TInjected> pool) 
+    public static Func<ParameterInfo, object?> CreateInjectorFromPool<TObject, TInjected>(IEnumerable<TInjected> pool) 
         => info => InjectFromPool<TObject, TInjected>(info, pool);
     
-    private static Func<ParameterInfo, object?> CreateInjectorFromObject<TInjected>(TInjected obj) 
+    public static Func<ParameterInfo, object?> CreateInjectorFromObject<TInjected>(TInjected obj) 
         => info => InjectFromObject(info, obj);
 
     #endregion
@@ -143,42 +140,5 @@ public partial class BunkumServer // Services
 
         IRateLimiter rateLimiter = new RateLimiter(timeProvider, settings.Value);
         this.AddService<RateLimitService>(rateLimiter);
-    }
-
-    public void AddHealthCheckService(IEnumerable<Type>? checkTypes = null, bool addGeneralCheck = true)
-    {
-        List<IHealthCheck> checks = new();
-        if (checkTypes != null)
-        {
-            IEnumerable<Type> checkTypesList = checkTypes.ToList();
-
-            if (checkTypesList.Any(check => !check.IsAssignableTo(typeof(IHealthCheck))))
-                throw new InvalidOperationException($"Cannot use a health check that is not an {nameof(IHealthCheck)}");
-            
-            foreach (Type type in checkTypesList)
-            {
-                IHealthCheck? healthCheck = InjectDependencies<IHealthCheck>(type, Array.Empty<object>(), new[]
-                {
-                    CreateInjectorFromObject(this._databaseProvider),
-                });
-                
-                if (healthCheck == null)
-                {
-                    this.Logger.LogWarning(BunkumCategory.Health, $"Health Check {type.Name} failed to initialize.");
-                    continue;
-                }
-                
-                checks.Add(healthCheck);
-            }
-        }
-        else
-        {
-            checks = new List<IHealthCheck>(1);
-        }
-        
-        if(addGeneralCheck) checks.Add(new GeneralHealthCheck());
-        
-        this.AddEndpointGroup<HealthCheckEndpoints>();
-        this.AddService<HealthService>(checks);
     }
 }

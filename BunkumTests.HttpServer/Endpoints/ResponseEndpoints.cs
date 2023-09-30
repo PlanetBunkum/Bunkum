@@ -3,6 +3,7 @@ using Bunkum.Core;
 using Bunkum.Core.Endpoints;
 using Bunkum.Core.Responses;
 using Bunkum.Listener.Protocol;
+using Bunkum.Protocols.Http;
 using BunkumTests.HttpServer.Tests;
 
 namespace BunkumTests.HttpServer.Endpoints;

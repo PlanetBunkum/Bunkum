@@ -1,4 +1,5 @@
 ﻿using Bunkum.Core;
+using Bunkum.HealthChecks;
 using Bunkum.Protocols.Http;
 using BunkumTests.HttpServer;
 using BunkumConsole = Bunkum.Core.BunkumConsole;

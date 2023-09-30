@@ -1,4 +1,4 @@
-namespace Bunkum.Core.Health;
+namespace Bunkum.HealthChecks;
 
 public interface IHealthCheck
 {

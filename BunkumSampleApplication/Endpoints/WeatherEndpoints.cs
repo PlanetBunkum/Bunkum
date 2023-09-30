@@ -3,6 +3,7 @@ using Bunkum.Core.Database.Dummy;
 using Bunkum.Core.Endpoints;
 using Bunkum.Core.Storage;
 using Bunkum.Listener.Protocol;
+using Bunkum.Protocols.Http;
 using BunkumSampleApplication.Configuration;
 using BunkumSampleApplication.Models;
 
