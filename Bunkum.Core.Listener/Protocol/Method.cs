@@ -30,7 +30,7 @@ public static class MethodUtils
         foreach (FieldInfo field in type.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
         {
             if(field.GetValue(null) is not Method method) continue;
-            if (@enum.ToString().SequenceEqual(method.Value)) return method;
+            if (@enum.ToString().Equals(method.Value, StringComparison.InvariantCultureIgnoreCase)) return method;
         }
 
         return Method.Invalid;
