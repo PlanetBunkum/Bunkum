@@ -2,8 +2,11 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace Bunkum.Core.Listener.Parsing;
+namespace Bunkum.Core.Listener.Protocol;
 
+/// <summary>
+/// A MIME content-type.
+/// </summary>
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 public enum ContentType
 {

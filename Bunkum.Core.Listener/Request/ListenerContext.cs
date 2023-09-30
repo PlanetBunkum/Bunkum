@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
-using Bunkum.Core.Listener.Parsing;
+using Bunkum.Core.Listener.Protocol;
 
 namespace Bunkum.Core.Listener.Request;
 
@@ -21,7 +21,7 @@ public abstract class ListenerContext
     /// <summary>
     /// The protocol version the request is using.
     /// </summary>
-    public HttpVersion Version { get; set; }
+    public Enum Version { get; set; }
     
     /// <summary>
     /// The protocol method the request is using.
@@ -88,7 +88,7 @@ public abstract class ListenerContext
     /// <summary>
     /// The status code to respond with.
     /// </summary>
-    public HttpStatusCode ResponseCode = HttpStatusCode.OK;
+    public Enum ResponseCode = HttpStatusCode.OK;
     
     /// <summary>
     /// The type of content we are responding with.
@@ -126,7 +126,7 @@ public abstract class ListenerContext
     public async Task FlushResponseAndClose()
     {
         if (this.ResponseType != null)
-            this.ResponseHeaders.Add("Content-Type", this.ResponseType.Value.GetName());
+            this.ResponseHeaders.Add("Content-Type", this.ResponseType.Value.ToString());
         
         if(this._responseLength != 0)
             this.ResponseHeaders.Add("Content-Length", this._responseLength.ToString());
@@ -141,7 +141,7 @@ public abstract class ListenerContext
     /// </summary>
     /// <param name="code"></param>
     /// <param name="data"></param>
-    public async Task SendResponse(HttpStatusCode code, ArraySegment<byte>? data = null)
+    public async Task SendResponse(Enum code, ArraySegment<byte>? data = null)
     {
         if (!this.CanSendData) return;
         
@@ -150,7 +150,7 @@ public abstract class ListenerContext
         this.ResponseHeaders.Add("Connection", "close");
         this.ResponseHeaders.Add("Date", DateTime.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ss 'GMT'"));
         
-        List<string> response = new() { $"HTTP/1.1 {(int)code} {code.ToString()}" }; // TODO: spaced code names ("Not Found" instead of "NotFound")
+        List<string> response = new() { $"HTTP/1.1 {code.GetHashCode()} {code.ToString()}" }; // TODO: spaced code names ("Not Found" instead of "NotFound")
         foreach ((string? key, string? value) in this.ResponseHeaders)
         {
             Debug.Assert(key != null);

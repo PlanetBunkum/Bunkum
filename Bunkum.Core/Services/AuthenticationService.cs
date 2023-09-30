@@ -4,7 +4,7 @@ using Bunkum.Core.Authentication;
 using Bunkum.Core.Authentication.Dummy;
 using Bunkum.Core.Database;
 using Bunkum.Core.Endpoints;
-using Bunkum.Core.Listener.Parsing;
+using Bunkum.Core.Listener.Protocol;
 using Bunkum.Core.Listener.Request;
 using Bunkum.Core.Responses;
 using NotEnoughLogs;

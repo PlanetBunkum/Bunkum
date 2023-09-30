@@ -2,6 +2,7 @@ using System.Net;
 using Bunkum.Core;
 using Bunkum.Core.Endpoints;
 using Bunkum.Core.Listener.Parsing;
+using Bunkum.Core.Listener.Protocol;
 using BunkumTests.HttpServer.Endpoints;
 
 namespace BunkumTests.HttpServer.Tests;
@@ -14,7 +15,7 @@ public class RoutingTests : ServerDependentTest
         EndpointAttribute attribute = new("/1234/1234");
         
         Assert.That(attribute.FullRoute, Is.EqualTo("/1234/1234"));
-        bool matches = attribute.UriMatchesRoute(new Uri("/1234/1234"), Method.Get, out Dictionary<string, string> parameters);
+        bool matches = attribute.UriMatchesRoute(new Uri("/1234/1234"), HttpProtocolMethods.Get, out Dictionary<string, string> parameters);
         
         Assert.Multiple(() =>
         {
@@ -30,7 +31,7 @@ public class RoutingTests : ServerDependentTest
         
         Assert.That(attribute.FullRoute, Is.EqualTo("/1234/1234/_"));
         
-        bool matches = attribute.UriMatchesRoute(new Uri("/1234/1234/asdf"), Method.Get, out Dictionary<string, string> parameters);
+        bool matches = attribute.UriMatchesRoute(new Uri("/1234/1234/asdf"), HttpProtocolMethods.Get, out Dictionary<string, string> parameters);
         Assert.Multiple(() =>
         {
             Assert.That(matches, Is.True);

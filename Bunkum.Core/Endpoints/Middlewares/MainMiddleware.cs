@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 using Bunkum.Core.Configuration;
 using Bunkum.Core.Database;
 using Bunkum.Core.Extensions;
-using Bunkum.Core.Listener.Parsing;
+using Bunkum.Core.Listener.Protocol;
 using Bunkum.Core.Listener.Request;
 using Bunkum.Core.Responses;
 using Bunkum.Core.Services;

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Web;
 using Bunkum.Core.Listener.Parsing;
+using Bunkum.Core.Listener.Protocol;
 using Bunkum.Core.Listener.Request;
 using NotEnoughLogs;
 
@@ -67,7 +68,7 @@ public class DirectHttpListener : BunkumHttpListener
         ListenerContext context = new DirectListenerContext(message.Stream, message.Reset)
         {
             Uri = message.Message.RequestUri!,
-            Method = MethodUtils.FromString(message.Message.Method.Method),
+            Method = MethodUtils.FromString(typeof(HttpProtocolMethods), message.Message.Method.Method),
             Query = HttpUtility.ParseQueryString(message.Message.RequestUri!.Query),
             RemoteEndpoint = IPEndPoint.Parse("0.0.0.0"),
             InputStream = stream,

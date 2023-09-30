@@ -1,7 +1,7 @@
 using System.Net;
 using Bunkum.Core;
 using Bunkum.Core.Endpoints;
-using Bunkum.Core.Listener.Parsing;
+using Bunkum.Core.Listener.Protocol;
 using Bunkum.Core.Responses;
 using BunkumTests.HttpServer.Tests;
 
@@ -27,8 +27,8 @@ public class ResponseEndpoints : EndpointGroup
         return new Response("works", ContentType.Plaintext, HttpStatusCode.Accepted); // random code lol
     }
 
-    [Endpoint("/response/serializedXml", Method.Get, ContentType.Xml)]
-    [Endpoint("/response/serializedJson", Method.Get, ContentType.Json)]
+    [Endpoint("/response/serializedXml", HttpMethods.Get, ContentType.Xml)]
+    [Endpoint("/response/serializedJson", HttpMethods.Get, ContentType.Json)]
     public ResponseSerializationObject SerializedObject(RequestContext context)
     {
         return new ResponseSerializationObject();

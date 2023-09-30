@@ -10,7 +10,7 @@ using Bunkum.Core.Endpoints.Middlewares;
 using Bunkum.Core.Listener;
 using Bunkum.Core.Listener.Listeners;
 using Bunkum.Core.Listener.Listeners.Direct;
-using Bunkum.Core.Listener.Parsing;
+using Bunkum.Core.Listener.Protocol;
 using Bunkum.Core.Listener.Request;
 using Bunkum.Core.Services;
 using EasyHotReload;
@@ -286,7 +286,7 @@ public partial class BunkumServer : IHotReloadable
                 requestStopwatch.Stop();
 
                 this.Logger.LogInfo(BunkumCategory.Request, $"Served request to {context.RemoteEndpoint}: " +
-                                                          $"{(int)context.ResponseCode} {context.ResponseCode} on " +
+                                                          $"{context.ResponseCode.GetHashCode()} {context.ResponseCode} on " +
                                                           $"{context.Method.ToString().ToUpper()} '{context.Uri.PathAndQuery}' " +
                                                           $"({requestStopwatch.ElapsedMilliseconds}ms)");
 

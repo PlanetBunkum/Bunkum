@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Web;
+using Bunkum.Core.Listener.Protocol;
 using Bunkum.Core.Listener.Parsing;
 using JetBrains.Annotations;
 
@@ -9,7 +10,7 @@ namespace Bunkum.Core.Endpoints;
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public class EndpointAttribute : Attribute
 {
-    public readonly string FullRoute;
+    public string FullRoute { get; private set; }
     private readonly Dictionary<int, RouteParam> _parameterIndexes = new();
 
     public readonly Method Method;
@@ -27,11 +28,8 @@ public class EndpointAttribute : Attribute
         }
     }
 
-    public EndpointAttribute(string route, Method method = Method.Get, ContentType contentType = ContentType.Plaintext)
+    private void GetRouteParameters(string route)
     {
-        this.Method = method;
-        this.ContentType = contentType;
-
         // Skip scanning for parameters if the route obviously doesn't contain one
         // Maybe can optimize further in the future with source generators?
         // Only runs once per endpoint either way, so whatever
@@ -87,7 +85,21 @@ public class EndpointAttribute : Attribute
         this.FullRoute = fullRoute;
     }
 
-    public EndpointAttribute(string route, ContentType contentType, Method method = Method.Get)
+    public EndpointAttribute(string route, HttpMethods method = HttpMethods.Get, ContentType contentType = ContentType.Plaintext)
+    {
+        this.Method = MethodUtils.FromEnum(typeof(HttpProtocolMethods), method);
+        this.ContentType = contentType;
+
+        this.GetRouteParameters(route);
+    }
+    
+    public EndpointAttribute(string route, ContentType contentType)
+        : this(route, HttpMethods.Get, contentType)
+    {
+        
+    }
+    
+    public EndpointAttribute(string route, ContentType contentType, HttpMethods method)
         : this(route, method, contentType)
     {
         

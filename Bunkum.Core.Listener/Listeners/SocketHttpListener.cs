@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using Bunkum.Core.Listener.Extensions;
 using Bunkum.Core.Listener.Parsing;
+using Bunkum.Core.Listener.Protocol;
 using Bunkum.Core.Listener.Request;
 using NotEnoughLogs;
 using HttpVersion = Bunkum.Core.Listener.Request.HttpVersion;
@@ -119,7 +120,7 @@ public partial class SocketHttpListener : BunkumHttpListener
         if (httpVersion == HttpVersion.Unknown)
             throw new NotSupportedException(version.ToString());
 
-        context.Method = MethodUtils.FromString(method);
+        context.Method = MethodUtils.FromString(typeof(HttpProtocolMethods), method);
         if (context.Method == Method.Invalid)
         {
             throw new Exception("Rejected request that sent invalid method " + method.ToString());

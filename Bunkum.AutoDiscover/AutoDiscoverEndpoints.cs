@@ -1,7 +1,7 @@
 using Bunkum.Core;
 using Bunkum.Core.Configuration;
 using Bunkum.Core.Endpoints;
-using Bunkum.Core.Listener.Parsing;
+using Bunkum.Core.Listener.Protocol;
 
 namespace Bunkum.AutoDiscover;
 
