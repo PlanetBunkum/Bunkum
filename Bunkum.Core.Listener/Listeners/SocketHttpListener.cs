@@ -11,7 +11,7 @@ using HttpVersion = Bunkum.Core.Listener.Request.HttpVersion;
 
 namespace Bunkum.Core.Listener.Listeners;
 
-public partial class SocketListener : BunkumListener
+public partial class SocketHttpListener : BunkumHttpListener
 {
     private Socket? _socket;
     private readonly Uri _listenEndpoint;
@@ -20,7 +20,7 @@ public partial class SocketListener : BunkumListener
     [GeneratedRegex("^[a-zA-Z]+$")]
     private static partial Regex LettersRegex();
 
-    public SocketListener(Uri listenEndpoint, bool useForwardedIp, Logger logger) : base(logger)
+    public SocketHttpListener(Uri listenEndpoint, bool useForwardedIp, Logger logger) : base(logger)
     {
         this._listenEndpoint = listenEndpoint;
         this._useForwardedIp = useForwardedIp;

@@ -6,11 +6,11 @@ namespace Bunkum.Core.Listener.Listeners.Direct;
 
 public class BunkumHttpMessageHandler : HttpMessageHandler
 {
-    private readonly DirectListener _listener;
+    private readonly DirectHttpListener _httpListener;
 
-    public BunkumHttpMessageHandler(DirectListener listener)
+    public BunkumHttpMessageHandler(DirectHttpListener httpListener)
     {
-        this._listener = listener;
+        this._httpListener = httpListener;
     }
 
     protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken ct)
@@ -23,7 +23,7 @@ public class BunkumHttpMessageHandler : HttpMessageHandler
     {
         MemoryStream stream = new();
         ManualResetEventSlim reset = new(false);
-        this._listener.EnqueueMessage(new DirectHttpMessage(request, stream, reset));
+        this._httpListener.EnqueueMessage(new DirectHttpMessage(request, stream, reset));
 
         // Wait for the signal that tells us the server has finished responding
         reset.Wait(ct);
@@ -52,7 +52,7 @@ public class BunkumHttpMessageHandler : HttpMessageHandler
 
         string contentLengthStr = "0";
         
-        foreach ((string? key, string? value) in BunkumListener.ReadHeaders(stream))
+        foreach ((string? key, string? value) in BunkumHttpListener.ReadHeaders(stream))
         {
             Debug.Assert(key != null);
             Debug.Assert(value != null);

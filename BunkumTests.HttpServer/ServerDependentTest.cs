@@ -16,10 +16,10 @@ public class ServerDependentTest
     [Pure]
     private protected (BunkumServer, HttpClient) Setup(bool start = true)
     {
-        DirectListener listener = new(new Logger());
-        HttpClient client = listener.GetClient();
+        DirectHttpListener httpListener = new(new Logger());
+        HttpClient client = httpListener.GetClient();
 
-        BunkumServer server = new(listener);
+        BunkumServer server = new(httpListener);
         server.AddAuthenticationService();
         if(start) server.Start(0);
         

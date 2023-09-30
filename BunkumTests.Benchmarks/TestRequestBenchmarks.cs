@@ -11,16 +11,16 @@ public class TestRequestBenchmarks
 {
     private static readonly Uri Endpoint = new("/");
     
-    private DirectListener _listener = null!;
+    private DirectHttpListener _httpListener = null!;
     private HttpClient _client = null!;
     private BunkumServer _server = null!;
 
     [GlobalSetup]
     public void Setup()
     {
-        this._listener = new DirectListener(new Logger());
-        this._client = this._listener.GetClient();
-        this._server = new BunkumServer(this._listener, false);
+        this._httpListener = new DirectHttpListener(new Logger());
+        this._client = this._httpListener.GetClient();
+        this._server = new BunkumServer(this._httpListener, false);
         
         this._server.DiscoverEndpointsFromAssembly(typeof(TestEndpoints).Assembly);
         this._server.Start(1);

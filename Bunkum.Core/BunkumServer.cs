@@ -58,7 +58,7 @@ public partial class BunkumServer : IHotReloadable
         if (setListener)
         {
             Uri listenEndpoint = new($"http://{bunkumConfig.ListenHost}:{bunkumConfig.ListenPort}");
-            this._listener = new SocketListener(listenEndpoint, bunkumConfig.UseForwardedIp, this.Logger);
+            this._listener = new SocketHttpListener(listenEndpoint, bunkumConfig.UseForwardedIp, this.Logger);
         }
         else
         {
@@ -73,7 +73,7 @@ public partial class BunkumServer : IHotReloadable
     public BunkumServer(BunkumListener listener, bool logToConsole = true, LoggerConfiguration? configuration = null) : this(false, logToConsole, configuration)
     {
         this._listener = listener;
-        if (listener is DirectListener directListener)
+        if (listener is DirectHttpListener directListener)
         {
             directListener.Callback = context =>
             {
