@@ -11,10 +11,10 @@ namespace Bunkum.Core.Listener;
 /// This probably isn't what you're looking for, unless you're looking to add protocol support to Bunkum. 
 /// </summary>
 public abstract class BunkumListener<TListenerContext, TStatusCode, TProtocolVersion, TProtocolMethod> : IDisposable
-    where TListenerContext : ListenerContext<TStatusCode, TProtocolVersion, TProtocolMethod>
     where TStatusCode : Enum
     where TProtocolVersion : Enum
     where TProtocolMethod : Enum
+    where TListenerContext : ListenerContext<TStatusCode, TProtocolVersion, TProtocolMethod>
 {
     /// <summary>
     /// The logger.

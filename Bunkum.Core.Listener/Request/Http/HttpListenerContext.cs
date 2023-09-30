@@ -30,14 +30,4 @@ public abstract class HttpListenerContext : ListenerContext<HttpStatusCode, Http
         
         this.CloseConnection();
     }
-
-    public override Task HandleInvalidRequest()
-    {
-        return this.SendResponse(HttpStatusCode.BadRequest);
-    }
-
-    public override Task HandleNoEndpoint()
-    {
-        return this.SendResponse(HttpStatusCode.NotFound);
-    }
 }
