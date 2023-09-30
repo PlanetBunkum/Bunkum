@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Bunkum.Listener.Request;
+namespace Bunkum.Protocols.Http;
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public enum HttpVersion

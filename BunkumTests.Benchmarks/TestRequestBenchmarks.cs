@@ -1,6 +1,7 @@
 using BenchmarkDotNet.Attributes;
 using Bunkum.Core;
-using Bunkum.Listener.Listeners.Direct;
+using Bunkum.Protocols.Http;
+using Bunkum.Protocols.Http.Direct;
 using BunkumTests.HttpServer.Endpoints;
 using NotEnoughLogs;
 
@@ -20,7 +21,7 @@ public class TestRequestBenchmarks
     {
         this._httpListener = new DirectHttpListener(new Logger());
         this._client = this._httpListener.GetClient();
-        this._server = new BunkumServer(this._httpListener, false);
+        this._server = new BunkumHttpServer(this._httpListener, false);
         
         this._server.DiscoverEndpointsFromAssembly(typeof(TestEndpoints).Assembly);
         this._server.Start(1);

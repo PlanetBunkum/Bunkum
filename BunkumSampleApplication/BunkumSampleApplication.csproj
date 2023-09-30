@@ -10,6 +10,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Bunkum.Listener\Bunkum.Listener.csproj" />
       <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
+      <ProjectReference Include="..\Bunkum.Protocols.Http\Bunkum.Protocols.Http.csproj" />
 
 
     </ItemGroup>

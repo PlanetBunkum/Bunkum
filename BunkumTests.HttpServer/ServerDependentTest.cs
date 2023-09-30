@@ -1,7 +1,8 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Bunkum.Core;
-using Bunkum.Listener.Listeners.Direct;
+using Bunkum.Protocols.Http;
+using Bunkum.Protocols.Http.Direct;
 using JetBrains.Annotations;
 using NotEnoughLogs;
 
@@ -19,7 +20,7 @@ public class ServerDependentTest
         DirectHttpListener httpListener = new(new Logger());
         HttpClient client = httpListener.GetClient();
 
-        BunkumServer server = new(httpListener);
+        BunkumServer server = new BunkumHttpServer(httpListener);
         server.AddAuthenticationService();
         if(start) server.Start(0);
         

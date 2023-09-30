@@ -1,8 +1,8 @@
 namespace Bunkum.Listener.Extensions;
 
-internal static class StreamExtensions
+public static class StreamExtensions
 {
-    internal static int ReadIntoBufferUntilChar(this Stream stream, char charToReadTo, Span<byte> buffer)
+    public static int ReadIntoBufferUntilChar(this Stream stream, char charToReadTo, Span<byte> buffer)
     {
         int readByte;
         int i = 0;
@@ -17,7 +17,7 @@ internal static class StreamExtensions
         return i;
     }
     
-    internal static int ReadIntoBufferUntilChar(this Stream stream, char charToReadTo, Span<char> buffer)
+    public static int ReadIntoBufferUntilChar(this Stream stream, char charToReadTo, Span<char> buffer)
     {
         int readByte;
         int i = 0;
@@ -33,7 +33,7 @@ internal static class StreamExtensions
         return i;
     }
     
-    internal static int SkipBufferUntilChar(this Stream stream, char charToReadTo)
+    public static int SkipBufferUntilChar(this Stream stream, char charToReadTo)
     {
         int readByte;
         int i = 0;
@@ -46,7 +46,7 @@ internal static class StreamExtensions
         return i;
     }
 
-    internal static int ReadIntoStream(this Stream stream, Stream otherStream, int count)
+    public static int ReadIntoStream(this Stream stream, Stream otherStream, int count)
     {
         int i = 0;
         while(i < count)

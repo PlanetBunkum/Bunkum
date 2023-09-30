@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
+      <ProjectReference Include="..\Bunkum.Protocols.Http\Bunkum.Protocols.Http.csproj" />
       <ProjectReference Include="..\BunkumTests.HttpServer\BunkumTests.HttpServer.csproj" />
     </ItemGroup>
 

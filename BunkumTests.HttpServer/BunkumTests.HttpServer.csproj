@@ -33,6 +33,7 @@
           <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
           <OutputItemType>Analyzer</OutputItemType>
       </ProjectReference>
+      <ProjectReference Include="..\Bunkum.Protocols.Http\Bunkum.Protocols.Http.csproj" />
     </ItemGroup>
 
     <ItemGroup>

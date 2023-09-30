@@ -1,15 +1,16 @@
 using System.Diagnostics;
 using System.Net;
 using System.Web;
+using Bunkum.Listener;
 using Bunkum.Listener.Protocol;
 using Bunkum.Listener.Request;
 using NotEnoughLogs;
 
-namespace Bunkum.Listener.Listeners.Direct;
+namespace Bunkum.Protocols.Http.Direct;
 
-public class DirectHttpListener : BunkumHttpListener
+public class DirectHttpListener : BunkumHttpListener, IListenerWithCallback
 {
-    public Action<ListenerContext>? Callback { private get; set; }
+    public Action<ListenerContext>? Callback { get; set; }
 
     public DirectHttpListener(Logger logger) : base(logger)
     {}
@@ -64,7 +65,7 @@ public class DirectHttpListener : BunkumHttpListener
             stream = new MemoryStream(0);
         }
 
-        ListenerContext context = new DirectListenerContext(message.Stream, message.Reset)
+        ListenerContext context = new DirectHttpListenerContext(message.Stream, message.Reset)
         {
             Uri = message.Message.RequestUri!,
             Method = MethodUtils.FromString(typeof(HttpProtocolMethods), message.Message.Method.Method),

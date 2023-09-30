@@ -1,18 +1,20 @@
-namespace Bunkum.Listener.Request;
+using Bunkum.Listener.Request;
 
-public class DirectListenerContext : ListenerContext
+namespace Bunkum.Protocols.Http.Direct;
+
+public class DirectHttpListenerContext : ListenerContext
 {
     private readonly MemoryStream _stream;
     private readonly ManualResetEventSlim? _reset;
     private bool _closed;
 
-    public DirectListenerContext(MemoryStream stream, ManualResetEventSlim reset)
+    public DirectHttpListenerContext(MemoryStream stream, ManualResetEventSlim reset)
     {
         this._stream = stream;
         this._reset = reset;
     }
 
-    public DirectListenerContext()
+    public DirectHttpListenerContext()
     {
         this._stream = new MemoryStream(Array.Empty<byte>(), false);
     }

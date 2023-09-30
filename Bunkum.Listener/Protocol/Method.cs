@@ -4,7 +4,7 @@ namespace Bunkum.Listener.Protocol;
 
 public record Method(string Value)
 {
-    internal static readonly Method Invalid = new("_");
+    public static readonly Method Invalid = new("_");
 
     public override string ToString()
     {

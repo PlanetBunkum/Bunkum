@@ -3,17 +3,17 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Web;
+using Bunkum.Listener;
 using Bunkum.Listener.Extensions;
 using Bunkum.Listener.Protocol;
 using Bunkum.Listener.Request;
 using NotEnoughLogs;
-using HttpVersion = Bunkum.Listener.Request.HttpVersion;
 
-namespace Bunkum.Listener.Listeners;
+namespace Bunkum.Protocols.Http.Socket;
 
 public partial class SocketHttpListener : BunkumHttpListener
 {
-    private Socket? _socket;
+    private System.Net.Sockets.Socket? _socket;
     private readonly Uri _listenEndpoint;
     private readonly bool _useForwardedIp;
     
@@ -42,7 +42,7 @@ public partial class SocketHttpListener : BunkumHttpListener
 
         IPEndPoint listenEndpoint = new(host, this._listenEndpoint.Port);
 
-        this._socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        this._socket = new System.Net.Sockets.Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         
         this._socket.Bind(listenEndpoint);
         this._socket.Listen(128);
@@ -55,7 +55,7 @@ public partial class SocketHttpListener : BunkumHttpListener
         if (this._socket == null)
             throw new InvalidOperationException("Cannot wait for a connection when we are not listening");
 
-        Socket client = await this._socket.AcceptAsync(globalCt ?? CancellationToken.None);
+        System.Net.Sockets.Socket client = await this._socket.AcceptAsync(globalCt ?? CancellationToken.None);
         NetworkStream stream = new(client);
 
         try
@@ -70,12 +70,12 @@ public partial class SocketHttpListener : BunkumHttpListener
         catch(Exception e)
         {
             this.Logger.LogWarning(ListenerCategory.Request, $"Failed to read request: {e}");
-            await new SocketListenerContext(client).SendResponse(HttpStatusCode.BadRequest);
+            await new SocketHttpListenerContext(client).SendResponse(HttpStatusCode.BadRequest);
             return null;
         }
     }
 
-    private ListenerContext ReadRequestIntoContext(Socket client, Stream stream)
+    private ListenerContext ReadRequestIntoContext(System.Net.Sockets.Socket client, Stream stream)
     {
         Span<char> method = stackalloc char[RequestLineMethodLimit];
         Span<char> path = stackalloc char[RequestLinePathLimit];
@@ -102,7 +102,7 @@ public partial class SocketHttpListener : BunkumHttpListener
             throw new Exception("Failed to read request line. Maybe you tried to connect with HTTPS?", e);
         }
 
-        ListenerContext context = new SocketListenerContext(client)
+        ListenerContext context = new SocketHttpListenerContext(client)
         {
             RealRemoteEndpoint = (client.RemoteEndPoint as IPEndPoint)!,
         };

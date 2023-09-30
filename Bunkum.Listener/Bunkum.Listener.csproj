@@ -13,4 +13,8 @@
       <PackageReference Include="NotEnoughLogs" Version="2.0.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Listeners\" />
+    </ItemGroup>
+
 </Project>

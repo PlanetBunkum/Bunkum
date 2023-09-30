@@ -1,10 +1,11 @@
 ﻿using Bunkum.Core;
+using Bunkum.Protocols.Http;
 using BunkumTests.HttpServer;
 using BunkumConsole = Bunkum.Core.BunkumConsole;
 
 BunkumConsole.AllocateConsole();
 
-BunkumServer server = new();
+BunkumServer server = new BunkumHttpServer();
 server.Initialize = s =>
 {
     s.AddHealthCheckService();

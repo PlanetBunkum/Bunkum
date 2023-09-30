@@ -4,6 +4,7 @@ using System.Reflection;
 using Bunkum.Core;
 using Bunkum.Core.Database.Dummy;
 using Bunkum.Core.Storage;
+using Bunkum.Protocols.Http;
 using BunkumSampleApplication.Configuration;
 using BunkumSampleApplication.Endpoints;
 using BunkumSampleApplication.Middlewares;
@@ -12,7 +13,7 @@ using NotEnoughLogs;
 using NotEnoughLogs.Behaviour;
 
 // Initialize a Bunkum server
-BunkumServer server = new(new LoggerConfiguration
+BunkumServer server = new BunkumHttpServer(new LoggerConfiguration
 {
     Behaviour = new QueueLoggingBehaviour(),
     #if DEBUG

@@ -1,6 +1,8 @@
 using System.Reflection;
 using Bunkum.Core.RateLimit;
 using Bunkum.Listener.Request;
+using Bunkum.Protocols.Http;
+using Bunkum.Protocols.Http.Direct;
 using BunkumTests.HttpServer.Time;
 
 namespace BunkumTests.HttpServer.Tests.RateLimit;
@@ -8,7 +10,7 @@ namespace BunkumTests.HttpServer.Tests.RateLimit;
 [Parallelizable]
 public class RateLimitTests
 {
-    private static readonly ListenerContext Ctx = new DirectListenerContext();
+    private static readonly ListenerContext Ctx = new DirectHttpListenerContext();
 
     [Test]
     public void AllowsSingleRequest()

@@ -9,8 +9,6 @@ using Bunkum.Core.Endpoints;
 using Bunkum.Core.Endpoints.Middlewares;
 using Bunkum.Core.Services;
 using Bunkum.Listener;
-using Bunkum.Listener.Listeners;
-using Bunkum.Listener.Listeners.Direct;
 using Bunkum.Listener.Protocol;
 using Bunkum.Listener.Request;
 using EasyHotReload;
@@ -24,7 +22,7 @@ namespace Bunkum.Core;
 /// </summary>
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-public partial class BunkumServer : IHotReloadable
+public abstract partial class BunkumServer : IHotReloadable
 {
     private readonly BunkumListener _listener;
     public readonly Logger Logger;
@@ -58,7 +56,9 @@ public partial class BunkumServer : IHotReloadable
         if (setListener)
         {
             Uri listenEndpoint = new($"http://{bunkumConfig.ListenHost}:{bunkumConfig.ListenPort}");
-            this._listener = new SocketHttpListener(listenEndpoint, bunkumConfig.UseForwardedIp, this.Logger);
+            // this._listener = new SocketHttpListener(listenEndpoint, bunkumConfig.UseForwardedIp, this.Logger);
+            // ReSharper disable once VirtualMemberCallInConstructor
+            this._listener = this.CreateDefaultListener(listenEndpoint, bunkumConfig.UseForwardedIp, this.Logger);
         }
         else
         {
@@ -68,14 +68,16 @@ public partial class BunkumServer : IHotReloadable
         HotReloadRegistry.RegisterReloadable(this);
     }
 
+    protected abstract BunkumListener CreateDefaultListener(Uri listenEndpoint, bool useForwardedIp, Logger logger);
+
     public BunkumServer(LoggerConfiguration? configuration = null) : this(true, true, configuration) {}
     
     public BunkumServer(BunkumListener listener, bool logToConsole = true, LoggerConfiguration? configuration = null) : this(false, logToConsole, configuration)
     {
         this._listener = listener;
-        if (listener is DirectHttpListener directListener)
+        if (listener is IListenerWithCallback callbackListener)
         {
-            directListener.Callback = context =>
+            callbackListener.Callback = context =>
             {
                 this.CompleteRequestAsync(context).Wait();
             };
