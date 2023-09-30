@@ -6,19 +6,19 @@ namespace BunkumTests.HttpServer.Endpoints;
 
 public class RouteParameterEndpoints : EndpointGroup
 {
-    [Endpoint("/param/{input}")]
+    [HttpEndpoint("/param/{input}")]
     public string Parameter(RequestContext context, string input)
     {
         return input;
     }
     
-    [Endpoint("/params/{input}/{inputOther}")]
+    [HttpEndpoint("/params/{input}/{inputOther}")]
     public string Parameters(RequestContext context, string input, string inputOther)
     {
         return input + "," + inputOther;
     }
     
-    [Endpoint("/inlineParam/inline{input}")]
+    [HttpEndpoint("/inlineParam/inline{input}")]
     public string InlineParameter(RequestContext context, string input)
     {
         return input;

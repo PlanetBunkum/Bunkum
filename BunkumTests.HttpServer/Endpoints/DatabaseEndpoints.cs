@@ -7,19 +7,19 @@ namespace BunkumTests.HttpServer.Endpoints;
 
 public class DatabaseEndpoints : EndpointGroup
 {
-    [Endpoint("/db/null")]
+    [HttpEndpoint("/db/null")]
     public string DatabaseNull(RequestContext context, DummyDatabaseContext? database)
     {
         return (database != null).ToString();
     }
     
-    [Endpoint("/db/value")]
+    [HttpEndpoint("/db/value")]
     public string DatabaseValue(RequestContext context, DummyDatabaseContext database)
     {
         return database.GetDummyValue().ToString();
     }
     
-    [Endpoint("/db/switch")]
+    [HttpEndpoint("/db/switch")]
     public string DatabaseValue(RequestContext context, TestSwitchDatabaseContext database)
     {
         return database.GetDummyValue().ToString();

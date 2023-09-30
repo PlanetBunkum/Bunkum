@@ -7,14 +7,14 @@ namespace BunkumTests.HttpServer.Endpoints;
 
 public class AuthenticationEndpoints : EndpointGroup
 {
-    [Endpoint("/auth", HttpMethods.Get, ContentType.Json)]
+    [HttpEndpoint("/auth", HttpMethods.Get, ContentType.Json)]
     [Authentication(true)]
     public DummyUser Authentication(RequestContext context, DummyUser user)
     {
         return user;
     }
     
-    [Endpoint("/token", HttpMethods.Get, ContentType.Json)]
+    [HttpEndpoint("/token", HttpMethods.Get, ContentType.Json)]
     [Authentication(true)]
     public string Authentication(RequestContext context, DummyToken token)
     {

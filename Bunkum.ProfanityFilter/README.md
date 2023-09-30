@@ -11,7 +11,7 @@ server.AddProfanityService();
 
 ```csharp
 // FilterEndpoints.cs
-[Endpoint("/censorSentence")]
+[HttpEndpoint("/censorSentence")]
 [NullStatusCode(HttpStatusCode.BadRequest)]
 public string? CensorSentence(RequestContext context, ProfanityService service)
 {

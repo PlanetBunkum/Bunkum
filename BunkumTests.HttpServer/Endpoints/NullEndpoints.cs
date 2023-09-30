@@ -7,7 +7,7 @@ namespace BunkumTests.HttpServer.Endpoints;
 
 public class NullEndpoints : EndpointGroup
 {
-    [Endpoint("/null", ContentType.Json)]
+    [HttpEndpoint("/null", ContentType.Json)]
     [NullStatusCode(HttpStatusCode.BadRequest)]
     public object? Null(RequestContext context)
     {

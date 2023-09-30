@@ -9,26 +9,26 @@ namespace BunkumTests.HttpServer.Endpoints;
 
 public class ResponseEndpoints : EndpointGroup
 {
-    [Endpoint("/response/string")]
+    [HttpEndpoint("/response/string")]
     public string String(RequestContext context)
     {
         return "works";
     }
     
-    [Endpoint("/response/responseObject")]
+    [HttpEndpoint("/response/responseObject")]
     public Response ResponseObject(RequestContext context)
     {
         return new Response("works", ContentType.Plaintext);
     }
     
-    [Endpoint("/response/responseObjectWithCode")]
+    [HttpEndpoint("/response/responseObjectWithCode")]
     public Response ResponseObjectWithCode(RequestContext context)
     {
         return new Response("works", ContentType.Plaintext, HttpStatusCode.Accepted); // random code lol
     }
 
-    [Endpoint("/response/serializedXml", HttpMethods.Get, ContentType.Xml)]
-    [Endpoint("/response/serializedJson", HttpMethods.Get, ContentType.Json)]
+    [HttpEndpoint("/response/serializedXml", HttpMethods.Get, ContentType.Xml)]
+    [HttpEndpoint("/response/serializedJson", HttpMethods.Get, ContentType.Json)]
     public ResponseSerializationObject SerializedObject(RequestContext context)
     {
         return new ResponseSerializationObject();

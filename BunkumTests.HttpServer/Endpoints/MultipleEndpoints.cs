@@ -5,8 +5,8 @@ namespace BunkumTests.HttpServer.Endpoints;
 
 public class MultipleEndpoints : EndpointGroup
 {
-    [Endpoint("/a")]
-    [Endpoint("/b")]
+    [HttpEndpoint("/a")]
+    [HttpEndpoint("/b")]
     public string Test(RequestContext context)
     {
         return "works";

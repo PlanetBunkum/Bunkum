@@ -8,13 +8,13 @@ namespace BunkumTests.HttpServer.Endpoints;
 
 public class StorageEndpoints : EndpointGroup
 {
-    [Endpoint("/storage/put")]
+    [HttpEndpoint("/storage/put")]
     public Response Put(RequestContext context, IDataStore dataStore)
     {
         dataStore.WriteToStore("file", "data"u8);
         return HttpStatusCode.OK;
     }
 
-    [Endpoint("/storage/get")]
+    [HttpEndpoint("/storage/get")]
     public byte[] Get(RequestContext context, IDataStore dataStore) => dataStore.GetDataFromStore("file");
 }

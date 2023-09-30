@@ -7,13 +7,13 @@ public class TestEndpoints : EndpointGroup
 {
     public const string TestString = "Test";
 
-    [Endpoint("/")]
+    [HttpEndpoint("/")]
     public string Test(RequestContext context)
     {
         return TestString;
     }
 
-    [Endpoint("/echoString")]
+    [HttpEndpoint("/echoString")]
     public string Echo(RequestContext context, string body)
     {
         return body;

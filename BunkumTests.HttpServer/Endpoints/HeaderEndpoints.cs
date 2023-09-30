@@ -6,14 +6,14 @@ namespace BunkumTests.HttpServer.Endpoints;
 
 public class HeaderEndpoints : EndpointGroup
 {
-    [Endpoint("/header/{name}")]
+    [HttpEndpoint("/header/{name}")]
     [NullStatusCode(HttpStatusCode.NotFound)]
     public string? GetHeader(RequestContext context, string name)
     {
         return context.RequestHeaders[name];
     }
     
-    [Endpoint("/cookie/{name}")]
+    [HttpEndpoint("/cookie/{name}")]
     [NullStatusCode(HttpStatusCode.NotFound)]
     public string? GetCookie(RequestContext context, string name)
     {

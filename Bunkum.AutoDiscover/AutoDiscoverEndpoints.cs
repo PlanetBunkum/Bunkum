@@ -7,7 +7,7 @@ namespace Bunkum.AutoDiscover;
 
 internal class AutoDiscoverEndpoints : EndpointGroup
 {
-    [Endpoint("/autodiscover", ContentType.Json)]
+    [HttpEndpoint("/autodiscover", ContentType.Json)]
     [Authentication(false)]
     public AutoDiscoverResponse AutoDiscover(RequestContext context, BunkumConfig bunkumConfig, AutoDiscoverConfig discoverConfig) => new()
         {

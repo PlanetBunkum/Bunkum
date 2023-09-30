@@ -5,7 +5,7 @@ namespace Bunkum.Core.Health.Endpoints;
 
 internal class HealthCheckEndpoints : EndpointGroup
 {
-    [Endpoint("/_health", ContentType.Json)]
+    [HttpEndpoint("/_health", ContentType.Json)]
     [Authentication(false)]
     public HealthReport GetHealthReport(RequestContext context, HealthReport report) => report;
 }

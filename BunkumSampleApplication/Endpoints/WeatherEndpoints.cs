@@ -10,9 +10,9 @@ namespace BunkumSampleApplication.Endpoints;
 
 public class WeatherEndpoints : EndpointGroup
 {
-    [Endpoint("/api/v1/weather", HttpMethods.Get, ContentType.Json)]
+    [HttpEndpoint("/api/v1/weather", HttpMethods.Get, ContentType.Json)]
     // This is a simple endpoint - the bare minimum.
-    // The only requirement of an endpoint is that it is marked with an [Endpoint] attribute and the first argument is a RequestContext.
+    // The only requirement of an endpoint is that it is marked with an [HttpEndpoint] attribute and the first argument is a RequestContext.
     public WeatherStatistic GetWeather(RequestContext context)
     {
         // Since we've marked our ContentType as Json, Bunkum will automatically serialize this object with Newtonsoft.JSON if we return it.
@@ -28,7 +28,7 @@ public class WeatherEndpoints : EndpointGroup
     }
     
     // Let's introduce some more Bunkum concepts.
-    [Endpoint("/api/v2/weather", HttpMethods.Get, ContentType.Json)]
+    [HttpEndpoint("/api/v2/weather", HttpMethods.Get, ContentType.Json)]
     // Here, we inject the ExampleConfiguration we set up in Program.cs.
     // It can be named anything, just as long as the type matches.
     public WeatherStatistic GetWeatherV2(RequestContext context, ExampleConfiguration configuration)
@@ -41,7 +41,7 @@ public class WeatherEndpoints : EndpointGroup
         };
     }
     
-    [Endpoint("/api/v3/weather", HttpMethods.Get, ContentType.Json)]
+    [HttpEndpoint("/api/v3/weather", HttpMethods.Get, ContentType.Json)]
     // We can do this for just about anything we set up in Program.cs. Let's get crazy...
     public WeatherStatistic GetWeatherV3(RequestContext context,
         ExampleConfiguration configuration,

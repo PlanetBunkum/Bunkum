@@ -7,13 +7,13 @@ namespace BunkumTests.HttpServer.Endpoints;
 [NoReorder]
 public class RouteStartsWithEndpoints : EndpointGroup
 {
-    [Endpoint("/sw/a")]
+    [HttpEndpoint("/sw/a")]
     public string A(RequestContext context)
     {
         return "a";
     }
     
-    [Endpoint("/sw/asdf")]
+    [HttpEndpoint("/sw/asdf")]
     public string Asdf(RequestContext context)
     {
         return "asdf";

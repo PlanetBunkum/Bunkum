@@ -7,13 +7,13 @@ namespace Bunkum.Core.Endpoints;
 
 [MeansImplicitUse]
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-public class EndpointAttribute : Attribute
+public abstract class EndpointAttribute : Attribute
 {
     public string FullRoute { get; private set; }
     private readonly Dictionary<int, RouteParam> _parameterIndexes = new();
 
-    public readonly Method Method;
-    public readonly ContentType ContentType;
+    public Method Method { get; protected set; }
+    public ContentType ContentType { get; protected set; }
 
     private struct RouteParam
     {
@@ -26,6 +26,8 @@ public class EndpointAttribute : Attribute
             this.Name = s;
         }
     }
+    
+    protected EndpointAttribute(string route) => this.GetRouteParameters(route);
 
     private void GetRouteParameters(string route)
     {
@@ -82,26 +84,6 @@ public class EndpointAttribute : Attribute
         }
 
         this.FullRoute = fullRoute;
-    }
-
-    public EndpointAttribute(string route, HttpMethods method = HttpMethods.Get, ContentType contentType = ContentType.Plaintext)
-    {
-        this.Method = MethodUtils.FromEnum(typeof(HttpProtocolMethods), method);
-        this.ContentType = contentType;
-
-        this.GetRouteParameters(route);
-    }
-    
-    public EndpointAttribute(string route, ContentType contentType)
-        : this(route, HttpMethods.Get, contentType)
-    {
-        
-    }
-    
-    public EndpointAttribute(string route, ContentType contentType, HttpMethods method)
-        : this(route, method, contentType)
-    {
-        
     }
 
     [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]

@@ -11,7 +11,7 @@ public class RoutingTests : ServerDependentTest
     [Test]
     public void IdentifiesFullRouteCorrectly()
     {
-        EndpointAttribute attribute = new("/1234/1234");
+        EndpointAttribute attribute = new HttpEndpointAttribute("/1234/1234");
         
         Assert.That(attribute.FullRoute, Is.EqualTo("/1234/1234"));
         bool matches = attribute.UriMatchesRoute(new Uri("/1234/1234"), HttpProtocolMethods.Get, out Dictionary<string, string> parameters);
@@ -26,7 +26,7 @@ public class RoutingTests : ServerDependentTest
     [Test]
     public void IdentifiesRouteParametersCorrectly()
     {
-        EndpointAttribute attribute = new("/1234/1234/{param}");
+        EndpointAttribute attribute = new HttpEndpointAttribute("/1234/1234/{param}");
         
         Assert.That(attribute.FullRoute, Is.EqualTo("/1234/1234/_"));
         

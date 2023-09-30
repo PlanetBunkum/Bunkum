@@ -9,7 +9,7 @@ namespace BunkumTests.HttpServer.Endpoints;
 
 public class BodyEndpoints : EndpointGroup
 {
-    [Endpoint("/body/string", HttpMethods.Post)]
+    [HttpEndpoint("/body/string", HttpMethods.Post)]
     public string String(RequestContext context, string body)
     {
         return body;
@@ -22,25 +22,25 @@ public class BodyEndpoints : EndpointGroup
         public string Field = "";
     }
     
-    [Endpoint("/body/json", HttpMethods.Post, ContentType.Json)]
+    [HttpEndpoint("/body/json", HttpMethods.Post, ContentType.Json)]
     public Serializable Json(RequestContext context, Serializable body)
     {
         return body;
     }
     
-    [Endpoint("/body/xml", HttpMethods.Post, ContentType.Xml)]
+    [HttpEndpoint("/body/xml", HttpMethods.Post, ContentType.Xml)]
     public Serializable Xml(RequestContext context, Serializable body)
     {
         return body;
     }
     
-    [Endpoint("/body/byteArray", HttpMethods.Post)]
+    [HttpEndpoint("/body/byteArray", HttpMethods.Post)]
     public string ByteArray(RequestContext context, byte[] body)
     {
         return Encoding.Default.GetString(body);
     }
     
-    [Endpoint("/body/stream", HttpMethods.Post)]
+    [HttpEndpoint("/body/stream", HttpMethods.Post)]
     public string Stream(RequestContext context, Stream body)
     {
         MemoryStream stream = (MemoryStream)body;

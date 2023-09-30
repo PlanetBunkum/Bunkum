@@ -7,7 +7,7 @@ namespace Bunkum.ProfanityFilter.Test;
 
 public class FilterEndpoints : EndpointGroup
 {
-    [Endpoint("/censorSentence")]
+    [HttpEndpoint("/censorSentence")]
     [NullStatusCode(HttpStatusCode.BadRequest)]
     public string? CensorSentence(RequestContext context, ProfanityService service)
     {
@@ -17,7 +17,7 @@ public class FilterEndpoints : EndpointGroup
         return service.CensorSentence(input);
     }
     
-    [Endpoint("/sentenceContainsProfanity", ContentType.Json)]
+    [HttpEndpoint("/sentenceContainsProfanity", ContentType.Json)]
     [NullStatusCode(HttpStatusCode.BadRequest)]
     public bool? SentenceContainsProfanity(RequestContext context, ProfanityService service)
     {
