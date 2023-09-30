@@ -114,10 +114,16 @@ public partial class SocketHttpListener : BunkumHttpListener
             _ => HttpVersion.Unknown,
         };
 
-        context.Version = httpVersion;
-
         if (httpVersion == HttpVersion.Unknown)
             throw new NotSupportedException(version.ToString());
+        
+#pragma warning disable CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
+        context.Protocol = httpVersion switch
+        {
+            HttpVersion.Http1_0 => HttpProtocolInformation.Http1_0,
+            HttpVersion.Http1_1 => HttpProtocolInformation.Http1_1,
+        };
+#pragma warning restore CS8509
 
         context.Method = MethodUtils.FromString(typeof(HttpProtocolMethods), method);
         if (context.Method == Method.Invalid)

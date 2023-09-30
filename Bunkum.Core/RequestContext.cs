@@ -12,7 +12,7 @@ public struct RequestContext
     public EndPoint RemoteEndpoint { get; internal set; }
     public MemoryStream RequestStream { get; internal set; }
 
-    public Enum ProtocolVersion { get; internal set; }
+    public ProtocolInformation Protocol { get; internal set; }
     public Method Method { get; internal set; }
     public Uri Url { get; internal set; }
     

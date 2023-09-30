@@ -21,7 +21,7 @@ public abstract class ListenerContext
     /// <summary>
     /// The protocol version the request is using.
     /// </summary>
-    public Enum Version { get; set; }
+    public ProtocolInformation Protocol { get; set; }
     
     /// <summary>
     /// The protocol method the request is using.
