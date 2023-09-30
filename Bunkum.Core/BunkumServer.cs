@@ -112,7 +112,9 @@ public partial class BunkumServer : IHotReloadable
     
     /// <summary>
     /// Start the server in single-threaded mode. Bunkum is responsible for blocking.
+    /// Deprecated and will be removed in 5.0.
     /// </summary>
+    [Obsolete($"Single-threaded mode is deprecated and will be removed in 5.0. Please use multi-threading mode via {nameof(Start)}.")]
     public async Task StartAndBlockAsync()
     {
         this.RunStartupTasks();

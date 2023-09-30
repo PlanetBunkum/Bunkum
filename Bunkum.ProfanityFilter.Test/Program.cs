@@ -7,4 +7,5 @@ server.AddProfanityService();
 
 server.AddEndpointGroup<FilterEndpoints>();
 
-await server.StartAndBlockAsync();
+server.Start();
+await Task.Delay(-1);
