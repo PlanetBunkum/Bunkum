@@ -1,7 +1,6 @@
 using BenchmarkDotNet.Attributes;
 using Bunkum.Core.RateLimit;
 using Bunkum.Listener.Request;
-using Bunkum.Protocols.Http;
 using Bunkum.Protocols.Http.Direct;
 using BunkumTests.HttpServer.Tests.RateLimit;
 using BunkumTests.HttpServer.Time;
