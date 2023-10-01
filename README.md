@@ -3,7 +3,7 @@
 ![Nuget downloads](https://img.shields.io/nuget/dt/Bunkum?color=blue&label=nuget%20downloads&logo=nuget)
 ![Version](https://img.shields.io/nuget/v/Bunkum?label=version)
 
-An open-source HTTP server for custom game servers built with flexibility in mind.
+An open-source protocol-agnostic request server for custom game servers, built with flexibility yet ease of use in mind.
 
 ## Projects using Bunkum
 
