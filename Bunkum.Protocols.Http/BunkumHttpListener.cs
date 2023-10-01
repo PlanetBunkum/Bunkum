@@ -7,9 +7,9 @@ namespace Bunkum.Protocols.Http;
 
 public abstract class BunkumHttpListener : BunkumListener
 {
-    public BunkumHttpListener(Logger logger) : base(logger)
+    protected BunkumHttpListener(Logger logger) : base(logger)
     {}
-    
+
     public static IEnumerable<(string, string)> ReadCookies(ReadOnlySpan<char> cookieHeader)
     {
         List<(string key, string value)> cookies = new(10);
