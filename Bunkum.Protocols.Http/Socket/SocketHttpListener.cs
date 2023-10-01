@@ -25,7 +25,7 @@ public partial class SocketHttpListener : BunkumHttpListener
         this._listenEndpoint = listenEndpoint;
         this._useForwardedIp = useForwardedIp;
         
-        this.Logger.LogInfo(ListenerCategory.Startup, "Internal server is listening at URL " + listenEndpoint);
+        this.Logger.LogInfo(ListenerCategory.Startup, "Internal HTTP server is listening at URL " + listenEndpoint);
     }
     
     public override void StartListening()

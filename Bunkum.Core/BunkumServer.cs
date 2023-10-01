@@ -33,6 +33,7 @@ public abstract partial class BunkumServer : IHotReloadable
     private readonly List<IMiddleware> _middlewares = new();
     private readonly List<Service> _services = new();
 
+    [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor")]
     private BunkumServer(bool setListener, bool logToConsole, LoggerConfiguration? configuration)
     {
         configuration ??= LoggerConfiguration.Default;
@@ -48,6 +49,8 @@ public abstract partial class BunkumServer : IHotReloadable
         }
 
         BunkumConfig bunkumConfig = Config.LoadFromJsonFile<BunkumConfig>("bunkum.json", this.Logger);
+        
+        // leave one more than one we define since downstream applications adding a config is common
         this._configs = new List<Config>(2)
         {
             bunkumConfig,
@@ -55,9 +58,7 @@ public abstract partial class BunkumServer : IHotReloadable
 
         if (setListener)
         {
-            Uri listenEndpoint = new($"http://{bunkumConfig.ListenHost}:{bunkumConfig.ListenPort}");
-            // this._listener = new SocketHttpListener(listenEndpoint, bunkumConfig.UseForwardedIp, this.Logger);
-            // ReSharper disable once VirtualMemberCallInConstructor
+            Uri listenEndpoint = new($"{this.ProtocolUriName}://{bunkumConfig.ListenHost}:{bunkumConfig.ListenPort}");
             this._listener = this.CreateDefaultListener(listenEndpoint, bunkumConfig.UseForwardedIp, this.Logger);
         }
         else
@@ -67,8 +68,9 @@ public abstract partial class BunkumServer : IHotReloadable
         
         HotReloadRegistry.RegisterReloadable(this);
     }
-
+    
     protected abstract BunkumListener CreateDefaultListener(Uri listenEndpoint, bool useForwardedIp, Logger logger);
+    protected abstract string ProtocolUriName { get; }
 
     public BunkumServer(LoggerConfiguration? configuration = null) : this(true, true, configuration) {}
     

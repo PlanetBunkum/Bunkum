@@ -16,4 +16,6 @@ public class BunkumHttpServer : BunkumServer
     {
         return new Socket.SocketHttpListener(listenEndpoint, useForwardedIp, logger);
     }
+
+    protected override string ProtocolUriName => "http";
 }

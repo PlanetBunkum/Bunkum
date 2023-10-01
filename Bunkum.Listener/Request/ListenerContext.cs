@@ -123,7 +123,7 @@ public abstract class ListenerContext
     /// <summary>
     /// Finish up the response, and close the connection.
     /// </summary>
-    public async Task FlushResponseAndClose()
+    public virtual async Task FlushResponseAndClose()
     {
         if (this.ResponseType != null)
             this.ResponseHeaders.Add("Content-Type", this.ResponseType.Value.ToString());
@@ -141,7 +141,7 @@ public abstract class ListenerContext
     /// </summary>
     /// <param name="code"></param>
     /// <param name="data"></param>
-    public async Task SendResponse(Enum code, ArraySegment<byte>? data = null)
+    public virtual async Task SendResponse(Enum code, ArraySegment<byte>? data = null)
     {
         if (!this.CanSendData) return;
         
@@ -171,8 +171,8 @@ public abstract class ListenerContext
     /// </summary>
     protected abstract void CloseConnection();
 
-    private Task SendBufferSafe(string str) => this.SendBufferSafe(Encoding.UTF8.GetBytes(str));
-    private async Task SendBufferSafe(ArraySegment<byte> buffer)
+    protected Task SendBufferSafe(string str) => this.SendBufferSafe(Encoding.UTF8.GetBytes(str));
+    protected async Task SendBufferSafe(ArraySegment<byte> buffer)
     {
         if (!this.CanSendData) return;
         
