@@ -87,7 +87,7 @@ public abstract class ListenerContext
     /// <summary>
     /// The status code to respond with.
     /// </summary>
-    public Enum ResponseCode = HttpStatusCode.OK;
+    public HttpStatusCode ResponseCode = HttpStatusCode.OK;
     
     /// <summary>
     /// The type of content we are responding with.
@@ -140,7 +140,7 @@ public abstract class ListenerContext
     /// </summary>
     /// <param name="code"></param>
     /// <param name="data"></param>
-    public async Task SendResponse(Enum code, ArraySegment<byte>? data = null)
+    public async Task SendResponse(HttpStatusCode code, ArraySegment<byte>? data = null)
     {
         if (!this.CanSendData) return;
 
@@ -148,7 +148,7 @@ public abstract class ListenerContext
         this.CloseConnection();
     }
 
-    protected abstract Task SendResponseInternal(Enum code, ArraySegment<byte>? data = null);
+    protected abstract Task SendResponseInternal(HttpStatusCode code, ArraySegment<byte>? data = null);
 
     /// <summary>
     /// Closes the connection we made. Called after a request has been processed, and after the response has been sent.

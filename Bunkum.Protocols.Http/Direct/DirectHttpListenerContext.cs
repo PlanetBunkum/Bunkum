@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net;
 using Bunkum.Listener.Request;
 
 namespace Bunkum.Protocols.Http.Direct;
@@ -23,7 +24,7 @@ public class DirectHttpListenerContext : ListenerContext
     protected override bool CanSendData => !this._closed;
     public override long ContentLength => this.InputStream.Length;
 
-    protected override async Task SendResponseInternal(Enum code, ArraySegment<byte>? data = null)
+    protected override async Task SendResponseInternal(HttpStatusCode code, ArraySegment<byte>? data = null)
     {
         List<string> response = new() { $"HTTP/1.1 {code.GetHashCode()} {code.ToString()}" }; // TODO: spaced code names ("Not Found" instead of "NotFound")
         foreach ((string? key, string? value) in this.ResponseHeaders)

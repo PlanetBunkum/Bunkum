@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net;
 using Bunkum.Listener.Request;
 
 namespace Bunkum.Protocols.Http.Socket;
@@ -8,7 +9,7 @@ public class SocketHttpListenerContext : SocketListenerContext
     public SocketHttpListenerContext(System.Net.Sockets.Socket socket) : base(socket)
     {}
 
-    protected override async Task SendResponseInternal(Enum code, ArraySegment<byte>? data = null)
+    protected override async Task SendResponseInternal(HttpStatusCode code, ArraySegment<byte>? data = null)
     {
         // this is dumb and stupid
         this.ResponseHeaders.Add("Server", "Bunkum");
