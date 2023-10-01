@@ -14,4 +14,6 @@ An open-source protocol-agnostic request server for custom game servers, built w
 
 [turecross321/SoundShapesServer](https://github.com/turecross321/SoundShapesServer) - A custom server for Sound Shapes
 
+[turecross321/K.O.R-Server](https://github.com/turecross321/K.O.R-Server) - Official server for [K.O.R](https://t-u-r-e.itch.io/kor)
+
 *Made with :heart: for the LittleBigPlanet community*
