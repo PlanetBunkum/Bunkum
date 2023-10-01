@@ -125,7 +125,7 @@ public abstract class ListenerContext
     public virtual async Task FlushResponseAndClose()
     {
         if (this.ResponseType != null)
-            this.ResponseHeaders.Add("Content-Type", this.ResponseType.Value.ToString());
+            this.ResponseHeaders.Add("Content-Type", this.ResponseType.Value.GetName());
         
         if(this._responseLength != 0)
             this.ResponseHeaders.Add("Content-Length", this._responseLength.ToString());
