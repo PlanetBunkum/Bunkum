@@ -46,6 +46,8 @@
       <IncludeAssets>Bunkum.Analyzers.dll</IncludeAssets>
       <OutputItemType>Analyzer</OutputItemType>
     </ProjectReference>
+      
+    <ProjectReference Include="..\Bunkum.Listener\Bunkum.Listener.csproj" />
   </ItemGroup>
     
   <ItemGroup>
