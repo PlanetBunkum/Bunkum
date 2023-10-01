@@ -57,3 +57,7 @@ jobs:
         run: dotnet nuget push Bunkum.Protocols.Gopher/bin/Release/Bunkum.Protocols.Gopher.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
             NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      - name: Upload Bunkum.Listener
+        run: dotnet nuget push Bunkum.Listener/bin/Release/Bunkum.Listener.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+        env:
+            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
