@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Reflection;
 using Bunkum.Core.RateLimit.Info;
@@ -6,6 +7,7 @@ using Bunkum.Listener.Request;
 
 namespace Bunkum.Core.RateLimit;
 
+[SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
 public class RateLimiter : IRateLimiter 
 {
     private readonly ITimeProvider _timeProvider;
@@ -41,17 +43,27 @@ public class RateLimiter : IRateLimiter
     public bool UserViolatesRateLimit(ListenerContext context, MethodInfo? method, IRateLimitUser user)
     {
         RateLimitSettings settings = method?.GetCustomAttribute<RateLimitSettingsAttribute>()?.Settings ?? this._settings;
-        
-        RateLimitUserInfo? info = this._userInfos
-            .FirstOrDefault(i => user.RateLimitUserIdIsEqual(i.User.RateLimitUserId) && i.Bucket == settings.Bucket);
 
-        if (info == null)
+        lock (this._remoteEndpointInfos)
         {
-            info = new RateLimitUserInfo(user, settings.Bucket);
-            this._userInfos.Add(info);
-        }
+            RateLimitUserInfo? info = this._userInfos
+                .FirstOrDefault(i =>
+                    user.RateLimitUserIdIsEqual(i.User.RateLimitUserId) && i.Bucket == settings.Bucket);
 
-        return this.ViolatesRateLimit(context, info, settings);
+            if (info == null)
+            {
+                info = new RateLimitUserInfo(user, settings.Bucket);
+                lock (this._userInfos)
+                {
+                    this._userInfos.Add(info);
+                }
+            }
+
+            lock (info)
+            {
+                return this.ViolatesRateLimit(context, info, settings);
+            }
+        }
     }
 
     public bool RemoteEndpointViolatesRateLimit(ListenerContext context, MethodInfo? method)
@@ -60,16 +72,23 @@ public class RateLimiter : IRateLimiter
         
         RateLimitSettings settings = method?.GetCustomAttribute<RateLimitSettingsAttribute>()?.Settings ?? this._settings;
 
-        RateLimitRemoteEndpointInfo? info = this._remoteEndpointInfos
-            .FirstOrDefault(i => ipAddress.Equals(i.IpAddress) && i.Bucket == settings.Bucket);
-
-        if (info == null)
+        lock (this._remoteEndpointInfos)
         {
-            info = new RateLimitRemoteEndpointInfo(ipAddress, settings.Bucket);
-            this._remoteEndpointInfos.Add(info);
-        }
+            RateLimitRemoteEndpointInfo? info = this._remoteEndpointInfos
+                .FirstOrDefault(i => ipAddress.Equals(i.IpAddress) && i.Bucket == settings.Bucket);
 
-        return this.ViolatesRateLimit(context, info, this._settings);
+            if (info == null)
+            {
+                info = new RateLimitRemoteEndpointInfo(ipAddress, settings.Bucket);
+
+                this._remoteEndpointInfos.Add(info);
+            }
+
+            lock (info)
+            {
+                return this.ViolatesRateLimit(context, info, this._settings);
+            }
+        }
     }
 
     private bool ViolatesRateLimit(ListenerContext context, IRateLimitInfo info, RateLimitSettings settings)
