@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Reflection;
 using Bunkum.Core.RateLimit.Info;
@@ -7,7 +6,6 @@ using Bunkum.Listener.Request;
 
 namespace Bunkum.Core.RateLimit;
 
-[SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
 public class RateLimiter : IRateLimiter 
 {
     private readonly ITimeProvider _timeProvider;
