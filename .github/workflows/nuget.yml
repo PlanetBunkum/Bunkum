@@ -32,15 +32,15 @@ jobs:
       - name: Upload Bunkum.Core
         run: dotnet nuget push Bunkum.Core/bin/Release/Bunkum.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
-            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
       - name: Upload Bunkum.ProfanityFilter
         run: dotnet nuget push Bunkum.ProfanityFilter/bin/Release/Bunkum.ProfanityFilter.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
-            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
       - name: Upload Bunkum.RealmDatabase
         run: dotnet nuget push Bunkum.RealmDatabase/bin/Release/Bunkum.RealmDatabase.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
-            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
       - name: Upload Bunkum.AutoDiscover
         run: dotnet nuget push Bunkum.AutoDiscover/bin/Release/Bunkum.AutoDiscover.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
@@ -48,16 +48,20 @@ jobs:
       - name: Upload Bunkum.HealthChecks
         run: dotnet nuget push Bunkum.HealthChecks/bin/Release/Bunkum.HealthChecks.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
-            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
       - name: Upload Bunkum.Protocols.Http
         run: dotnet nuget push Bunkum.Protocols.Http/bin/Release/Bunkum.Protocols.Http.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
-            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
       - name: Upload Bunkum.Protocols.Gopher
         run: dotnet nuget push Bunkum.Protocols.Gopher/bin/Release/Bunkum.Protocols.Gopher.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
-            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
       - name: Upload Bunkum.Listener
         run: dotnet nuget push Bunkum.Listener/bin/Release/Bunkum.Listener.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
-            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      - name: Upload Bunkum.HealthChecks.RealmDatabase
+        run: dotnet nuget push Bunkum.HealthChecks.RealmDatabase/bin/Release/Bunkum.HealthChecks.RealmDatabase.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+        env:
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}

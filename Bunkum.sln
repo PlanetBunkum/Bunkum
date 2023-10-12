@@ -43,6 +43,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bunkum.Protocols.Gopher", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BunkumGopherSampleApplication", "BunkumGopherSampleApplication\BunkumGopherSampleApplication.csproj", "{14F46EF6-393E-434C-AD83-10C9A87B1DFA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bunkum.HealthChecks.RealmDatabase", "Bunkum.HealthChecks.RealmDatabase\Bunkum.HealthChecks.RealmDatabase.csproj", "{FE739B7A-F4FE-488C-A35D-72AA459FC6C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -116,6 +118,10 @@ Global
 		{14F46EF6-393E-434C-AD83-10C9A87B1DFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14F46EF6-393E-434C-AD83-10C9A87B1DFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14F46EF6-393E-434C-AD83-10C9A87B1DFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE739B7A-F4FE-488C-A35D-72AA459FC6C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE739B7A-F4FE-488C-A35D-72AA459FC6C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE739B7A-F4FE-488C-A35D-72AA459FC6C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE739B7A-F4FE-488C-A35D-72AA459FC6C2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B6B9F1DD-7E85-402E-88A7-EF6B88E6CE9A} = {77922B8B-F6FE-47D6-8742-6BA528BC8D7C}
@@ -131,5 +137,6 @@ Global
 		{8F3C4788-D310-48D7-9494-1ED1787D44C2} = {77922B8B-F6FE-47D6-8742-6BA528BC8D7C}
 		{508E64A9-4D7D-410A-BD74-671261F9E9A9} = {BBAA9024-6FEC-4C68-9F96-83D2055EC6D2}
 		{14F46EF6-393E-434C-AD83-10C9A87B1DFA} = {98B2B79B-7EF4-42B5-B92B-3E7FECB00DBB}
+		{FE739B7A-F4FE-488C-A35D-72AA459FC6C2} = {77922B8B-F6FE-47D6-8742-6BA528BC8D7C}
 	EndGlobalSection
 EndGlobal

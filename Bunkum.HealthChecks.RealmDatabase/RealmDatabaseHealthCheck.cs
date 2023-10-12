@@ -1,9 +1,8 @@
 using System.Diagnostics;
 using Bunkum.Core.Database;
-using Bunkum.HealthChecks;
 using static Bunkum.HealthChecks.HealthStatusType;
 
-namespace Bunkum.RealmDatabase;
+namespace Bunkum.HealthChecks.RealmDatabase;
 
 public class RealmDatabaseHealthCheck : IHealthCheck
 {

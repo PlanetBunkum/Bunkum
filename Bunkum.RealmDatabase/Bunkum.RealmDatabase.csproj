@@ -37,7 +37,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Bunkum.HealthChecks\Bunkum.HealthChecks.csproj" />
       <ProjectReference Include="..\Bunkum.Listener\Bunkum.Listener.csproj" />
       <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
     </ItemGroup>
