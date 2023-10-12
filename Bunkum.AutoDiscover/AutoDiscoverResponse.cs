@@ -1,23 +1,28 @@
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace Bunkum.AutoDiscover;
 
-#nullable disable
-
 [JsonObject(MemberSerialization.OptIn)]
 internal class AutoDiscoverResponse
 {
-    private const int CurrentVersion = 2;
+    private const int CurrentVersion = 3;
 
     [JsonProperty("version")]
     public int Version { get; set; } = CurrentVersion;
 
     [JsonProperty("serverBrand")]
-    public string ServerBrand { get; set; }
+    public required string ServerBrand { get; set; }
+    
+    [JsonProperty("serverDescription")]
+    public string ServerDescription { get; set; } = "";
         
     [JsonProperty("url")]
-    public string Url { get; set; }
+    public required string Url { get; set; }
+
+    [JsonProperty("bannerImageUrl")]
+    public string? BannerImageUrl { get; set; }
 
     [JsonProperty("usesCustomDigestKey")]
-    public bool UsesCustomDigestKey { get; set; }
+    public required bool UsesCustomDigestKey { get; set; }
 }

@@ -17,10 +17,15 @@ public static class BunkumServerExtensions
     /// A boolean, when true it represents that the LBP server will only accept the digest key <c>CustomServerDigest</c>.
     /// Otherwise, the server is using the default digest key.
     /// </param>
+    /// <param name="serverDescription">An optional friendly description of the server. You can put anything you like here.</param>
+    /// <param name="bannerImageUrl">
+    /// An optional image that the client may retrieve.
+    /// You can put any URL here as long as the link points to an image, however PNG is recommended.
+    /// </param>
     public static void AddAutoDiscover(this BunkumServer server, string serverBrand, string baseEndpoint,
-        bool usesCustomDigestKey = false)
+        bool usesCustomDigestKey = false, string serverDescription = "", string? bannerImageUrl = null)
     {
-        AutoDiscoverConfig config = new(serverBrand, baseEndpoint, usesCustomDigestKey);
+        AutoDiscoverConfig config = new(serverBrand, baseEndpoint, usesCustomDigestKey, serverDescription, bannerImageUrl);
         server.AddService<AutoDiscoverService>(config);
         server.AddEndpointGroup<AutoDiscoverEndpoints>();
     }
