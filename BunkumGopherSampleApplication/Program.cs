@@ -1,6 +1,10 @@
 ﻿using System.Reflection;
 using Bunkum.Core;
+using Bunkum.Core.Responses;
 using Bunkum.Protocols.Gopher;
+using Bunkum.Protocols.Gopher.Responses.Serialization;
+
+Response.AddSerializer<BunkumGophermapSerializer>();
 
 BunkumServer server = new BunkumGopherServer();
 

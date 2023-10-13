@@ -1,14 +1,25 @@
 using Bunkum.Core;
 using Bunkum.Core.Endpoints;
 using Bunkum.Protocols.Gopher;
+using Bunkum.Protocols.Gopher.Responses;
 
 namespace BunkumGopherSampleApplication.Endpoints;
 
 public class RootEndpoints : EndpointGroup
 {
     [GopherEndpoint("/")]
-    public string GetRoot(RequestContext context)
+    public Gophermap GetRoot(RequestContext context)
     {
-        return "iYo man\n";
+        return new Gophermap
+        {
+            Items = new List<GophermapItem>
+            {
+                new()
+                {
+                    ItemType = GopherItemType.Message,
+                    DisplayString = "Yo man",
+                },
+            },
+        };
     }
 }

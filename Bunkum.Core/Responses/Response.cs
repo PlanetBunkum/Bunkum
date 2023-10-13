@@ -44,7 +44,6 @@ public partial struct Response
     public readonly string ResponseType;
     public readonly byte[] Data;
     
-    [Obsolete("Content types in direct response constructors are no longer supported.")]
     public Response(byte[] data, string contentType = ContentType.Plaintext, HttpStatusCode statusCode = HttpStatusCode.OK)
     {
         this.StatusCode = statusCode;
