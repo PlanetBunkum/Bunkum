@@ -1,59 +1,19 @@
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 
 namespace Bunkum.Listener.Protocol;
 
 /// <summary>
-/// A MIME content-type.
+/// A set of MIME content-type.
 /// </summary>
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
-public enum ContentType
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+public static class ContentType
 {
-    [ContentType("text/html; charset=utf-8", false)] Html,
-    [ContentType("text/plain", false)] Plaintext,
-    [ContentType("text/xml", true)] Xml,
-    [ContentType("application/json", true)] Json,
-    [ContentType("application/octet-stream", false)] BinaryData,
-    [ContentType("image/png", false)] Png,
-    [ContentType("image/jpeg", false)] Jpeg,
-}
-
-[AttributeUsage(AttributeTargets.Field)]
-internal class ContentTypeAttribute : Attribute
-{
-    internal string Name { get; }
-    internal bool IsSerializable { get; }
-
-    internal ContentTypeAttribute(string name, bool isSerializable)
-    {
-        this.Name = name;
-        this.IsSerializable = isSerializable;
-    }
-}
-
-public static class ContentTypeExtensions
-{
-    private static ContentTypeAttribute GetAttribute(ContentType contentType)
-    {
-        Type type = typeof(ContentType);
-        
-        MemberInfo? memberInfo = type.GetMember(contentType.ToString()).FirstOrDefault();
-        Debug.Assert(memberInfo != null);
-        
-        ContentTypeAttribute? attribute = memberInfo.GetCustomAttribute<ContentTypeAttribute>();
-        Debug.Assert(attribute != null);
-
-        return attribute;
-    }
-    
-    internal static string GetName(this ContentType contentType)
-    {
-        return GetAttribute(contentType).Name;
-    }
-    
-    public static bool IsSerializable(this ContentType contentType)
-    {
-        return GetAttribute(contentType).IsSerializable;
-    }
+    public const string Html = "text/html; charset=utf-8";
+    public const string Plaintext = "text/plain";
+    public const string Xml = "text/xml";
+    public const string Json = "application/json";
+    public const string BinaryData = "application/octet-stream";
+    public const string Png = "image/png";
+    public const string Jpeg = "image/jpeg";
 }

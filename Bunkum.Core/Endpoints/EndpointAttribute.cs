@@ -13,7 +13,7 @@ public abstract class EndpointAttribute : Attribute
     private readonly Dictionary<int, RouteParam> _parameterIndexes = new();
 
     public Method Method { get; protected set; }
-    public ContentType ContentType { get; protected set; }
+    public string ContentType { get; protected set; }
 
     private struct RouteParam
     {

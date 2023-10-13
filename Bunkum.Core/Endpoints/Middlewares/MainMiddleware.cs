@@ -53,7 +53,7 @@ internal class MainMiddleware : IMiddleware
         }
         else
         {
-            context.ResponseType = resp.Value.ContentType;
+            context.ResponseType = resp.Value.ResponseType;
             context.ResponseCode = resp.Value.StatusCode;
                 
             // if(this.UseDigestSystem) this.SetDigestResponse(context, new MemoryStream(resp.Value.Data));

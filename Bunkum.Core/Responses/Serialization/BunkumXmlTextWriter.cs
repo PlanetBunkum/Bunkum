@@ -1,7 +1,7 @@
 using System.Text;
 using System.Xml;
 
-namespace Bunkum.Core.Serialization;
+namespace Bunkum.Core.Responses.Serialization;
 
 /// <summary>
 /// A custom XML text writer that strips namespaces and attributes from elements.
