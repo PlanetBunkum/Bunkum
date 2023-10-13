@@ -82,25 +82,6 @@ public static class GophermapItemType
 
     #endregion
 
-    #region gopher+ types
-
-    /// <summary>
-    /// Item is a bitmap image.
-    /// </summary>
-    public static readonly char BitmapImage = ':';
-    
-    /// <summary>
-    /// Item is a movie file.
-    /// </summary>
-    public static readonly char MovieFile = ';';
-    
-    /// <summary>
-    /// Item is an audio file.
-    /// </summary>
-    public static readonly char SoundFile = '<';
-
-    #endregion
-
     #region Non-canonical types
 
     /// <summary>
@@ -132,6 +113,16 @@ public static class GophermapItemType
     /// Item is a rich text format file.
     /// </summary>
     public static readonly char RichText = 'r';
+
+    /// <summary>
+    /// Item is a bitmap image, most likely an image.
+    /// </summary>
+    public static readonly char ImageFile = 'p';
+    
+    /// <summary>
+    /// Item is an audio file.
+    /// </summary>
+    public static readonly char SoundFile = 's';
 
     #endregion
 }
