@@ -12,14 +12,19 @@ public class BunkumGophermapSerializer : IBunkumSerializer
     
     public byte[] Serialize(object data)
     {
-        if (data is not Gophermap gophermap)
-            throw new InvalidOperationException($"Cannot serialize an object that is not a {nameof(Gophermap)}");
+        IEnumerable<GophermapItem>? items = data as IEnumerable<GophermapItem>;
+        Gophermap? gophermap = data as Gophermap;
+        
+        if (gophermap == null && items == null)
+            throw new InvalidOperationException($"Cannot serialize an object that is not a {nameof(Gophermap)} or {nameof(IEnumerable<GophermapItem>)}");
+
+        items ??= gophermap!.Items;
 
         StringBuilder str = new();
-        foreach (GophermapItem gopherDirectoryItem in gophermap.Items)
+        foreach (GophermapItem gopherDirectoryItem in items)
         {
             str.Append(gopherDirectoryItem.ItemType);
-            str.Append(gopherDirectoryItem.DisplayString);
+            str.Append(gopherDirectoryItem.DisplayText);
             
             str.Append('\t');
             str.Append(gopherDirectoryItem.Selector);

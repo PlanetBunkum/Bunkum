@@ -1,25 +1,32 @@
 using Bunkum.Core;
+using Bunkum.Core.Configuration;
 using Bunkum.Core.Endpoints;
 using Bunkum.Protocols.Gopher;
 using Bunkum.Protocols.Gopher.Responses;
+using Bunkum.Protocols.Gopher.Responses.Items;
 
 namespace BunkumGopherSampleApplication.Endpoints;
 
 public class RootEndpoints : EndpointGroup
 {
     [GopherEndpoint("/")]
-    public Gophermap GetRoot(RequestContext context)
+    public List<GophermapItem> GetRoot(RequestContext context, BunkumConfig config)
     {
-        return new Gophermap
+        return new List<GophermapItem>
         {
-            Items = new List<GophermapItem>
-            {
-                new()
-                {
-                    ItemType = GopherItemType.Message,
-                    DisplayString = "Yo man",
-                },
-            },
+            new GophermapMessage("Welcome to Bunkum's Gopher sample application."),
+            new GophermapLink("Visit an External Destination", new Uri("gopher://gopher.floodgap.com")),
+            new GophermapLink("Visit a Local Endpoint", config, "/test"),
+        };
+    }
+
+    [GopherEndpoint("/test")]
+    public List<GophermapItem> GetLocalEndpoint(RequestContext context, BunkumConfig config)
+    {
+        return new List<GophermapItem>
+        {
+            new GophermapMessage("There are no Easter Eggs up here."),
+            new GophermapLink("Go away.", config, "/"),
         };
     }
 }

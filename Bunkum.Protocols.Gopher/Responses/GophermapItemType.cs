@@ -1,6 +1,6 @@
 namespace Bunkum.Protocols.Gopher.Responses;
 
-public static class GopherItemType
+public static class GophermapItemType
 {
     #region Canonical types
 
