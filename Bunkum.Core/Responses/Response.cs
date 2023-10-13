@@ -1,89 +1,83 @@
 using System.Net;
 using System.Text;
-using System.Xml.Serialization;
-using Bunkum.Core.Serialization;
+using Bunkum.Core.Responses.Serialization;
 using Bunkum.Listener.Protocol;
-using Newtonsoft.Json;
 
 namespace Bunkum.Core.Responses;
 
 public partial struct Response
 {
-    public Response(byte[] data, ContentType contentType = ContentType.Html, HttpStatusCode statusCode = HttpStatusCode.OK)
+    // FIXME: storing this statically is beyond moronic especially given the case of unit tests / multiple servers per process in general,
+    // but my hand is forced as we must allow the user to create their own Response objects cleanly
+    // we could just pass in the context but MEH, that's a later jvyden problem
+    // yeah that's right fuck you later jvyden
+    private static readonly List<IBunkumSerializer> Serializers = new();
+    
+    /// <summary>
+    /// Registers a <see cref="IBunkumSerializer"/> that will be used for a set of Content Types when creating a Response's data.
+    /// </summary>
+    /// <param name="serializer">The serializer to use</param>
+    public static void AddSerializer(IBunkumSerializer serializer)
+    {
+        foreach (string contentType in serializer.ContentTypes)
+        {
+            if (GetSerializerOrDefault(contentType) != null)
+                throw new InvalidOperationException($"Cannot add a serializer when there is already a serializer handling '{contentType}'");
+        }
+
+        Serializers.Add(serializer);
+    }
+
+    /// <summary>
+    /// Registers a <see cref="TBunkumSerializer"/> that will be used for its set of Content Types when creating a Response's data.
+    /// </summary>
+    /// <typeparam name="TBunkumSerializer">The type of <see cref="IBunkumSerializer"/> to create.</typeparam>
+    public static void AddSerializer<TBunkumSerializer>() where TBunkumSerializer : IBunkumSerializer, new()
+    {
+        AddSerializer(new TBunkumSerializer());
+    }
+
+    private static IBunkumSerializer? GetSerializerOrDefault(string contentType) 
+        => Serializers.FirstOrDefault(s => s.ContentTypes.Contains(contentType));
+
+    public readonly HttpStatusCode StatusCode;
+    public readonly string ResponseType;
+    public readonly byte[] Data;
+    
+    [Obsolete("Content types in direct response constructors are no longer supported.")]
+    public Response(byte[] data, string contentType = ContentType.Plaintext, HttpStatusCode statusCode = HttpStatusCode.OK)
     {
         this.StatusCode = statusCode;
         this.Data = data;
-        this.ContentType = contentType;
+        this.ResponseType = contentType;
     }
-
-    #region Serialization setup
-    private static readonly XmlSerializerNamespaces Namespaces = new();
-    private static readonly JsonSerializer JsonSerializer = new();
 
     static Response()
     {
-        Namespaces.Add("", "");
         SetupResponseCache();
+        AddSerializer<BunkumJsonSerializer>();
+        AddSerializer<BunkumXmlSerializer>();
     }
-    #endregion
 
     private static partial void SetupResponseCache();
 
     public Response(HttpStatusCode statusCode) : this("", ContentType.BinaryData, statusCode) 
     {}
 
-    public Response(object? data, ContentType contentType = ContentType.Html, HttpStatusCode statusCode = HttpStatusCode.OK, bool skipSerialization = false)
+    public Response(object? data, string contentType = ContentType.Plaintext, HttpStatusCode statusCode = HttpStatusCode.OK, bool skipSerialization = false)
     {
-        this.ContentType = contentType;
         this.StatusCode = statusCode;
 
-        if (skipSerialization || data is null or string || !contentType.IsSerializable())
+        IBunkumSerializer? serializer = GetSerializerOrDefault(contentType);
+        if (skipSerialization || serializer is null || data is null or string)
         {
             this.Data = Encoding.Default.GetBytes(data?.ToString() ?? string.Empty);
             return;
         }
         
-        // ReSharper disable once ConvertIfStatementToSwitchStatement
-        if(data is INeedsPreparationBeforeSerialization prep) 
-            prep.PrepareForSerialization();
-
         if (data is IHasResponseCode status)
             this.StatusCode = status.StatusCode;
 
-        using MemoryStream stream = new();
-        switch (contentType)
-        {
-            case ContentType.Png:
-            case ContentType.Jpeg:
-            case ContentType.Html:
-            case ContentType.Plaintext:
-            case ContentType.BinaryData:
-                throw new InvalidOperationException();
-            
-            case ContentType.Xml:
-            {
-                using BunkumXmlTextWriter writer = new(stream);
-
-                XmlSerializer serializer = new(data.GetType());
-                serializer.Serialize(writer, data, Namespaces);
-                break;
-            }
-            case ContentType.Json:
-            {
-                using StreamWriter sw = new(stream);
-                using JsonWriter writer = new JsonTextWriter(sw);
-                
-                JsonSerializer.Serialize(writer, data);
-                break;
-            }
-            default:
-                throw new ArgumentOutOfRangeException(nameof(contentType), contentType, null);
-        }
-
-        this.Data = stream.ToArray();
+        this.Data = serializer.Serialize(data);
     }
-
-    public readonly HttpStatusCode StatusCode;
-    public readonly ContentType ContentType;
-    public readonly byte[] Data;
 }

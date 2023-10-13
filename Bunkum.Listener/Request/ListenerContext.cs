@@ -92,7 +92,7 @@ public abstract class ListenerContext
     /// <summary>
     /// The type of content we are responding with.
     /// </summary>
-    public ContentType? ResponseType;
+    public string? ResponseType;
 
     private int _responseLength;
 
@@ -125,7 +125,7 @@ public abstract class ListenerContext
     public virtual async Task FlushResponseAndClose()
     {
         if (this.ResponseType != null)
-            this.ResponseHeaders.Add("Content-Type", this.ResponseType.Value.GetName());
+            this.ResponseHeaders.Add("Content-Type", this.ResponseType);
         
         if(this._responseLength != 0)
             this.ResponseHeaders.Add("Content-Length", this._responseLength.ToString());
