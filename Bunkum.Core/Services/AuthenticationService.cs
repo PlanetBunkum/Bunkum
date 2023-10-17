@@ -39,18 +39,17 @@ public class AuthenticationService : Service
         }
     }
     
-    // Cache user objects by the context to avoid double lookups
-    private readonly Dictionary<ListenerContext, IToken<IUser>?> _tokenCache = new();
+    // Cache the token to avoid double lookups.
+    // We don't use a list here as you can't have multiple tokens per request (and thus one token per thread)
+    private readonly ThreadLocal<IToken<IUser>?> _tokenCache = new(() => null);
 
     /// <inheritdoc />
     public override Response? OnRequestHandled(ListenerContext context, MethodInfo method, Lazy<IDatabaseContext> database)
     {
         if (!(method.GetCustomAttribute<AuthenticationAttribute>()?.Required ?? this._assumeAuthenticationRequired)) return null;
         
-        // Don't need to look in cache, this is the first time we are looking for a user.
-        IToken<IUser>? token = this._authenticationProvider.AuthenticateToken(context, database);
-        
-        this._tokenCache.Add(context, token);
+        IToken<IUser>? token = this.AuthenticateToken(context, database);
+        this._tokenCache.Value = token;
             
         if (token == null)
             return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.Forbidden);
@@ -70,20 +69,25 @@ public class AuthenticationService : Service
             if (token != null) return token.User;
         }
 
-        this._tokenCache.Remove(context);
+        this._tokenCache.Value = null;
         return null;
     }
 
     public IToken<IUser>? AuthenticateToken(ListenerContext context, Lazy<IDatabaseContext> database, bool remove = false)
     {
+        this.Logger.LogTrace(nameof(AuthenticationService), "Attempting to look up a token in the cache...");
+        
         // Look for the user in the cache.
         // ReSharper disable once InvertIf
-        if (this._tokenCache.TryGetValue(context, out IToken<IUser>? user))
+        if (this._tokenCache.Value != null)
         {
-            if(remove) this._tokenCache.Remove(context);
-            return user;
-        }
+            this.Logger.LogTrace(nameof(AuthenticationService), "Found token in cache! \\o/ (Remove: {0})", remove);
             
+            if(remove) this._tokenCache.Value = null;
+            return this._tokenCache.Value;
+        }
+
+        this.Logger.LogTrace(nameof(AuthenticationService), "Did not find token in cache, calling authentication provider.");
         return this._authenticationProvider.AuthenticateToken(context, database);
     }
 }
