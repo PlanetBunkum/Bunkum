@@ -37,6 +37,16 @@ public partial struct Response
         AddSerializer(new TBunkumSerializer());
     }
 
+    /// <summary>
+    /// Removes and unregisters all <see cref="TBunkumSerializer"/>s. 
+    /// </summary>
+    /// <typeparam name="TBunkumSerializer">The type of <see cref="IBunkumSerializer"/> to remove.</typeparam>
+    /// <returns>The number of serializers removed.</returns>
+    public static int RemoveSerializer<TBunkumSerializer>() where TBunkumSerializer : IBunkumSerializer
+    {
+        return Serializers.RemoveAll(s => s.GetType() == typeof(TBunkumSerializer));
+    }
+
     private static IBunkumSerializer? GetSerializerOrDefault(string contentType) 
         => Serializers.FirstOrDefault(s => s.ContentTypes.Contains(contentType));
 
