@@ -68,9 +68,14 @@ public class AuthenticationService : Service
             IToken<IUser>? token = this.AuthenticateToken(context, database);
             if (token != null) return token.User;
         }
-
-        this._tokenCache.Value = null;
+        
         return null;
+    }
+
+    /// <inheritdoc />
+    public override void AfterRequestHandled(ListenerContext context, Response response, MethodInfo method, Lazy<IDatabaseContext> database)
+    {
+        this._tokenCache.Value = null;
     }
 
     public IToken<IUser>? AuthenticateToken(ListenerContext context, Lazy<IDatabaseContext> database, bool remove = false)
