@@ -79,7 +79,12 @@ public class DirectHttpListener : BunkumHttpListener, IListenerWithCallback
             Debug.Assert(key != null);
             Debug.Assert(values != null);
 
-            foreach (string value in values) context.RequestHeaders.Add(key, value);
+            //Special case for User-Agent because microsoft sucks and splits up user agents by spaces >:(
+            if (key.Equals("User-Agent", StringComparison.InvariantCultureIgnoreCase))
+                context.RequestHeaders.Add(key, string.Join(" ", values));
+            else
+                foreach (string value in values)
+                    context.RequestHeaders.Add(key, value);
         }
 
         string? cookieHeader = context.RequestHeaders["Cookie"];
