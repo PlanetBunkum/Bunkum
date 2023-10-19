@@ -5,6 +5,7 @@ using Bunkum.Protocols.Http;
 using Bunkum.Protocols.Http.Direct;
 using JetBrains.Annotations;
 using NotEnoughLogs;
+using NotEnoughLogs.Behaviour;
 
 namespace BunkumTests.HttpServer;
 
@@ -20,10 +21,12 @@ public class ServerDependentTest
         DirectHttpListener httpListener = new(new Logger());
         HttpClient client = httpListener.GetClient();
 
-        BunkumServer server = new BunkumHttpServer(httpListener, configuration: new LoggerConfiguration()
+        BunkumServer server = new BunkumHttpServer(httpListener, configuration: new LoggerConfiguration
         {
+            Behaviour = new DirectLoggingBehaviour(),
             MaxLevel = LogLevel.Trace,
         });
+        
         server.AddAuthenticationService();
         if(start) server.Start(0);
         
