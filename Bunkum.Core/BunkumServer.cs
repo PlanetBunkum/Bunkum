@@ -34,12 +34,15 @@ public abstract partial class BunkumServer : IHotReloadable
     private readonly List<Service> _services = new();
 
     [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor")]
-    private BunkumServer(bool setListener, bool logToConsole, LoggerConfiguration? configuration)
+    private BunkumServer(bool setListener, LoggerConfiguration? configuration, List<ILoggerSink>? sinks)
     {
         configuration ??= LoggerConfiguration.Default;
+
+        sinks ??= new List<ILoggerSink>(1)
+        {
+            new ConsoleSink(),
+        };
         
-        List<ILoggerSink> sinks = new();
-        if(logToConsole) sinks.Add(new ConsoleSink());
         this.Logger = new Logger(sinks, configuration);
         
         this.Logger.LogInfo(BunkumCategory.Startup, $"Bunkum is storing its data at {BunkumFileSystem.DataDirectory}.");
@@ -72,9 +75,9 @@ public abstract partial class BunkumServer : IHotReloadable
     protected abstract BunkumListener CreateDefaultListener(Uri listenEndpoint, bool useForwardedIp, Logger logger);
     protected abstract string ProtocolUriName { get; }
 
-    public BunkumServer(LoggerConfiguration? configuration = null) : this(true, true, configuration) {}
+    public BunkumServer(LoggerConfiguration? configuration = null, List<ILoggerSink>? sinks = null) : this(true, configuration, sinks) {}
     
-    public BunkumServer(BunkumListener listener, bool logToConsole = true, LoggerConfiguration? configuration = null) : this(false, logToConsole, configuration)
+    public BunkumServer(BunkumListener listener, LoggerConfiguration? configuration = null, List<ILoggerSink>? sinks = null) : this(false, configuration, sinks)
     {
         this._listener = listener;
         if (listener is IListenerWithCallback callbackListener)

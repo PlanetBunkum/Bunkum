@@ -2,15 +2,16 @@ using Bunkum.Core;
 using Bunkum.Listener;
 using Bunkum.Protocols.Gopher.Socket;
 using NotEnoughLogs;
+using NotEnoughLogs.Sinks;
 
 namespace Bunkum.Protocols.Gopher;
 
 public class BunkumGopherServer : BunkumServer
 {
-    public BunkumGopherServer(LoggerConfiguration? configuration = null) : base(configuration)
+    public BunkumGopherServer(LoggerConfiguration? configuration = null, List<ILoggerSink>? sinks = null) : base(configuration, sinks)
     {}
 
-    public BunkumGopherServer(BunkumListener listener, bool logToConsole = true, LoggerConfiguration? configuration = null) : base(listener, logToConsole, configuration)
+    public BunkumGopherServer(BunkumListener listener, LoggerConfiguration? configuration = null, List<ILoggerSink>? sinks = null) : base(listener, configuration, sinks)
     {}
 
     protected override BunkumListener CreateDefaultListener(Uri listenEndpoint, bool useForwardedIp, Logger logger)
