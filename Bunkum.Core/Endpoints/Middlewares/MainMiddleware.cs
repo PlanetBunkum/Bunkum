@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Net;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml.Serialization;
 using Bunkum.Core.Configuration;
@@ -18,19 +19,24 @@ namespace Bunkum.Core.Endpoints.Middlewares;
 
 internal class MainMiddleware : IMiddleware
 {
-    private readonly List<EndpointGroup> _endpoints;
     private readonly Logger _logger;
 
+    private readonly List<EndpointGroup> _endpoints;
     private readonly List<Service> _services;
-
+    private readonly List<IBunkumSerializer> _serializers;
     private readonly List<Config> _configs;
 
-    public MainMiddleware(List<EndpointGroup> endpoints, Logger logger, List<Service> services, List<Config> configs)
+    public MainMiddleware(List<EndpointGroup> endpoints,
+        Logger logger,
+        List<Service> services,
+        List<Config> configs,
+        List<IBunkumSerializer> serializers)
     {
-        this._endpoints = endpoints;
         this._logger = logger;
+        
+        this._endpoints = endpoints;
         this._services = services;
-
+        this._serializers = serializers;
         this._configs = configs;
     }
     
@@ -129,7 +135,7 @@ internal class MainMiddleware : IMiddleware
         return null;
     }
 
-    private static Response GenerateResponseFromEndpoint(object? val, EndpointAttribute attribute, MethodInfo method)
+    private Response GenerateResponseFromEndpoint(object? val, EndpointAttribute attribute, MethodInfo method)
     {
         // ReSharper disable once ConvertSwitchStatementToSwitchExpression
         switch (val)
@@ -156,9 +162,11 @@ internal class MainMiddleware : IMiddleware
             }
             default:
             {
+                IBunkumSerializer? serializer = this.GetSerializerOrDefault(attribute.ContentType);
+                
                 HttpStatusCode okCode = method.GetCustomAttribute<SuccessStatusCodeAttribute>()?.StatusCode ??
                                         HttpStatusCode.OK;
-                return new Response(val, attribute.ContentType, okCode);
+                return new Response(val, attribute.ContentType, okCode, serializer);
             }
         }
     }
@@ -332,4 +340,7 @@ internal class MainMiddleware : IMiddleware
         
         body.Seek(0, SeekOrigin.Begin);
     }
+    
+    private IBunkumSerializer? GetSerializerOrDefault(string contentType) 
+        => this._serializers.FirstOrDefault(s => s.ContentTypes.Contains(contentType));
 }
