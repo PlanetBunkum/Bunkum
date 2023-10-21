@@ -5,7 +5,7 @@ namespace Bunkum.Protocols.Gopher.Socket;
 
 public class SocketGopherListenerContext : SocketListenerContext
 {
-    public SocketGopherListenerContext(System.Net.Sockets.Socket socket) : base(socket)
+    public SocketGopherListenerContext(System.Net.Sockets.Socket socket, Stream stream) : base(socket, stream)
     {}
 
     public override long ContentLength => 0;

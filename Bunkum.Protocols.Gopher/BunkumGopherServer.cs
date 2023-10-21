@@ -11,6 +11,7 @@ public class BunkumGopherServer : BunkumServer
     public BunkumGopherServer(LoggerConfiguration? configuration = null, List<ILoggerSink>? sinks = null) : base(configuration, sinks)
     {}
 
+    [Obsolete("This constructor is obsolete, `UseListener` is preferred instead!")]
     public BunkumGopherServer(BunkumListener listener, LoggerConfiguration? configuration = null, List<ILoggerSink>? sinks = null) : base(listener, configuration, sinks)
     {}
 

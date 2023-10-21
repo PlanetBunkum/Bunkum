@@ -10,6 +10,7 @@ public class BunkumHttpServer : BunkumServer
     public BunkumHttpServer(LoggerConfiguration? configuration = null, List<ILoggerSink>? sinks = null) : base(configuration, sinks)
     {}
 
+    [Obsolete("This constructor is obsolete, `UseListener` is preferred instead!")]
     public BunkumHttpServer(BunkumListener listener, LoggerConfiguration? configuration = null, List<ILoggerSink>? sinks = null) : base(listener, configuration, sinks)
     {}
 

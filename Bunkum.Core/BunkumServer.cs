@@ -24,7 +24,7 @@ namespace Bunkum.Core;
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public abstract partial class BunkumServer : IHotReloadable
 {
-    private readonly BunkumListener _listener;
+    private BunkumListener? _listener;
     public readonly Logger Logger;
     
     private IDatabaseProvider<IDatabaseContext> _databaseProvider = new DummyDatabaseProvider();
@@ -33,8 +33,9 @@ public abstract partial class BunkumServer : IHotReloadable
     private readonly List<IMiddleware> _middlewares = new();
     private readonly List<Service> _services = new();
 
-    [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor")]
-    private BunkumServer(bool setListener, LoggerConfiguration? configuration, List<ILoggerSink>? sinks)
+    private readonly BunkumConfig _bunkumConfig;
+
+    protected BunkumServer(LoggerConfiguration? configuration, List<ILoggerSink>? sinks)
     {
         configuration ??= LoggerConfiguration.Default;
 
@@ -51,42 +52,25 @@ public abstract partial class BunkumServer : IHotReloadable
             this.Logger.LogInfo(BunkumCategory.Startup, "You can override where data is stored using the BUNKUM_DATA_FOLDER environment variable.");
         }
 
-        BunkumConfig bunkumConfig = Config.LoadFromJsonFile<BunkumConfig>("bunkum.json", this.Logger);
+        this._bunkumConfig = Config.LoadFromJsonFile<BunkumConfig>("bunkum.json", this.Logger);
         
         // leave one more than one we define since downstream applications adding a config is common
         this._configs = new List<Config>(2)
         {
-            bunkumConfig,
+            this._bunkumConfig,
         };
 
-        if (setListener)
-        {
-            Uri listenEndpoint = new($"{this.ProtocolUriName}://{bunkumConfig.ListenHost}:{bunkumConfig.ListenPort}");
-            this._listener = this.CreateDefaultListener(listenEndpoint, bunkumConfig.UseForwardedIp, this.Logger);
-        }
-        else
-        {
-            this._listener = null!;
-        }
-        
         HotReloadRegistry.RegisterReloadable(this);
     }
     
     protected abstract BunkumListener CreateDefaultListener(Uri listenEndpoint, bool useForwardedIp, Logger logger);
     protected abstract string ProtocolUriName { get; }
 
-    public BunkumServer(LoggerConfiguration? configuration = null, List<ILoggerSink>? sinks = null) : this(true, configuration, sinks) {}
-    
-    public BunkumServer(BunkumListener listener, LoggerConfiguration? configuration = null, List<ILoggerSink>? sinks = null) : this(false, configuration, sinks)
+    /// <inheritdoc />
+    [Obsolete("This constructor is obsolete, `UseListener` is preferred instead!")]
+    protected BunkumServer(BunkumListener listener, LoggerConfiguration? configuration = null, List<ILoggerSink>? sinks = null) : this(configuration, sinks)
     {
         this._listener = listener;
-        if (listener is IListenerWithCallback callbackListener)
-        {
-            callbackListener.Callback = context =>
-            {
-                this.CompleteRequestAsync(context).Wait();
-            };
-        }
     }
 
     /// <summary>
@@ -136,6 +120,20 @@ public abstract partial class BunkumServer : IHotReloadable
         
         this.Logger.LogInfo(BunkumCategory.Startup, "Starting up...");
 
+        if (this._listener == null)
+        {
+            Uri listenEndpoint = new($"{this.ProtocolUriName}://{this._bunkumConfig.ListenHost}:{this._bunkumConfig.ListenPort}");
+            this._listener = this.CreateDefaultListener(listenEndpoint, this._bunkumConfig.UseForwardedIp, this.Logger);
+        }
+        
+        if (this._listener is IListenerWithCallback callbackListener)
+        {
+            callbackListener.Callback = context =>
+            {
+                this.CompleteRequestAsync(context).Wait();
+            };
+        }
+        
         foreach (Service service in this._services)
         {
             this.Logger.LogInfo(BunkumCategory.Startup, $"Initializing service {service.GetType().Name}...");
@@ -448,4 +446,10 @@ public abstract partial class BunkumServer : IHotReloadable
     
     public void AddMiddleware<TMiddleware>() where TMiddleware : IMiddleware, new() => this.AddMiddleware(new TMiddleware());
     public void AddMiddleware<TMiddleware>(TMiddleware middleware) where TMiddleware : IMiddleware => this._middlewares.Add(middleware);
+
+    /// <summary>
+    /// Set the listener this BunkumServer uses. Will default to CreateDefaultListener if not called.
+    /// </summary>
+    /// <param name="listener">The listener to use</param>
+    public void UseListener(BunkumListener listener) => this._listener = listener;
 }

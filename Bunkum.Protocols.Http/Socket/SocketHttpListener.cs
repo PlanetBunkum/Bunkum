@@ -70,7 +70,7 @@ public partial class SocketHttpListener : BunkumHttpListener
         catch(Exception e)
         {
             this.Logger.LogWarning(ListenerCategory.Request, $"Failed to read request: {e}");
-            await new SocketHttpListenerContext(client).SendResponse(HttpStatusCode.BadRequest);
+            await new SocketHttpListenerContext(client, stream).SendResponse(HttpStatusCode.BadRequest);
             return null;
         }
     }
@@ -102,7 +102,7 @@ public partial class SocketHttpListener : BunkumHttpListener
             throw new Exception("Failed to read request line. Maybe you tried to connect with HTTPS?", e);
         }
 
-        ListenerContext context = new SocketHttpListenerContext(client)
+        ListenerContext context = new SocketHttpListenerContext(client, stream)
         {
             RealRemoteEndpoint = (client.RemoteEndPoint as IPEndPoint)!,
         };

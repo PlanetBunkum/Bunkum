@@ -8,6 +8,7 @@ namespace Bunkum.Listener.Request;
 public abstract class SocketListenerContext : ListenerContext
 {
     private readonly Socket _socket;
+    private readonly Stream _stream;
     
     private bool _socketClosed;
     private bool SocketClosed => this._socketClosed || !this._socket.Connected;
@@ -16,9 +17,10 @@ public abstract class SocketListenerContext : ListenerContext
     /// Initializes the <see cref="ListenerContext"/> with socket support.
     /// </summary>
     /// <param name="socket">The socket to use for this context.</param>
-    protected SocketListenerContext(Socket socket)
+    protected SocketListenerContext(Socket socket, Stream stream)
     {
         this._socket = socket;
+        this._stream = stream;
     }
 
     /// <inheritdoc/>
@@ -46,6 +48,6 @@ public abstract class SocketListenerContext : ListenerContext
     /// <inheritdoc/>
     protected override async Task SendBuffer(ArraySegment<byte> buffer)
     {
-        await this._socket.SendAsync(buffer);
+        await this._stream.WriteAsync(buffer);
     }
 }

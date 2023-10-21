@@ -1,23 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
+      <TargetFramework>net7.0</TargetFramework>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <Nullable>enable</Nullable>
     </PropertyGroup>
-    
-    <ItemGroup>
-      <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
-      <ProjectReference Include="..\Bunkum.Listener\Bunkum.Listener.csproj" />
-    </ItemGroup>
 
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <Authors>LittleBigRefresh</Authors>
-        <Title>Bunkum.Protocols.Http</Title>
-        <PackageId>Bunkum.Protocols.Http</PackageId>
-        <Description>HTTP protocol support for Bunkum</Description>
+        <Title>Bunkum.Protocols.Gemini</Title>
+        <PackageId>Bunkum.Protocols.Gemini</PackageId>
+        <Description>Gemini protocol support for Bunkum</Description>
         <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum</PackageProjectUrl>
@@ -29,7 +24,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\" />
+      <ProjectReference Include="..\Bunkum.Analyzers\Bunkum.Analyzers.csproj" />
+      <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
+      <ProjectReference Include="..\Bunkum.Listener\Bunkum.Listener.csproj" />
     </ItemGroup>
 
 </Project>
