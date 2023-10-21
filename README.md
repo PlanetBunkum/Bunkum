@@ -10,7 +10,9 @@ An open-source protocol-agnostic request server for custom game servers, built w
 > **Note**
 > If you'd like to show off your project here - don't hesitate to open a pull request!
 
-[LittleBigRefresh/Refresh](https://github.com/LittleBigRefresh/Refresh) - A second-generation custom server for LittleBigPlanet that focuses on code quality and reliability. 
+[LittleBigRefresh/Refresh](https://github.com/LittleBigRefresh/Refresh) - A second-generation custom server for LittleBigPlanet that focuses on code quality and reliability.
+
+[LittleBigRefrehs/Refresh.GopherFrontend](https://github.com/LittleBigRefresh/Refresh.GopherFrontend) - A proxy for Refresh ApiV3 that allows Gopher (and soon Gemini) clients to explore Refresh instances. Great example of Bunkum's protocol-agnostic support!
 
 [turecross321/SoundShapesServer](https://github.com/turecross321/SoundShapesServer) - A custom server for Sound Shapes
 
