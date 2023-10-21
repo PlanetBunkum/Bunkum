@@ -22,7 +22,8 @@ public class TestRequestBenchmarks
     {
         this._httpListener = new DirectHttpListener(new Logger());
         this._client = this._httpListener.GetClient();
-        this._server = new BunkumHttpServer(this._httpListener, sinks: new List<ILoggerSink>());
+        this._server = new BunkumHttpServer(sinks: new List<ILoggerSink>());
+        this._server.UseListener(this._httpListener);
         
         this._server.DiscoverEndpointsFromAssembly(typeof(TestEndpoints).Assembly);
         this._server.Start(1);

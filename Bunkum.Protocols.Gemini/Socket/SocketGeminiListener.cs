@@ -23,10 +23,10 @@ public partial class SocketGeminiListener : BunkumGeminiListener
     [GeneratedRegex("^[a-zA-Z]+$")]
     private static partial Regex LettersRegex();
     
-    public SocketGeminiListener(Uri listenEndpoint, Logger logger) : base(logger)
+    public SocketGeminiListener(X509Certificate2 cert, Uri listenEndpoint, Logger logger) : base(logger)
     {
         this._listenEndpoint = listenEndpoint;
-        this._cert = new(File.ReadAllBytes("cert.pfx"), "aaaa");
+        this._cert = cert;
    
         this.Logger.LogInfo(ListenerCategory.Startup, "Internal Gemini server is listening at URL {0}", listenEndpoint);
     }

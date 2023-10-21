@@ -7,7 +7,7 @@ using BunkumGeminiSampleApplication.Services;
 using NotEnoughLogs;
 using NotEnoughLogs.Behaviour;
 
-BunkumServer server = new BunkumGeminiServer(new LoggerConfiguration
+BunkumServer server = new BunkumGeminiServer(null, new LoggerConfiguration
 {
     Behaviour = new QueueLoggingBehaviour(),
     #if DEBUG

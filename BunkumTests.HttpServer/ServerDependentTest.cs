@@ -21,11 +21,12 @@ public class ServerDependentTest
         DirectHttpListener httpListener = new(new Logger());
         HttpClient client = httpListener.GetClient();
 
-        BunkumServer server = new BunkumHttpServer(httpListener, configuration: new LoggerConfiguration
+        BunkumServer server = new BunkumHttpServer(configuration: new LoggerConfiguration
         {
             Behaviour = new DirectLoggingBehaviour(),
             MaxLevel = LogLevel.Trace,
         });
+        server.UseListener(httpListener);
         
         server.AddAuthenticationService();
         if(start) server.Start(0);
