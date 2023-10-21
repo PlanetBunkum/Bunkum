@@ -7,6 +7,7 @@ using Bunkum.Core.Database;
 using Bunkum.Core.Database.Dummy;
 using Bunkum.Core.Endpoints;
 using Bunkum.Core.Endpoints.Middlewares;
+using Bunkum.Core.Responses;
 using Bunkum.Core.Services;
 using Bunkum.Listener;
 using Bunkum.Listener.Protocol;
@@ -32,6 +33,7 @@ public abstract partial class BunkumServer : IHotReloadable
     private readonly List<EndpointGroup> _endpoints = new();
     private readonly List<IMiddleware> _middlewares = new();
     private readonly List<Service> _services = new();
+    private readonly List<IBunkumSerializer> _serializers = new();
 
     private readonly BunkumConfig _bunkumConfig;
 
@@ -238,7 +240,8 @@ public abstract partial class BunkumServer : IHotReloadable
             MainMiddleware mainMiddleware = new(this._endpoints,
                 this.Logger,
                 this._services,
-                this._configs);
+                this._configs,
+                this._serializers);
 
             Action next = () => { mainMiddleware.HandleRequest(context, database, null!); };
             
@@ -348,6 +351,7 @@ public abstract partial class BunkumServer : IHotReloadable
         this._endpoints.Clear();
         this._services.Clear();
         this._middlewares.Clear();
+        this._serializers.Clear();
         this._databaseProvider.Dispose();
         
         // Refresh internal state using (potentially new) initialization function
@@ -452,4 +456,42 @@ public abstract partial class BunkumServer : IHotReloadable
     /// </summary>
     /// <param name="listener">The listener to use</param>
     public void UseListener(BunkumListener listener) => this._listener = listener;
+    
+    private IBunkumSerializer? GetSerializerOrDefault(string contentType) 
+        => this._serializers.FirstOrDefault(s => s.ContentTypes.Contains(contentType));
+
+    /// <summary>
+    /// Registers a <see cref="IBunkumSerializer"/> that will be used for a set of Content Types when creating a Response's data.
+    /// </summary>
+    /// <param name="serializer">The serializer to use</param>
+    public void AddSerializer(IBunkumSerializer serializer)
+    {
+        foreach (string contentType in serializer.ContentTypes)
+        {
+            if (this.GetSerializerOrDefault(contentType) != null)
+                throw new InvalidOperationException($"Cannot add a serializer when there is already a serializer handling '{contentType}'");
+        }
+
+        this._serializers.Add(serializer);
+    }
+    
+    /// <summary>
+    /// Registers a <see cref="TBunkumSerializer"/> that will be used for its set of Content Types when creating a Response's data.
+    /// </summary>
+    /// <typeparam name="TBunkumSerializer">The type of <see cref="IBunkumSerializer"/> to create.</typeparam>
+    public void AddSerializer<TBunkumSerializer>() where TBunkumSerializer : IBunkumSerializer, new()
+    {
+        this.AddSerializer(new TBunkumSerializer());
+    }
+    
+    /// <summary>
+    /// Removes and unregisters all <see cref="TBunkumSerializer"/>s. 
+    /// </summary>
+    /// <typeparam name="TBunkumSerializer">The type of <see cref="IBunkumSerializer"/> to remove.</typeparam>
+    /// <returns>The number of serializers removed.</returns>
+    public int RemoveSerializer<TBunkumSerializer>() where TBunkumSerializer : IBunkumSerializer
+    {
+        return this._serializers.RemoveAll(s => s.GetType() == typeof(TBunkumSerializer));
+    }
+
 }
