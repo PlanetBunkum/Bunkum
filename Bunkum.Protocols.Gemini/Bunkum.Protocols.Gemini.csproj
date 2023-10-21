@@ -5,23 +5,22 @@
       <ImplicitUsings>enable</ImplicitUsings>
       <Nullable>enable</Nullable>
     </PropertyGroup>
-    
+
     <PropertyGroup>
-      <GenerateDocumentationFile>true</GenerateDocumentationFile>
-      <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-      <Authors>LittleBigRefresh</Authors>
-      <Title>Bunkum.Protocols.Gemini</Title>
-      <PackageId>Bunkum.Protocols.Gemini</PackageId>
-      <Description>An implementation of the Gemini protocol for Bunkum.</Description>
-      <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum</RepositoryUrl>
-      <RepositoryType>git</RepositoryType>
-      <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum</PackageProjectUrl>
-      <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
-      <IncludeSymbols>true</IncludeSymbols>
-      <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-      <PackageReadmeFile>README.md</PackageReadmeFile>
-      <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-      <Version>4.0.0.0</Version>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <Authors>LittleBigRefresh</Authors>
+        <Title>Bunkum.Protocols.Gemini</Title>
+        <PackageId>Bunkum.Protocols.Gemini</PackageId>
+        <Description>Gemini protocol support for Bunkum</Description>
+        <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     </PropertyGroup>
 
     <ItemGroup>
