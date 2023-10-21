@@ -6,7 +6,7 @@ namespace Bunkum.Protocols.Http.Socket;
 
 public class SocketHttpListenerContext : SocketListenerContext
 {
-    public SocketHttpListenerContext(System.Net.Sockets.Socket socket) : base(socket)
+    public SocketHttpListenerContext(System.Net.Sockets.Socket socket, Stream stream) : base(socket, stream)
     {}
 
     protected override async Task SendResponseInternal(HttpStatusCode code, ArraySegment<byte>? data = null)
