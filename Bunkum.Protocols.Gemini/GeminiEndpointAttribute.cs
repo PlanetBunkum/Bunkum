@@ -11,4 +11,10 @@ public class GeminiEndpointAttribute : EndpointAttribute
         this.Method = Method.Invalid;
         this.ContentType = GeminiContentTypes.Gemtext;
     }
+
+    public GeminiEndpointAttribute(string route, string contentType) : base(route)
+    {
+        this.Method = Method.Invalid;
+        this.ContentType = contentType;
+    }
 }
