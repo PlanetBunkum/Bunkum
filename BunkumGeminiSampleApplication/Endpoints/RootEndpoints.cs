@@ -1,17 +1,18 @@
-using System.Text;
 using Bunkum.Core;
 using Bunkum.Core.Endpoints;
-using Bunkum.Core.Responses;
+using Bunkum.Listener.Protocol;
 using Bunkum.Protocols.Gemini;
-using Bunkum.Protocols.Gemini.Responses;
 
 namespace BunkumGeminiSampleApplication.Endpoints;
 
 public class RootEndpoints : EndpointGroup
 {
     [GeminiEndpoint("/")]
-    public Response Root(RequestContext context)
-    {
-        return new Response("# THIS IS A TEST\r\n", GeminiContentTypes.Gemtext);
-    }
+    public string ManuallyAddedRootEndpoint(RequestContext context) =>
+        @"# Weather test
+
+=> /api/v1/weather V1 Weather API
+=> /api/v2/weather V2 Weather API
+=> /api/v3/weather V3 Weather API
+";
 }
