@@ -87,12 +87,13 @@ public partial class SocketGeminiListener : BunkumGeminiListener
     {
         SslStream stream = new(rawStream);
 
-        await stream.AuthenticateAsServerAsync(
-            this._cert,
-            false,
-            SslProtocols.Tls12 | SslProtocols.Tls13,
-            false
-        );
+        await stream.AuthenticateAsServerAsync(new SslServerAuthenticationOptions
+        {
+            EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
+            ServerCertificate = this._cert,
+            ClientCertificateRequired = true,
+            RemoteCertificateValidationCallback = (sender, certificate, chain, errors) => true,
+        });
 
         Uri uri = new(GetPath(stream));
         

@@ -1,6 +1,5 @@
 using Bunkum.Core;
 using Bunkum.Core.Endpoints;
-using Bunkum.Listener.Protocol;
 using Bunkum.Protocols.Gemini;
 
 namespace BunkumGeminiSampleApplication.Endpoints;
