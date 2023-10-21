@@ -76,6 +76,7 @@ public partial struct Response
     public Response(object? data, string contentType = ContentType.Plaintext, HttpStatusCode statusCode = HttpStatusCode.OK, bool skipSerialization = false)
     {
         this.StatusCode = statusCode;
+        this.ResponseType = contentType;
 
         IBunkumSerializer? serializer = GetSerializerOrDefault(contentType);
         if (skipSerialization || serializer is null || data is null or string)
