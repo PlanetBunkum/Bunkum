@@ -14,6 +14,11 @@ public class BunkumGophermapSerializer : IBunkumSerializer
     // Adapted from https://stackoverflow.com/a/1450889
     private static List<string> SplitIntoChunks(string str, int maxChunkSize)
     {
+        if (str.Length <= maxChunkSize)
+        {
+            return new List<string>(1) { str };
+        }
+        
         // Add 1 since the string wont always fit exactly to a multiple of maxChunkSize
         List<string> chunks = new(str.Length / maxChunkSize + 1);
         
