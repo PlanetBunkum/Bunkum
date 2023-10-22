@@ -17,4 +17,7 @@ public class GeminiEndpointAttribute : EndpointAttribute
         this.Method = Method.Invalid;
         this.ContentType = contentType;
     }
+
+    /// <inherit-doc/>
+    public override ProtocolInformation Protocol => GeminiProtocolInformation.Gemini;
 }

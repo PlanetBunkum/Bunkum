@@ -14,6 +14,11 @@ public abstract class EndpointAttribute : Attribute
 
     public Method Method { get; protected set; }
     public string ContentType { get; protected set; }
+    
+    /// <summary>
+    /// The protocol this endpoint type is meant for.
+    /// </summary>
+    public abstract ProtocolInformation Protocol { get; }
 
     private struct RouteParam
     {
