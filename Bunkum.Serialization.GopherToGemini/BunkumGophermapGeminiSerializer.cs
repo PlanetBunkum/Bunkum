@@ -33,15 +33,17 @@ public class BunkumGophermapGeminiSerializer : IBunkumSerializer
         {
             switch (gopherDirectoryItem.ItemType)
             {
-                case GophermapItemType.File:
-                case GophermapItemType.Directory:
-                {
-                    str.Append($"=> {gopherDirectoryItem.Selector} {gopherDirectoryItem.DisplayText}");
-                    break;
-                }
                 case GophermapItemType.Message:
+                case GophermapItemType.Error:
                 {
                     str.Append(gopherDirectoryItem.DisplayText);
+                    break;
+                }
+                case GophermapItemType.File:
+                case GophermapItemType.Directory:
+                default:
+                {
+                    str.Append($"=> gemini://{gopherDirectoryItem.Hostname}:{gopherDirectoryItem.Port}{gopherDirectoryItem.Selector} {gopherDirectoryItem.DisplayText}");
                     break;
                 }
             }
