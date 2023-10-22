@@ -4,15 +4,12 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
-      <ProjectReference Include="..\Bunkum.Listener\Bunkum.Listener.csproj" />
+      <ProjectReference Include="..\Bunkum.Protocols.Gemini\Bunkum.Protocols.Gemini.csproj" />
       <ProjectReference Include="..\Bunkum.Protocols.Gopher\Bunkum.Protocols.Gopher.csproj" />
-      <ProjectReference Include="..\Bunkum.Serialization.GopherToGemini\Bunkum.Serialization.GopherToGemini.csproj" />
     </ItemGroup>
-
 
 </Project>

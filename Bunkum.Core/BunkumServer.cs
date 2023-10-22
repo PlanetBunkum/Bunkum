@@ -54,7 +54,7 @@ public abstract partial class BunkumServer : IHotReloadable
             this.Logger.LogInfo(BunkumCategory.Startup, "You can override where data is stored using the BUNKUM_DATA_FOLDER environment variable.");
         }
 
-        this._bunkumConfig = Config.LoadFromJsonFile<BunkumConfig>("bunkum.json", this.Logger);
+        this._bunkumConfig = Config.LoadFromJsonFile<BunkumConfig>($"bunkum-{this.ProtocolUriName}.json", this.Logger);
         
         // leave one more than one we define since downstream applications adding a config is common
         this._configs = new List<Config>(2)

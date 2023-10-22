@@ -1,6 +1,7 @@
 using Bunkum.Core;
 using Bunkum.Core.Configuration;
 using Bunkum.Core.Endpoints;
+using Bunkum.Protocols.Gemini;
 using Bunkum.Protocols.Gopher;
 using Bunkum.Protocols.Gopher.Responses;
 using Bunkum.Protocols.Gopher.Responses.Items;
@@ -10,6 +11,7 @@ namespace BunkumGopherSampleApplication.Endpoints;
 public class RootEndpoints : EndpointGroup
 {
     [GopherEndpoint("/")]
+    [GeminiEndpoint("/")]
     public List<GophermapItem> GetRoot(RequestContext context, BunkumConfig config)
     {
         return new List<GophermapItem>
@@ -21,6 +23,7 @@ public class RootEndpoints : EndpointGroup
     }
 
     [GopherEndpoint("/test")]
+    [GeminiEndpoint("/test")]
     public List<GophermapItem> GetLocalEndpoint(RequestContext context, BunkumConfig config)
     {
         return new List<GophermapItem>

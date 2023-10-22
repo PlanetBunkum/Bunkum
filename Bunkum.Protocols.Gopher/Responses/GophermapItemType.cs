@@ -1,33 +1,33 @@
 namespace Bunkum.Protocols.Gopher.Responses;
 
-public static class GophermapItemType
+public enum GophermapItemType : byte
 {
     #region Canonical types
 
-        /// <summary>
+    /// <summary>
     /// Item is a file
     /// </summary>
-    public static readonly char File = '0';
+    File = (byte)'0',
     
     /// <summary>
     /// Item is a directory
     /// </summary>
-    public static readonly char Directory = '1';
+    Directory = (byte)'1',
     
     /// <summary>
     /// Item is a CSO phone-book server
     /// </summary>
-    public static readonly char CsoPhonebookServer = '2';
+    CsoPhonebookServer = (byte)'2',
     
     /// <summary>
     /// Error
     /// </summary>
-    public static readonly char Error = '3';
+    Error = (byte)'3',
     
     /// <summary>
     /// Item is a BinHexed Macintosh file.
     /// </summary>
-    public static readonly char BinHexMacintosh = '4';
+    BinHexMacintosh = (byte)'4',
     
     /// <summary>
     /// Item is DOS binary archive of some sort.
@@ -35,22 +35,22 @@ public static class GophermapItemType
     /// <remarks>
     /// Client must read until the TCP connection closes.
     /// </remarks>
-    public static readonly char DosBinary = '5';
+    DosBinary = (byte)'5',
     
     /// <summary>
     /// Item is a UNIX uuencoded file.
     /// </summary>
-    public static readonly char UnixUuEncoded = '6';
+    UnixUuEncoded = (byte)'6',
     
     /// <summary>
     /// Item is an Index-Search server.
     /// </summary>
-    public static readonly char IndexSearchServer = '7';
+    IndexSearchServer = (byte)'7',
     
     /// <summary>
     /// Item points to a text-based telnet session.
     /// </summary>
-    public static readonly char TelnetServer = '8';
+    TelnetServer = (byte)'8',
     
     /// <summary>
     /// Item is a binary file!
@@ -58,27 +58,27 @@ public static class GophermapItemType
     /// <remarks>
     /// Client must read until the TCP connection closes.
     /// </remarks>
-    public static readonly char Binary = '9';
+    Binary = (byte)'9',
     
     /// <summary>
     /// Item is a redundant server
     /// </summary>
-    public static readonly char RedundantServer = '+';
+    RedundantServer = (byte)'+',
 
     /// <summary>
     /// Item points to a text-based tn3270 session.
     /// </summary>
-    public static readonly char Tn3270 = 'T';
+    Tn3270 = (byte)'T',
 
     /// <summary>
     /// Item is a GIF format graphics file.
     /// </summary>
-    public static readonly char Gif = 'g';
+    Gif = (byte)'g',
     
     /// <summary>
     /// Item is some kind of image file.
     /// </summary>
-    public static readonly char Image = 'I';
+    Image = (byte)'I',
 
     #endregion
 
@@ -87,42 +87,42 @@ public static class GophermapItemType
     /// <summary>
     /// Item is a document.
     /// </summary>
-    public static readonly char Document = 'd';
+    Document = (byte)'d',
     
     /// <summary>
     /// Item is an HTML document.
     /// </summary>
-    public static readonly char HtmlDocument = 'h';
+    HtmlDocument = (byte)'h',
     
     /// <summary>
     /// Item is an XML document.
     /// </summary>
-    public static readonly char XmlDocument = 'X';
+    XmlDocument = (byte)'X',
     
     /// <summary>
     /// Item is a PDF document.
     /// </summary>
-    public static readonly char PdfDocument = 'P';
+    PdfDocument = (byte)'P',
     
     /// <summary>
     /// Item is an informative message.
     /// </summary>
-    public static readonly char Message = 'i';
+    Message = (byte)'i',
     
     /// <summary>
     /// Item is a rich text format file.
     /// </summary>
-    public static readonly char RichText = 'r';
+    RichText = (byte)'r',
 
     /// <summary>
     /// Item is a bitmap image, most likely an image.
     /// </summary>
-    public static readonly char ImageFile = 'p';
+    ImageFile = (byte)'p',
     
     /// <summary>
     /// Item is an audio file.
     /// </summary>
-    public static readonly char SoundFile = 's';
+    SoundFile = (byte)'s',
 
     #endregion
 }
