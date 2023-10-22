@@ -1,6 +1,7 @@
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using Bunkum.Listener.Protocol;
 using NotEnoughLogs;
 
@@ -23,4 +24,9 @@ public struct RequestContext
     
     public NameValueCollection RequestHeaders { get; internal set; }
     public Dictionary<string, string> ResponseHeaders { get; internal set; }
+
+    /// <summary>
+    /// The certificate the client used to authenticate with the server
+    /// </summary>
+    public X509Certificate? RemoteCertificate { get; internal set; }
 }

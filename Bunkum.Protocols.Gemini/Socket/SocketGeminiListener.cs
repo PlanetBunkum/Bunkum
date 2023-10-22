@@ -105,6 +105,7 @@ public partial class SocketGeminiListener : BunkumGeminiListener
             Protocol = GeminiProtocolInformation.Gemini,
             InputStream = new MemoryStream(0),
             Uri = uri,
+            RemoteCertificate = stream.RemoteCertificate,
         };
     }
 }
