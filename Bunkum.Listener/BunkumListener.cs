@@ -28,7 +28,7 @@ public abstract class BunkumListener : IDisposable
     /// <summary>
     /// The maximum length the request line's path can have in bytes.
     /// </summary>
-    protected const int RequestLinePathLimit = 128; // bytes
+    protected const int RequestLinePathLimit = 1024; // bytes
     
     /// <summary>
     /// The maximum length the request line's version can have in bytes.
