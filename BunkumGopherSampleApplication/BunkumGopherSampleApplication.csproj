@@ -11,8 +11,6 @@
       <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
       <ProjectReference Include="..\Bunkum.Listener\Bunkum.Listener.csproj" />
       <ProjectReference Include="..\Bunkum.Protocols.Gopher\Bunkum.Protocols.Gopher.csproj" />
-      <ProjectReference Include="..\Bunkum.Serialization.GopherToGemini\Bunkum.Serialization.GopherToGemini.csproj" />
     </ItemGroup>
-
 
 </Project>

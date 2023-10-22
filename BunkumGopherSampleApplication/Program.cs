@@ -1,25 +1,14 @@
 ﻿using System.Reflection;
 using Bunkum.Core;
-using Bunkum.Protocols.Gemini;
 using Bunkum.Protocols.Gopher;
 using Bunkum.Protocols.Gopher.Responses.Serialization;
-using Bunkum.Serialization.GopherToGemini;
 
-BunkumServer gopherServer = new BunkumGopherServer();
+BunkumServer server = new BunkumGopherServer();
 
-gopherServer.Initialize = s =>
+server.Initialize = s =>
 {
     s.DiscoverEndpointsFromAssembly(Assembly.GetExecutingAssembly());
     s.AddSerializer<BunkumGophermapSerializer>();
 };
-
-BunkumServer geminiServer = new BunkumGeminiServer();
-geminiServer.Initialize = s =>
-{
-    s.DiscoverEndpointsFromAssembly(Assembly.GetExecutingAssembly());
-    s.AddSerializer<BunkumGophermapGeminiSerializer>();
-};
-
-gopherServer.Start();
-geminiServer.Start();
+server.Start();
 await Task.Delay(-1);
