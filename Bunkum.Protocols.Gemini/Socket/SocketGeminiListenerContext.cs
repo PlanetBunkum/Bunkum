@@ -1,6 +1,5 @@
 using System.Buffers.Text;
 using System.Net;
-using System.Text;
 using Bunkum.Listener.Request;
 using Bunkum.Protocols.Gemini.Responses;
 
@@ -10,10 +9,12 @@ public class SocketGeminiListenerContext : SocketListenerContext
 {
     public SocketGeminiListenerContext(System.Net.Sockets.Socket socket, Stream stream) : base(socket, stream)
     {}
-    
+
+    /// <inheritdoc />
     public override long ContentLength => 0;
-    
-    private static readonly byte[] Endline = "\r\n"u8.ToArray();
+   
+    //This is stored statically to save on allocations
+    private static readonly byte[] LineEnding = "\r\n"u8.ToArray();
     
     protected override async Task SendResponseInternal(HttpStatusCode code, ArraySegment<byte>? data = null)
     {
@@ -37,7 +38,7 @@ public class SocketGeminiListenerContext : SocketListenerContext
             await this.SendBufferSafe(data.Value);
         else
             await this.SendBufferSafe(this.ResponseType ?? GeminiContentTypes.Gemtext);
-        await this.SendBufferSafe(new ArraySegment<byte>(Endline));
+        await this.SendBufferSafe(new ArraySegment<byte>(LineEnding));
         
         //Only send body data if its a success response
         if (statusCodeBytes[0] == (byte)'2' && data != null)

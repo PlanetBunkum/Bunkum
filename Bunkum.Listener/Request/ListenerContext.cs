@@ -1,6 +1,7 @@
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Bunkum.Listener.Protocol;
 
@@ -58,6 +59,11 @@ public abstract class ListenerContext
     /// If BunkumConfig.UseForwardedIp is enabled, this will use the endpoint forwarded via the reverse proxy. 
     /// </summary>
     public IPEndPoint RemoteEndpoint = null!;
+
+    /// <summary>
+    /// The certificate the client used to authenticate with the server
+    /// </summary>
+    public X509Certificate? RemoteCertificate = null;
 
     /// <summary>
     /// The length of the request body.

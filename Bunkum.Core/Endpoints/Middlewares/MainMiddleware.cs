@@ -104,6 +104,7 @@ internal class MainMiddleware : IMiddleware
                             Method = context.Method,
                             RequestHeaders = context.RequestHeaders,
                             ResponseHeaders = context.ResponseHeaders,
+                            RemoteCertificate = context.RemoteCertificate,
                         },
                     };
 
