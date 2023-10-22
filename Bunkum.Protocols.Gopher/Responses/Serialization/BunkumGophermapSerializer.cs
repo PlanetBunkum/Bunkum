@@ -1,11 +1,15 @@
-using System.Collections.ObjectModel;
 using System.Text;
 using Bunkum.Core.Responses;
 
 namespace Bunkum.Protocols.Gopher.Responses.Serialization;
 
+/// <summary>
+/// An <see cref="IBunkumSerializer"/> that implements serialization for <see cref="Gophermap"/>s.
+/// Will also accept <see cref="IEnumerable&lt;GophermapItem&gt;"/>s.
+/// </summary>
 public class BunkumGophermapSerializer : IBunkumSerializer
 {
+    /// <inherit-doc/>
     public string[] ContentTypes => new[]
     {
         GopherContentTypes.Gophermap,
@@ -29,6 +33,7 @@ public class BunkumGophermapSerializer : IBunkumSerializer
     }
 
     
+    /// <inherit-doc/>
     public byte[] Serialize(object data)
     {
         IEnumerable<GophermapItem>? items = data as IEnumerable<GophermapItem>;
@@ -38,7 +43,7 @@ public class BunkumGophermapSerializer : IBunkumSerializer
             throw new InvalidOperationException($"Cannot serialize an object that is not a {nameof(Gophermap)} or {nameof(IEnumerable<GophermapItem>)}");
 
         items ??= gophermap!.Items;
-        items = items.ToList();
+        items = items.ToList(); // Convert to a list so we avoid multiple enumeration
 
         StringBuilder str = new();
 
@@ -49,10 +54,10 @@ public class BunkumGophermapSerializer : IBunkumSerializer
             List<string> chunks = SplitIntoChunks(gopherDirectoryItem.DisplayText, 70);
             for (int chunkIndex = 0; chunkIndex < chunks.Count; chunkIndex++)
             {
-                string chunk = chunks[chunkIndex];
+                string displayTextChunk = chunks[chunkIndex];
                 
                 str.Append(gopherDirectoryItem.ItemType);
-                str.Append(chunk);
+                str.Append(displayTextChunk);
 
                 str.Append('\t');
                 str.Append(gopherDirectoryItem.Selector);
@@ -63,6 +68,9 @@ public class BunkumGophermapSerializer : IBunkumSerializer
                 str.Append('\t');
                 str.Append(gopherDirectoryItem.Port);
 
+                // IF we're not yet at the end,
+                // OR we're in the middle of printing a series of chunks,
+                // THEN add a new line.
                 if (i != count || chunkIndex != chunks.Count)
                 {
                     str.Append("\r\n");
@@ -72,6 +80,7 @@ public class BunkumGophermapSerializer : IBunkumSerializer
             i++;
         }
 
+        // Gopher clients expect a trailing period referred to as the Lastline
         str.Append(".\r\n");
 
         return Encoding.UTF8.GetBytes(str.ToString());
