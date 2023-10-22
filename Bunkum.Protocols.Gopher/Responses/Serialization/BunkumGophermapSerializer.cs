@@ -11,10 +11,16 @@ public class BunkumGophermapSerializer : IBunkumSerializer
         GopherContentTypes.Gophermap,
     };
     
-    // https://stackoverflow.com/a/1450889
-    private static IEnumerable<string> SplitIntoChunks(string str, int maxChunkSize) {
+    // Adapted from https://stackoverflow.com/a/1450889
+    private static List<string> SplitIntoChunks(string str, int maxChunkSize)
+    {
+        // Add 1 since the string wont always fit exactly to a multiple of maxChunkSize
+        List<string> chunks = new(str.Length / maxChunkSize + 1);
+        
         for (int i = 0; i < str.Length; i += maxChunkSize) 
-            yield return str.Substring(i, Math.Min(maxChunkSize, str.Length - i));
+            chunks.Add(str.Substring(i, Math.Min(maxChunkSize, str.Length - i)));
+        
+        return chunks;
     }
 
     
@@ -35,21 +41,24 @@ public class BunkumGophermapSerializer : IBunkumSerializer
         int count = items.Count();
         foreach (GophermapItem gopherDirectoryItem in items)
         {
-            foreach (string chunk in SplitIntoChunks(gopherDirectoryItem.DisplayText, 70))
+            List<string> chunks = SplitIntoChunks(gopherDirectoryItem.DisplayText, 70);
+            for (int chunkIndex = 0; chunkIndex < chunks.Count; chunkIndex++)
             {
+                string chunk = chunks[chunkIndex];
+                
                 str.Append(gopherDirectoryItem.ItemType);
                 str.Append(chunk);
-            
+
                 str.Append('\t');
                 str.Append(gopherDirectoryItem.Selector);
-            
+
                 str.Append('\t');
                 str.Append(gopherDirectoryItem.Hostname);
-            
+
                 str.Append('\t');
                 str.Append(gopherDirectoryItem.Port);
 
-                if (i != count)
+                if (i != count || chunkIndex != chunks.Count)
                 {
                     str.Append("\r\n");
                 }
