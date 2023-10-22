@@ -19,6 +19,7 @@ public class RootEndpoints : EndpointGroup
 => /api/v3/weather V3 Weather API
 
 => /requires_cert Endpoint that requires a client cert
+=> /input Query input test
 ";
 
     [GeminiEndpoint("/requires_cert")]
@@ -30,5 +31,17 @@ public class RootEndpoints : EndpointGroup
         return new Response($@"# Hello {context.RemoteCertificate.Issuer}!
 
 We have authenticated you!", GeminiContentTypes.Gemtext);
+    }
+
+    [GeminiEndpoint("/input")]
+    public Response Input(RequestContext context)
+    {
+        string? input = context.QueryString.Get("input");
+        if (input != null)
+        {
+            return new Response($"# You have input the text \"{input}\"", GeminiContentTypes.Gemtext);
+        }
+        
+        return new Response("TEST INPUT FIELD", ContentType.Plaintext, HttpStatusCode.Continue);
     }
 }
