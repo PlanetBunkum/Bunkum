@@ -79,6 +79,9 @@ internal class MainMiddleware : IMiddleware
 
                 foreach (EndpointAttribute attribute in attributes)
                 {
+                    if(attribute.Protocol.Name != context.Protocol.Name)
+                        continue;
+                        
                     if (!attribute.UriMatchesRoute(context.Uri, context.Method, out Dictionary<string, string> parameters))
                         continue;
 

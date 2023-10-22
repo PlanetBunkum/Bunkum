@@ -68,6 +68,7 @@ public class DirectHttpListener : BunkumHttpListener, IListenerWithCallback
         ListenerContext context = new DirectHttpListenerContext(message.Stream, message.Reset)
         {
             Uri = message.Message.RequestUri!,
+            Protocol = HttpProtocolInformation.Http1_1,
             Method = MethodUtils.FromString(typeof(HttpProtocolMethods), message.Message.Method.Method),
             Query = HttpUtility.ParseQueryString(message.Message.RequestUri!.Query),
             RemoteEndpoint = IPEndPoint.Parse("0.0.0.0"),

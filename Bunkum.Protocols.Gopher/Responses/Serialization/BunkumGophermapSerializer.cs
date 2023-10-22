@@ -56,7 +56,7 @@ public class BunkumGophermapSerializer : IBunkumSerializer
             {
                 string displayTextChunk = chunks[chunkIndex];
                 
-                str.Append(gopherDirectoryItem.ItemType);
+                str.Append((char)gopherDirectoryItem.ItemType);
                 str.Append(displayTextChunk);
 
                 str.Append('\t');

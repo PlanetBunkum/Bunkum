@@ -10,6 +10,5 @@ server.Initialize = s =>
     s.DiscoverEndpointsFromAssembly(Assembly.GetExecutingAssembly());
     s.AddSerializer<BunkumGophermapSerializer>();
 };
-
 server.Start();
 await Task.Delay(-1);

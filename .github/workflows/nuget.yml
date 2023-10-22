@@ -65,6 +65,10 @@ jobs:
         run: dotnet nuget push Bunkum.Listener/bin/Release/Bunkum.Listener.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      - name: Upload Bunkum.Serialization.GopherToGemini
+        run: dotnet nuget push Bunkum.Serialization.GopherToGemini/bin/Release/Bunkum.Serialization.GopherToGemini.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+        env:
+            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
       - name: Upload Bunkum.HealthChecks.RealmDatabase
         run: dotnet nuget push Bunkum.HealthChecks.RealmDatabase/bin/Release/Bunkum.HealthChecks.RealmDatabase.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:

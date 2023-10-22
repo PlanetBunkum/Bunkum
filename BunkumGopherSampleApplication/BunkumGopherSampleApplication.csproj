@@ -13,5 +13,4 @@
       <ProjectReference Include="..\Bunkum.Protocols.Gopher\Bunkum.Protocols.Gopher.csproj" />
     </ItemGroup>
 
-
 </Project>

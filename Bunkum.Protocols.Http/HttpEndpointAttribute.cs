@@ -22,4 +22,7 @@ public class HttpEndpointAttribute : EndpointAttribute
     {
         
     }
+
+    /// <inherit-doc/>
+    public override ProtocolInformation Protocol => HttpProtocolInformation.Http1_1;
 }

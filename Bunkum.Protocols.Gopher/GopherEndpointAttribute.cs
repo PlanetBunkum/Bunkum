@@ -11,4 +11,7 @@ public class GopherEndpointAttribute : EndpointAttribute
         this.Method = Method.Invalid;
         this.ContentType = GopherContentTypes.Gophermap;
     }
+
+    /// <inherit-doc/>
+    public override ProtocolInformation Protocol => GopherProtocolInformation.Gopher;
 }

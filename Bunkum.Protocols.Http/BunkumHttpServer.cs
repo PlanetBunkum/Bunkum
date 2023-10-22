@@ -14,10 +14,12 @@ public class BunkumHttpServer : BunkumServer
     public BunkumHttpServer(BunkumListener listener, LoggerConfiguration? configuration = null, List<ILoggerSink>? sinks = null) : base(listener, configuration, sinks)
     {}
 
+    /// <inherit-doc/>
     protected override BunkumListener CreateDefaultListener(Uri listenEndpoint, bool useForwardedIp, Logger logger)
     {
         return new Socket.SocketHttpListener(listenEndpoint, useForwardedIp, logger);
     }
 
+    /// <inherit-doc/>
     protected override string ProtocolUriName => "http";
 }
