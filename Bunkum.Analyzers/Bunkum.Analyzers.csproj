@@ -30,6 +30,12 @@
         <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
+    <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
+        <ItemGroup>
+            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+        </ItemGroup>
+    </Target>
+
     <ItemGroup>
       <PackageReference Include="JetBrains.Annotations" Version="2023.2.0" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />

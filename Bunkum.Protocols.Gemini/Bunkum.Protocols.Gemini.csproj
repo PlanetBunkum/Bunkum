@@ -27,6 +27,12 @@
         <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
+    <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
+        <ItemGroup>
+            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+        </ItemGroup>
+    </Target>
+
     <ItemGroup>
       <ProjectReference Include="..\Bunkum.Analyzers\Bunkum.Analyzers.csproj" />
       <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
