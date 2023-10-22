@@ -43,7 +43,7 @@ public class BunkumGophermapGeminiSerializer : IBunkumSerializer
                 case GophermapItemType.Directory:
                 default:
                 {
-                    str.Append($"=> gemini://{gopherDirectoryItem.Hostname}:{gopherDirectoryItem.Port}{gopherDirectoryItem.Selector} {gopherDirectoryItem.DisplayText}");
+                    str.Append($"=> {gopherDirectoryItem.Protocol}://{gopherDirectoryItem.Hostname}:{gopherDirectoryItem.Port}{gopherDirectoryItem.Selector} {gopherDirectoryItem.DisplayText}");
                     break;
                 }
             }
