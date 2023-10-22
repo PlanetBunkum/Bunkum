@@ -1,11 +1,12 @@
+using System.Collections.Specialized;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using Bunkum.Listener;
 using Bunkum.Listener.Extensions;
 using Bunkum.Listener.Protocol;
@@ -96,8 +97,10 @@ public partial class SocketGeminiListener : BunkumGeminiListener
         });
 
         Uri uri = new(GetPath(stream));
-        
-        return new SocketGeminiListenerContext(client, stream)
+
+        string? query = uri.Query.Length > 0 ? uri.Query[1..] : null;
+
+        SocketGeminiListenerContext context = new(client, stream)
         {
             RealRemoteEndpoint = (client.RemoteEndPoint as IPEndPoint)!,
             RemoteEndpoint = (client.RemoteEndPoint as IPEndPoint)!,
@@ -106,6 +109,12 @@ public partial class SocketGeminiListener : BunkumGeminiListener
             InputStream = new MemoryStream(0),
             Uri = uri,
             RemoteCertificate = stream.RemoteCertificate,
+            Query = new NameValueCollection(),
         };
+
+        if(query != null)
+            context.Query["input"] = HttpUtility.UrlDecode(query);
+        
+        return context;
     }
 }
