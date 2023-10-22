@@ -35,7 +35,7 @@ public class BunkumGophermapSerializer : IBunkumSerializer
         int count = items.Count();
         foreach (GophermapItem gopherDirectoryItem in items)
         {
-            foreach (string chunk in SplitIntoChunks(gopherDirectoryItem.DisplayText, 80))
+            foreach (string chunk in SplitIntoChunks(gopherDirectoryItem.DisplayText, 70))
             {
                 str.Append(gopherDirectoryItem.ItemType);
                 str.Append(chunk);
