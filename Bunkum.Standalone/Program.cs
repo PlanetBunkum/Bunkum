@@ -40,7 +40,7 @@ LoggerConfiguration logConfig = new()
 {
     Behaviour = new QueueLoggingBehaviour(),
 #if DEBUG
-    MaxLevel = LogLevel.Trace,
+    MaxLevel = LogLevel.Debug,
 #else
     MaxLevel = LogLevel.Info,
 #endif
