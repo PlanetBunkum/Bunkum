@@ -23,7 +23,18 @@ if (result == null)
 
 BunkumStandaloneArguments arguments = result.Value;
 
-Environment.SetEnvironmentVariable("BUNKUM_DATA_FOLDER", Path.GetTempPath());
+const string dataFolder = "BUNKUM_DATA_FOLDER";
+
+if (Environment.GetEnvironmentVariable(dataFolder) == null)
+{
+    string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+    string configPath = Path.Join(appData, "bunkum");
+    
+    if (!Directory.Exists(configPath))
+        Directory.CreateDirectory(configPath);
+    
+    Environment.SetEnvironmentVariable(dataFolder, configPath);
+}
 
 LoggerConfiguration logConfig = new()
 {
