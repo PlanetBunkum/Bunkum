@@ -25,9 +25,12 @@ public class DebugService : Service
         if (method.HasCustomAttribute<DebugRequestBodyAttribute>())
         {
             context.InputStream.Seek(0, SeekOrigin.Begin);
-            using StreamReader reader = new(context.InputStream);
+            
+            StreamReader reader = new(context.InputStream);
             string body = reader.ReadToEnd();
             this.Logger.LogDebug(BunkumCategory.Request, "Request body for {0} ({1} bytes):\n{2}", context.Uri.AbsolutePath, context.InputStream.Length, body);
+            
+            context.InputStream.Seek(0, SeekOrigin.Begin);
         }
         
         return null;
