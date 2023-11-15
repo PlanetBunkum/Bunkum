@@ -2,7 +2,7 @@ using System.Reflection;
 using Bunkum.Core.RateLimit;
 using Bunkum.Listener.Request;
 using Bunkum.Protocols.Http.Direct;
-using BunkumTests.HttpServer.Time;
+using Microsoft.Extensions.Time.Testing;
 
 namespace BunkumTests.HttpServer.Tests.RateLimit;
 
@@ -14,7 +14,7 @@ public class RateLimitTests
     [Test]
     public void AllowsSingleRequest()
     {
-        MockTimeProvider timeProvider = new();
+        FakeTimeProvider timeProvider = new();
         MockRateLimitUser user = new("user");
 
         RateLimiter rateLimiter = new(timeProvider);
@@ -24,7 +24,7 @@ public class RateLimitTests
     [Test]
     public void AllowsManyRequests()
     {
-        MockTimeProvider timeProvider = new();
+        FakeTimeProvider timeProvider = new();
         MockRateLimitUser user = new("user");
 
         RateLimiter rateLimiter = new(timeProvider);
@@ -38,7 +38,7 @@ public class RateLimitTests
     [Test]
     public void DeniesTooManyRequests()
     {
-        MockTimeProvider timeProvider = new();
+        FakeTimeProvider timeProvider = new();
         MockRateLimitUser user = new("user");
 
         RateLimiter rateLimiter = new(timeProvider);
@@ -54,7 +54,7 @@ public class RateLimitTests
     [Test]
     public void AllowsRequestAgainAfterTimeout()
     {
-        MockTimeProvider timeProvider = new();
+        FakeTimeProvider timeProvider = new();
         MockRateLimitUser user = new("user");
 
         RateLimiter rateLimiter = new(timeProvider);
@@ -66,14 +66,14 @@ public class RateLimitTests
         
         Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, null, user), Is.True);
 
-        timeProvider.Seconds = RateLimitSettings.DefaultRequestTimeoutDuration;
+        timeProvider.Advance(TimeSpan.FromSeconds(RateLimitSettings.DefaultRequestTimeoutDuration));
         Assert.That(rateLimiter.UserViolatesRateLimit(Ctx, null, user), Is.False);
     }
     
     [Test]
     public void DeniesCorrectUser()
     {
-        MockTimeProvider timeProvider = new();
+        FakeTimeProvider timeProvider = new();
         MockRateLimitUser user1 = new("user1");
         MockRateLimitUser user2 = new("user2");
 
@@ -97,7 +97,7 @@ public class RateLimitTests
     [Test]
     public void RespectsAttribute()
     {
-        MockTimeProvider timeProvider = new();
+        FakeTimeProvider timeProvider = new();
         MockRateLimitUser user = new("user");
         
         RateLimiter rateLimiter = new(timeProvider);
