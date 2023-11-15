@@ -8,11 +8,9 @@ namespace BunkumTests.HttpServer.Tests;
 public class HealthCheckTests
 {
     [Test]
-#pragma warning disable NUnit1003
     [TestCase(Unhealthy)]
     [TestCase(Degraded)]
     [TestCase(Healthy)]
-#pragma warning restore NUnit1003
     public void HealthChecksWork(HealthStatusType type)
     {
         TestHealthCheck check = new(type);
