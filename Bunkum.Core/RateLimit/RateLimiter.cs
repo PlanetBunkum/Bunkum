@@ -1,23 +1,22 @@
 using System.Net;
 using System.Reflection;
 using Bunkum.Core.RateLimit.Info;
-using Bunkum.Core.Time;
 using Bunkum.Listener.Request;
 
 namespace Bunkum.Core.RateLimit;
 
 public class RateLimiter : IRateLimiter 
 {
-    private readonly ITimeProvider _timeProvider;
+    private readonly TimeProvider _timeProvider;
     private readonly RateLimitSettings _settings;
     
     public RateLimiter()
     {
-        this._timeProvider = new RealTimeProvider();
+        this._timeProvider = TimeProvider.System;
         this._settings = RateLimitSettings.DefaultSettings;
     }
 
-    public RateLimiter(ITimeProvider timeProvider)
+    public RateLimiter(TimeProvider timeProvider)
     {
         this._timeProvider = timeProvider;
         this._settings = RateLimitSettings.DefaultSettings;
@@ -25,11 +24,11 @@ public class RateLimiter : IRateLimiter
 
     public RateLimiter(RateLimitSettings settings)
     {
-        this._timeProvider = new RealTimeProvider();
+        this._timeProvider = TimeProvider.System;
         this._settings = settings;
     }
     
-    public RateLimiter(ITimeProvider provider, RateLimitSettings settings)
+    public RateLimiter(TimeProvider provider, RateLimitSettings settings)
     {
         this._timeProvider = provider;
         this._settings = settings;
@@ -91,7 +90,7 @@ public class RateLimiter : IRateLimiter
 
     private bool ViolatesRateLimit(ListenerContext context, IRateLimitInfo info, RateLimitSettings settings)
     {
-        int now = this._timeProvider.Seconds;
+        int now = (int)this._timeProvider.GetUtcNow().ToUnixTimeSeconds();
         
         if (info.LimitedUntil != 0)
         {

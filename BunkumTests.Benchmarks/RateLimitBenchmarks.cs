@@ -3,8 +3,8 @@ using Bunkum.Core.RateLimit;
 using Bunkum.Listener.Request;
 using Bunkum.Protocols.Http.Direct;
 using BunkumTests.HttpServer.Tests.RateLimit;
-using BunkumTests.HttpServer.Time;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Time.Testing;
 
 namespace BunkumTests.Benchmarks;
 
@@ -15,13 +15,13 @@ public class RateLimitBenchmarks
     private static readonly ListenerContext Ctx = new DirectHttpListenerContext();
 
     private RateLimiter _rateLimiter = null!;
-    private MockTimeProvider _timeProvider = null!;
+    private FakeTimeProvider _timeProvider = null!;
     private MockRateLimitUser _user = null!;
 
     [GlobalSetup]
     public void GlobalSetup()
     {
-        this._timeProvider = new MockTimeProvider();
+        this._timeProvider = new FakeTimeProvider();
         this._rateLimiter = new RateLimiter(this._timeProvider);
         this._user = new MockRateLimitUser("user");
     }
