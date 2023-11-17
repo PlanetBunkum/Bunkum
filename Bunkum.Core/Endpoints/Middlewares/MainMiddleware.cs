@@ -292,7 +292,7 @@ internal class MainMiddleware : IMiddleware
             }
             catch (Exception e)
             {
-                this._logger.LogError(BunkumCategory.UserContent, $"Failed to parse object data: {e}\n\nXML: {body}");
+                this._logger.LogError(BunkumCategory.UserContent, $"Failed to parse object data: {e}\n\nXML: {Encoding.UTF8.GetString(body.ToArray())}");
                 return false;
             }
         }
