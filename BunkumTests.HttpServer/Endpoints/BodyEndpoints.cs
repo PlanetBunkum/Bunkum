@@ -45,6 +45,6 @@ public class BodyEndpoints : EndpointGroup
     public string Stream(RequestContext context, Stream body)
     {
         MemoryStream stream = (MemoryStream)body;
-        return Encoding.Default.GetString(stream.GetBuffer());
+        return Encoding.Default.GetString(stream.ToArray());
     }
 }
