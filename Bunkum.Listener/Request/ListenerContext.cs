@@ -86,7 +86,7 @@ public abstract class ListenerContext
     /// <summary>
     /// Can we currently send data back to the client?
     /// </summary>
-    protected abstract bool CanSendData { get; }
+    protected internal abstract bool CanSendData { get; }
 
     // Response
     
@@ -150,7 +150,7 @@ public abstract class ListenerContext
     {
         if (!this.CanSendData) return;
 
-        await this.SendResponseInternal(code, data);
+        this.SendResponseInternal(code, data).Wait();
         this.CloseConnection();
     }
 

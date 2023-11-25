@@ -24,7 +24,7 @@ public abstract class SocketListenerContext : ListenerContext
     }
 
     /// <inheritdoc/>
-    protected override bool CanSendData => !this.SocketClosed;
+    protected internal override bool CanSendData => !this.SocketClosed || !this._stream.CanWrite;
     
     /// <inheritdoc/>
     protected override void CloseConnection()
