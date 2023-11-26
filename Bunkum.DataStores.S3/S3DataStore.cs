@@ -73,6 +73,7 @@ public class S3DataStore(AmazonS3Client client, string bucketName) : IDataStore
 
     public Stream OpenWriteStream(string key)
     {
+        // We can't really create a stream directly into S3 like we can with a file, so leave this unimplemented for now
         throw new NotImplementedException();
     }
 }
