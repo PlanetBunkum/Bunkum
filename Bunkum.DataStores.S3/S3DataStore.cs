@@ -9,7 +9,12 @@ public class S3DataStore(AmazonS3Client client, string bucketName) : IDataStore
 {
     private readonly AmazonS3Client _client = client;
     private readonly string _bucketName = bucketName;
-
+    
+    // Amazon S3 has a bit more functionality than a dataStore can typically provide.
+    // Expose the client to allow users to use it.
+    // ReSharper disable once ConvertToAutoPropertyWhenPossible
+    public AmazonS3Client Client => this._client;
+    
     // https://stackoverflow.com/a/4107867
     public bool ExistsInStore(string key)
     {
