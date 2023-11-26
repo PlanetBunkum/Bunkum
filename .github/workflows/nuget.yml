@@ -77,3 +77,7 @@ jobs:
         run: dotnet nuget push Bunkum.HealthChecks.RealmDatabase/bin/Release/Bunkum.HealthChecks.RealmDatabase.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      - name: Upload Bunkum.DataStores.S3
+        run: dotnet nuget push Bunkum.DataStores.S3/bin/Release/Bunkum.DataStores.S3.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+        env:
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
