@@ -48,7 +48,8 @@ public class S3DataStore(AmazonS3Client client, string bucketName) : IDataStore
 
     public string[] GetKeysFromStore()
     {
-        throw new NotImplementedException();
+        ListObjectsResponse response = this._client.ListObjectsAsync(this._bucketName).Result;
+        return response.S3Objects.Select(o => o.Key).ToArray();
     }
 
     public bool WriteToStoreFromStream(string key, Stream data)

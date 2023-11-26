@@ -13,4 +13,8 @@
       <ProjectReference Include="..\Bunkum.Protocols.Http\Bunkum.Protocols.Http.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="HttpMultipartParser" Version="8.2.0" />
+    </ItemGroup>
+
 </Project>
