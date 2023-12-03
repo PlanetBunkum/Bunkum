@@ -50,7 +50,7 @@ public class S3DataStore(AmazonS3Client client, string bucketName) : IDataStore
     {
         Stream data = this.GetStreamFromStore(key);
         byte[] buffer = new byte[data.Length];
-        _ = data.Read(buffer, 0, (int)data.Length);
+        _ = data.ReadAtLeast(buffer, (int)data.Length);
 
         return buffer;
     }
