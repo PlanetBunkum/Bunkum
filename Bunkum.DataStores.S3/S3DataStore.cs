@@ -1,4 +1,5 @@
-﻿using Amazon.S3;
+﻿using System.Net;
+using Amazon.S3;
 using Amazon.S3.Model;
 using Bunkum.Core.Storage;
 using static System.Net.HttpStatusCode;
@@ -23,9 +24,18 @@ public class S3DataStore(AmazonS3Client client, string bucketName) : IDataStore
             this._client.GetObjectMetadataAsync(this._bucketName, key).Wait();
             return true;
         }
-        catch(AmazonS3Exception e)
+        catch (AggregateException e)
         {
-            if (e.StatusCode == NotFound) return false;
+            foreach (Exception innerException in e.InnerExceptions)
+            {
+                if (innerException is AmazonS3Exception { StatusCode: NotFound }) return false;
+            }
+
+            throw;
+        }
+        catch (AmazonS3Exception e)
+        {
+            if (e.StatusCode is NotFound) return false;
             throw;
         }
     }
