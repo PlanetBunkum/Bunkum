@@ -81,3 +81,7 @@ jobs:
         run: dotnet nuget push Bunkum.DataStores.S3/bin/Release/Bunkum.DataStores.S3.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      - name: Upload Bunkum.EntityFrameworkDatabase
+        run: dotnet nuget push Bunkum.EntityFrameworkDatabase/bin/Release/Bunkum.EntityFrameworkDatabase.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+        env:
+            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
