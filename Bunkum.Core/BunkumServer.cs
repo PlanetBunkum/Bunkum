@@ -220,7 +220,7 @@ public abstract partial class BunkumServer : IHotReloadable
             #if DEBUG
             context.Write(e.ToString());
             #else
-            context.Write("Internal Server Error");
+            context.Write("Internal Server Error"u8);
             #endif
         }
     }
@@ -292,7 +292,7 @@ public abstract partial class BunkumServer : IHotReloadable
 #if DEBUG
                 context.Write(e.ToString());
 #else
-                context.Write("Internal Server Error");
+                context.Write("Internal Server Error"u8);
 #endif
             }
             catch

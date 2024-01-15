@@ -55,7 +55,9 @@ internal class MainMiddleware : IMiddleware
         {
             context.ResponseType = ContentType.Plaintext;
             context.ResponseCode = HttpStatusCode.NotFound;
-            context.Write("Not found: " + path);
+            
+            context.Write("Not found: "u8);
+            context.Write(path);
         }
         else
         {
