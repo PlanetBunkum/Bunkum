@@ -119,7 +119,7 @@ public abstract class ListenerContext
     /// Writes a byte array to the response stream.
     /// </summary>
     /// <param name="buffer">The byte array to write.</param>
-    public void Write(byte[] buffer)
+    public void Write(ReadOnlySpan<byte> buffer)
     {
         this.ResponseStream.Write(buffer);
         this._responseLength += buffer.Length;
