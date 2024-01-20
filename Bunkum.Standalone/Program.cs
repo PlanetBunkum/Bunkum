@@ -42,14 +42,15 @@ internal class Program
             Environment.SetEnvironmentVariable(dataFolder, configPath);
         }
 
+        LogLevel level;
+        if (arguments.Debug) level = LogLevel.Debug;
+        else if (arguments.Trace) level = LogLevel.Trace;
+        else level = LogLevel.Info;
+
         LoggerConfiguration logConfig = new()
         {
             Behaviour = new QueueLoggingBehaviour(),
-#if DEBUG
-            MaxLevel = LogLevel.Debug,
-#else
-    MaxLevel = LogLevel.Info,
-#endif
+            MaxLevel = level,
         };
 
         BunkumServer server = arguments.Protocol switch
