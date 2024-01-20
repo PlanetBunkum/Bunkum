@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
@@ -33,7 +33,7 @@
     </Target>
 
     <ItemGroup>
-      <PackageReference Include="Realm" Version="11.5.0" />
+      <PackageReference Include="Realm" Version="11.6.1" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,3 +1,4 @@
+using System.Collections.Specialized;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -58,7 +59,9 @@ public partial class SocketGopherListener : BunkumGopherListener
         return this.ReadRequestIntoContext(client, stream);
     }
 
-    private static string GetPath(Stream stream)
+    private record struct PathAndQuery(string Path, string? Query);
+
+    private static PathAndQuery GetPathAndQuery(Stream stream)
     {
         Span<byte> buffer = stackalloc byte[RequestLinePathLimit];
         int read = stream.ReadIntoBufferUntilChar('\n', buffer);
@@ -70,13 +73,19 @@ public partial class SocketGopherListener : BunkumGopherListener
             pathBuilder.Append('/');
         }
 
-        pathBuilder.Append(Encoding.UTF8.GetString(buffer));
-        return pathBuilder.ToString();
+        ReadOnlySpan<char> fullPath = Encoding.UTF8.GetString(buffer).AsSpan();
+        int querySeparator = fullPath.IndexOf('\t');
+
+        string? query = querySeparator == -1 ? null : fullPath[(querySeparator + 1)..].ToString();
+        ReadOnlySpan<char> path = querySeparator == -1 ? fullPath : fullPath[..querySeparator];
+
+        pathBuilder.Append(path);
+        return new PathAndQuery(pathBuilder.ToString(), query);
     }
 
     private ListenerContext ReadRequestIntoContext(System.Net.Sockets.Socket client, Stream stream)
     {
-        string path = GetPath(stream);
+        GetPathAndQuery(stream).Deconstruct(out string path, out string? query);
 
         ListenerContext context = new SocketGopherListenerContext(client, stream)
         {
@@ -86,7 +95,13 @@ public partial class SocketGopherListener : BunkumGopherListener
             Protocol = GopherProtocolInformation.Gopher,
             InputStream = new MemoryStream(0),
             Uri = new Uri($"gopher://{this._listenEndpoint.Host}:{this._listenEndpoint.Port}{path}", UriKind.Absolute),
+            Query = new NameValueCollection(),
         };
+
+        if (query != null)
+        {
+            context.Query["input"] = query;
+        }
 
         return context;
     }

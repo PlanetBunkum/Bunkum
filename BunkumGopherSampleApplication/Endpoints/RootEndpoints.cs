@@ -17,6 +17,7 @@ public class RootEndpoints : EndpointGroup
             new GophermapMessage("Welcome to Bunkum's Gopher sample application."),
             new GophermapLink("Visit an External Destination", new Uri("gopher://gopher.floodgap.com")),
             new GophermapLink("Visit a Local Endpoint", config, "/test"),
+            new GophermapLink(GophermapItemType.IndexSearchServer, "Test Input", config, "/input"),
         };
     }
 
@@ -27,6 +28,16 @@ public class RootEndpoints : EndpointGroup
         {
             new GophermapMessage("There are no Easter Eggs up here."),
             new GophermapLink("Go away.", config, "/"),
+        };
+    }
+    
+    [GopherEndpoint("/input")]
+    public List<GophermapItem> GetUserInput(RequestContext context, BunkumConfig config)
+    {
+        return new List<GophermapItem>
+        {
+            new GophermapMessage($"You inputted '{context.QueryString["input"]}'."),
+            new GophermapLink("Return to root", config, "/"),
         };
     }
 }

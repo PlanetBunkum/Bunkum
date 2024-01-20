@@ -86,7 +86,7 @@ public abstract class ListenerContext
     /// <summary>
     /// Can we currently send data back to the client?
     /// </summary>
-    protected abstract bool CanSendData { get; }
+    protected internal abstract bool CanSendData { get; }
 
     // Response
     
@@ -119,7 +119,7 @@ public abstract class ListenerContext
     /// Writes a byte array to the response stream.
     /// </summary>
     /// <param name="buffer">The byte array to write.</param>
-    public void Write(byte[] buffer)
+    public void Write(ReadOnlySpan<byte> buffer)
     {
         this.ResponseStream.Write(buffer);
         this._responseLength += buffer.Length;
@@ -150,7 +150,7 @@ public abstract class ListenerContext
     {
         if (!this.CanSendData) return;
 
-        await this.SendResponseInternal(code, data);
+        this.SendResponseInternal(code, data).Wait();
         this.CloseConnection();
     }
 

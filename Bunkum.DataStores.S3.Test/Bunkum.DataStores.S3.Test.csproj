@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -8,8 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Bunkum.ProfanityFilter\Bunkum.ProfanityFilter.csproj" />
+      <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
+      <ProjectReference Include="..\Bunkum.DataStores.S3\Bunkum.DataStores.S3.csproj" />
       <ProjectReference Include="..\Bunkum.Protocols.Http\Bunkum.Protocols.Http.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="HttpMultipartParser" Version="8.3.0" />
     </ItemGroup>
 
 </Project>

@@ -55,7 +55,9 @@ internal class MainMiddleware : IMiddleware
         {
             context.ResponseType = ContentType.Plaintext;
             context.ResponseCode = HttpStatusCode.NotFound;
-            context.Write("Not found: " + path);
+            
+            context.Write("Not found: "u8);
+            context.Write(path);
         }
         else
         {
@@ -270,47 +272,41 @@ internal class MainMiddleware : IMiddleware
         return null;
     }
 
-    private bool TryAddBodyToInvocation(EndpointAttribute attribute, Type paramType, MemoryStream body, ICollection<object?> invokeList)
+    private bool TryAddBodyToInvocation(EndpointAttribute attribute, Type paramType, MemoryStream bodyStream, ICollection<object?> invokeList)
     {
-        if (paramType == typeof(Stream)) invokeList.Add(body);
-        else if (paramType == typeof(string))
-        {
-            TrimToToFirstNullByte(body);
-            invokeList.Add(Encoding.Default.GetString(body.ToArray()));
-        }
-        else if (paramType == typeof(byte[])) invokeList.Add(body.GetBuffer());
+        byte[] body = bodyStream.ToArray();
+        
+        if (paramType == typeof(Stream)) invokeList.Add(new MemoryStream(body));
+        else if (paramType == typeof(string)) invokeList.Add(Encoding.UTF8.GetString(TrimToFirstNullByte(body)));
+        else if (paramType == typeof(byte[])) invokeList.Add(body);
         else if (attribute.ContentType == ContentType.Xml)
         {
-            TrimToToFirstNullByte(body);
-
             XmlSerializer serializer = new(paramType);
             try
             {
-                object? obj = serializer.Deserialize(new StreamReader(body));
+                object? obj = serializer.Deserialize(new StringReader(Encoding.UTF8.GetString(TrimToFirstNullByte(body))));
                 if (obj == null) throw new Exception();
                 invokeList.Add(obj);
             }
             catch (Exception e)
             {
-                this._logger.LogError(BunkumCategory.UserContent, $"Failed to parse object data: {e}\n\nXML: {body}");
+                this._logger.LogError(BunkumCategory.UserContent, $"Failed to parse object data: {e}\n\nXML: {Encoding.UTF8.GetString(body)}");
                 return false;
             }
         }
         else if (attribute.ContentType == ContentType.Json)
         {
-            TrimToToFirstNullByte(body);
-
             try
             {
                 JsonSerializer serializer = new();
-                using JsonReader reader = new JsonTextReader(new StreamReader(body, null, false, -1, true));
+                using JsonReader reader = new JsonTextReader(new StringReader(Encoding.UTF8.GetString(TrimToFirstNullByte(body))));
                 object? obj = serializer.Deserialize(reader, paramType);
                 if (obj == null) throw new Exception();
                 invokeList.Add(obj);
             }
             catch (Exception e)
             {
-                this._logger.LogError(BunkumCategory.UserContent, $"Failed to parse object data: {e}\n\nJSON: {body}");
+                this._logger.LogError(BunkumCategory.UserContent, $"Failed to parse object data: {e}\n\nJSON: {Encoding.UTF8.GetString(body)}");
                 return false;
             }
         }
@@ -322,27 +318,21 @@ internal class MainMiddleware : IMiddleware
             return false;
         }
 
-        body.Seek(0, SeekOrigin.Begin);
         return true;
     }
 
-    private static void TrimToToFirstNullByte(Stream body)
+    private static ReadOnlySpan<byte> TrimToFirstNullByte(ReadOnlySpan<byte> arr)
     {
-        long i = 0;
-        body.Seek(0, SeekOrigin.Begin);
-        int b;
-        while ((b = body.ReadByte()) != -1)
-        {
-            if (b == 0) break;
+        //Find the first null byte
+        int idx = arr.IndexOf((byte)0);
 
-            i += 1;
+        //If theres no null byte, do not trim
+        if (idx == -1)
+        {
+            idx = arr.Length;
         }
 
-        //Only call SetLength when necessary 
-        if(i != body.Length)
-            body.SetLength(i);
-        
-        body.Seek(0, SeekOrigin.Begin);
+        return arr[..idx];
     }
     
     private IBunkumSerializer? GetSerializerOrDefault(string contentType) 

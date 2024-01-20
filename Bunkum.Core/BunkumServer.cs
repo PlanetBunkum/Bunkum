@@ -180,10 +180,20 @@ public abstract partial class BunkumServer : IHotReloadable
     {
         while (!this._stopToken.IsCancellationRequested)
         {
-            await this._listener.WaitForConnectionAsync(async context => await Task.Factory.StartNew(async () =>
+            try
             {
-                await this.CompleteRequestAsync(context);
-            }), this._stopToken.Token);
+
+                await this._listener.WaitForConnectionAsync(
+                    async context => await Task.Factory.StartNew(async () =>
+                    {
+                        await this.CompleteRequestAsync(context);
+                    }), this._stopToken.Token);
+
+            }
+            catch(Exception e)
+            {
+                this.Logger.LogCritical(BunkumCategory.Request, "Critical error while handling a request: {0}", e);
+            }
         }
         
         Debug.WriteLine("Block task was stopped");
@@ -210,7 +220,7 @@ public abstract partial class BunkumServer : IHotReloadable
             #if DEBUG
             context.Write(e.ToString());
             #else
-            context.Write("Internal Server Error");
+            context.Write("Internal Server Error"u8);
             #endif
         }
     }
@@ -282,7 +292,7 @@ public abstract partial class BunkumServer : IHotReloadable
 #if DEBUG
                 context.Write(e.ToString());
 #else
-                context.Write("Internal Server Error");
+                context.Write("Internal Server Error"u8);
 #endif
             }
             catch

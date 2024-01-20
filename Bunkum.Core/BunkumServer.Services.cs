@@ -5,7 +5,6 @@ using Bunkum.Core.Configuration;
 using Bunkum.Core.RateLimit;
 using Bunkum.Core.Services;
 using Bunkum.Core.Storage;
-using Bunkum.Core.Time;
 using JetBrains.Annotations;
 
 namespace Bunkum.Core;
@@ -133,10 +132,10 @@ public partial class BunkumServer // Services
         this.AddService<StorageService>(Activator.CreateInstance<TDataStore>());
     }
 
-    public void AddRateLimitService(RateLimitSettings? settings = null, ITimeProvider? timeProvider = null)
+    public void AddRateLimitService(RateLimitSettings? settings = null, TimeProvider? timeProvider = null)
     {
         settings ??= RateLimitSettings.DefaultSettings;
-        timeProvider ??= new RealTimeProvider();
+        timeProvider ??= TimeProvider.System;
 
         IRateLimiter rateLimiter = new RateLimiter(timeProvider, settings.Value);
         this.AddService<RateLimitService>(rateLimiter);

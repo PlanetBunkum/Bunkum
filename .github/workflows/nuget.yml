@@ -15,7 +15,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: 8.0.x
       - name: Restore
         run: dotnet restore /property:Configuration=Release
       - name: Set VERSION variable from tag
@@ -77,3 +77,11 @@ jobs:
         run: dotnet nuget push Bunkum.HealthChecks.RealmDatabase/bin/Release/Bunkum.HealthChecks.RealmDatabase.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      - name: Upload Bunkum.DataStores.S3
+        run: dotnet nuget push Bunkum.DataStores.S3/bin/Release/Bunkum.DataStores.S3.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+        env:
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      - name: Upload Bunkum.EntityFrameworkDatabase
+        run: dotnet nuget push Bunkum.EntityFrameworkDatabase/bin/Release/Bunkum.EntityFrameworkDatabase.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+        env:
+            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}

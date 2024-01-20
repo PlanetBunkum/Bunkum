@@ -1,23 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-    
-    <ItemGroup>
-      <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
-      <ProjectReference Include="..\Bunkum.Listener\Bunkum.Listener.csproj" />
-    </ItemGroup>
 
     <PropertyGroup>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <Authors>LittleBigRefresh</Authors>
-        <Title>Bunkum.Protocols.Http</Title>
-        <PackageId>Bunkum.Protocols.Http</PackageId>
-        <Description>HTTP protocol support for Bunkum</Description>
+        <Title>Bunkum.EntityFrameworkDatabase</Title>
+        <PackageId>Bunkum.EntityFrameworkDatabase</PackageId>
+        <Description>A package for Bunkum that adds native support for databases via Entity Framework.</Description>
         <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum</PackageProjectUrl>
@@ -38,4 +32,11 @@
         </ItemGroup>
     </Target>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
+    </ItemGroup>
 </Project>

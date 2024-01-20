@@ -3,7 +3,7 @@ using Bunkum.Core;
 using Bunkum.Core.RateLimit;
 using Bunkum.Core.Services;
 using BunkumTests.HttpServer.Endpoints;
-using BunkumTests.HttpServer.Time;
+using Microsoft.Extensions.Time.Testing;
 
 namespace BunkumTests.HttpServer.Tests.RateLimit;
 
@@ -12,7 +12,7 @@ public class RateLimitIntegrationTests : ServerDependentTest
     [Test]
     public void AllowsSingleRequest()
     {
-        MockTimeProvider timeProvider = new();
+        FakeTimeProvider timeProvider = new();
         RateLimiter rateLimiter = new(timeProvider);
         
         (BunkumServer server, HttpClient client) = this.Setup();
@@ -30,7 +30,7 @@ public class RateLimitIntegrationTests : ServerDependentTest
     [Test]
     public void AllowsManyRequests()
     {
-        MockTimeProvider timeProvider = new();
+        FakeTimeProvider timeProvider = new();
         RateLimiter rateLimiter = new(timeProvider);
         
         (BunkumServer server, HttpClient client) = this.Setup();
@@ -51,7 +51,7 @@ public class RateLimitIntegrationTests : ServerDependentTest
     [Test]
     public void DeniesTooManyRequests()
     {
-        MockTimeProvider timeProvider = new();
+        FakeTimeProvider timeProvider = new();
         RateLimiter rateLimiter = new(timeProvider);
         
         (BunkumServer server, HttpClient client) = this.Setup();
@@ -75,7 +75,7 @@ public class RateLimitIntegrationTests : ServerDependentTest
     [Test]
     public void AllowsRequestAgainAfterTimeout()
     {
-        MockTimeProvider timeProvider = new();
+        FakeTimeProvider timeProvider = new();
         RateLimiter rateLimiter = new(timeProvider);
         
         (BunkumServer server, HttpClient client) = this.Setup();
@@ -95,7 +95,7 @@ public class RateLimitIntegrationTests : ServerDependentTest
         HttpResponseMessage newMsg = client.Send(new HttpRequestMessage(HttpMethod.Get, "/"));
         Assert.That(newMsg.StatusCode, Is.EqualTo(HttpStatusCode.TooManyRequests));
 
-        timeProvider.Seconds = RateLimitSettings.DefaultRequestTimeoutDuration;
+        timeProvider.Advance(TimeSpan.FromSeconds(RateLimitSettings.DefaultRequestTimeoutDuration));
         
         newMsg = client.Send(new HttpRequestMessage(HttpMethod.Get, "/"));
         Assert.That(newMsg.StatusCode, Is.EqualTo(HttpStatusCode.OK));
