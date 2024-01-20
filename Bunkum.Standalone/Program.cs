@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using Bunkum.Core;
 using Bunkum.Protocols.Gemini;
 using Bunkum.Protocols.Gopher;
@@ -13,8 +14,18 @@ namespace Bunkum.Standalone;
 
 internal class Program
 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void PrintExperimentalWarning()
+    {
+        ConsoleColor oldColor = Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("Warning: Bunkum's standalone server is currently experimental. Use caution.");
+        Console.ForegroundColor = oldColor;
+    }
+    
     public static async Task Main(string[] args)
     {
+        PrintExperimentalWarning();
         using Parser parser = new(settings =>
         {
             settings.CaseInsensitiveEnumValues = true;
