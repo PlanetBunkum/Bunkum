@@ -33,8 +33,10 @@
     </Target>
 
     <ItemGroup>
-      <PackageReference Include="Bunkum" Version="4.4.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
+    </ItemGroup>
 </Project>
