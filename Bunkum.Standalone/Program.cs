@@ -9,56 +9,64 @@ using CommandLine;
 using NotEnoughLogs;
 using NotEnoughLogs.Behaviour;
 
-Parser parser = new(settings =>
+namespace Bunkum.Standalone;
+
+internal class Program
 {
-    settings.CaseInsensitiveEnumValues = true;
-});
+    public static async Task Main(string[] args)
+    {
+        using Parser parser = new(settings =>
+        {
+            settings.CaseInsensitiveEnumValues = true;
+            settings.AutoHelp = true;
+            settings.AutoVersion = true;
+            settings.HelpWriter = Console.Out;
+        });
 
-ParserResult<BunkumStandaloneArguments>? result = parser.ParseArguments<BunkumStandaloneArguments>(args);
-if (result == null)
-{
-    Environment.Exit(1);
-    return;
-}
+        await parser.ParseArguments<BunkumStandaloneArguments>(args)
+            .WithParsedAsync(StartServer);
+    }
 
-BunkumStandaloneArguments arguments = result.Value;
+    private static async Task StartServer(BunkumStandaloneArguments arguments)
+    {
+        const string dataFolder = "BUNKUM_DATA_FOLDER";
 
-const string dataFolder = "BUNKUM_DATA_FOLDER";
-
-if (Environment.GetEnvironmentVariable(dataFolder) == null)
-{
-    string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-    string configPath = Path.Join(appData, "bunkum");
+        if (Environment.GetEnvironmentVariable(dataFolder) == null)
+        {
+            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string configPath = Path.Join(appData, "bunkum");
     
-    if (!Directory.Exists(configPath))
-        Directory.CreateDirectory(configPath);
+            if (!Directory.Exists(configPath))
+                Directory.CreateDirectory(configPath);
     
-    Environment.SetEnvironmentVariable(dataFolder, configPath);
-}
+            Environment.SetEnvironmentVariable(dataFolder, configPath);
+        }
 
-LoggerConfiguration logConfig = new()
-{
-    Behaviour = new QueueLoggingBehaviour(),
+        LoggerConfiguration logConfig = new()
+        {
+            Behaviour = new QueueLoggingBehaviour(),
 #if DEBUG
-    MaxLevel = LogLevel.Debug,
+            MaxLevel = LogLevel.Debug,
 #else
     MaxLevel = LogLevel.Info,
 #endif
-};
+        };
 
-BunkumServer server = arguments.Protocol switch
-{
-    SupportedProtocol.Http => new BunkumHttpServer(logConfig),
-    SupportedProtocol.Gopher => new BunkumGopherServer(logConfig),
-    SupportedProtocol.Gemini => new BunkumGeminiServer(null, logConfig),
-    _ => throw new NotImplementedException(arguments.Protocol.ToString()),
-};
+        BunkumServer server = arguments.Protocol switch
+        {
+            SupportedProtocol.Http => new BunkumHttpServer(logConfig),
+            SupportedProtocol.Gopher => new BunkumGopherServer(logConfig),
+            SupportedProtocol.Gemini => new BunkumGeminiServer(null, logConfig),
+            _ => throw new NotImplementedException(arguments.Protocol.ToString()),
+        };
 
-server.Initialize = s =>
-{
-    s.DiscoverEndpointsFromAssembly(Assembly.GetExecutingAssembly());
-    s.AddMiddleware<FileSystemMiddleware>();
-};
+        server.Initialize = s =>
+        {
+            s.DiscoverEndpointsFromAssembly(Assembly.GetExecutingAssembly());
+            s.AddMiddleware<FileSystemMiddleware>();
+        };
 
-server.Start();
-await Task.Delay(-1);
+        server.Start();
+        await Task.Delay(-1);
+    }
+}
