@@ -9,13 +9,13 @@
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-        <Authors>LittleBigRefresh</Authors>
+        <Authors>PlanetBunkum</Authors>
         <Title>Bunkum.ProfanityFilter</Title>
         <PackageId>Bunkum.ProfanityFilter</PackageId>
         <Description>A wrapper around Profanity.Detector for Bunkum</Description>
-        <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum</RepositoryUrl>
+        <RepositoryUrl>https://github.com/PlanetBunkum/Bunkum</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/PlanetBunkum/Bunkum</PackageProjectUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>

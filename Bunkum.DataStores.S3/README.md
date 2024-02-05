@@ -3,7 +3,7 @@
 A package for Bunkum that adds native support for S3 object storage.
 
 This package is new and experimental.
-Please create issues on our [issue tracker](https://github.com/LittleBigRefresh/Bunkum/issues) for questions, support and ...well, issues.
+Please create issues on our [issue tracker](https://github.com/PlanetBunkum/Bunkum/issues) for questions, support and ...well, issues.
 
 ## Usage
 

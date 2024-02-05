@@ -12,13 +12,13 @@
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-        <Authors>LittleBigRefresh</Authors>
+        <Authors>PlanetBunkum</Authors>
         <Title>Bunkum.Analyzers</Title>
         <PackageId>Bunkum.Analyzers</PackageId>
         <Description>A suite of analyzers to help assist with Bunkum development.</Description>
-        <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum</RepositoryUrl>
+        <RepositoryUrl>https://github.com/PlanetBunkum/Bunkum</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/PlanetBunkum/Bunkum</PackageProjectUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>

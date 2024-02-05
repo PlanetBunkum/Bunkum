@@ -15,13 +15,13 @@
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-        <Authors>LittleBigRefresh</Authors>
+        <Authors>PlanetBunkum</Authors>
         <Title>Bunkum.Serialization.GopherToGemini</Title>
         <PackageId>Bunkum.Serialization.GopherToGemini</PackageId>
         <Description>Allows serialization of Gophermaps in Gemini for Bunkum servers</Description>
-        <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum</RepositoryUrl>
+        <RepositoryUrl>https://github.com/PlanetBunkum/Bunkum</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/PlanetBunkum/Bunkum</PackageProjectUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>

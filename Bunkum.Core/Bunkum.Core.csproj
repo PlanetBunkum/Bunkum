@@ -12,13 +12,13 @@
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Authors>LittleBigRefresh</Authors>
+    <Authors>PlanetBunkum</Authors>
     <Title>Bunkum</Title>
     <PackageId>Bunkum</PackageId>
     <Description>An open-source protocol-agnostic request server for custom game servers, built with flexibility yet ease of use in mind.</Description>
-    <RepositoryUrl>https://github.com/LittleBigRefresh/Bunkum</RepositoryUrl>
+    <RepositoryUrl>https://github.com/PlanetBunkum/Bunkum</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageProjectUrl>https://github.com/LittleBigRefresh/Bunkum</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/PlanetBunkum/Bunkum</PackageProjectUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
