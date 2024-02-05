@@ -8,8 +8,10 @@ namespace Bunkum.ProfanityFilter;
 /// <summary>
 /// A wrapper around Profanity.Detector for Bunkum
 /// </summary>
+[Obsolete(DeprecationWarning.Reason)]
 public class ProfanityService : EndpointService
 {
+    [Obsolete(DeprecationWarning.Reason)]
     internal ProfanityService(Logger logger, string[] allowList, string[] extraDenyList) : base(logger)
     {
         this._profanityFilter = new Filter();
@@ -25,6 +27,7 @@ public class ProfanityService : EndpointService
     /// </summary>
     /// <param name="input">The input to check against.</param>
     /// <returns>true if the input contains any detected profanity, false if not.</returns>
+    [Obsolete(DeprecationWarning.Reason)]
     public bool SentenceContainsProfanity(string input)
     {
         return this._profanityFilter.DetectAllProfanities(input, true).Count > 0;
@@ -35,6 +38,7 @@ public class ProfanityService : EndpointService
     /// </summary>
     /// <param name="input">The input to replace.</param>
     /// <returns>The input, with profanity censored using asterisks ('*').</returns>
+    [Obsolete(DeprecationWarning.Reason)]
     public string CensorSentence(string input)
     {
         return this._profanityFilter.CensorString(input, '*');

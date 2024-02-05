@@ -1,3 +1,6 @@
+# Deprecated
+Bunkum.ProfanityFilter is deprecated as it no longer fits the scope of Bunkum, and will be removed in a later release.
+
 # Bunkum.ProfanityFilter
 A wrapper around Profanity.Detector for Bunkum
 
