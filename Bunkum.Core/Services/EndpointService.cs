@@ -14,7 +14,7 @@ public abstract class EndpointService : Service
     {}
     
     /// <inheritdoc/>
-    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo parameter, Lazy<IDatabaseContext> database)
+    public override object? AddParameterToEndpoint(ListenerContext context, BunkumParameterInfo parameter, Lazy<IDatabaseContext> database)
     {
         if (parameter.ParameterType.IsAssignableTo(this.GetType()))
             return this;

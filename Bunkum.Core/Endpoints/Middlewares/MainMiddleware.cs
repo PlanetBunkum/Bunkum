@@ -244,7 +244,7 @@ internal class MainMiddleware : IMiddleware
                 while (arg == null)
                 {
                     if (!services.MoveNext()) break;
-                    arg = services.Current.AddParameterToEndpoint(context, param, database);
+                    arg = services.Current.AddParameterToEndpoint(context, new BunkumParameterInfo(param), database);
                 }
                             
                 services.Dispose();

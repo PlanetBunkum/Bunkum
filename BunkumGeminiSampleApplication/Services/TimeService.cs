@@ -17,7 +17,7 @@ public class TimeService : Service
     internal TimeService(Logger logger) : base(logger)
     {}
     
-    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo parameter, Lazy<IDatabaseContext> database)
+    public override object? AddParameterToEndpoint(ListenerContext context, BunkumParameterInfo parameter, Lazy<IDatabaseContext> database)
     {
         this.Logger.LogDebug(BunkumCategory.Service, $"TimeService is attempting to pass something in for `{parameter.ParameterType.Name} {parameter.Name}`");
         if (parameter.ParameterType == typeof(DateTimeOffset))

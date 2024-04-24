@@ -58,7 +58,7 @@ public class AuthenticationService : Service
     }
 
     /// <inheritdoc />
-    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo parameter, Lazy<IDatabaseContext> database)
+    public override object? AddParameterToEndpoint(ListenerContext context, BunkumParameterInfo parameter, Lazy<IDatabaseContext> database)
     {
         if(ParameterBasedFrom<IToken<IUser>>(parameter))
             return this.AuthenticateToken(context, database);

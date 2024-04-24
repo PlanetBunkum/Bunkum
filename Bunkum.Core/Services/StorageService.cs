@@ -14,8 +14,8 @@ public class StorageService : Service
     {
         this._dataStore = dataStore;
     }
-
-    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo parameter, Lazy<IDatabaseContext> database)
+    
+    public override object? AddParameterToEndpoint(ListenerContext context, BunkumParameterInfo parameter, Lazy<IDatabaseContext> database)
     {
         if(ParameterBasedFrom<IDataStore>(parameter))
             return this._dataStore;

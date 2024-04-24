@@ -36,6 +36,19 @@ public abstract class Service
     /// </summary>
     public virtual void AfterRequestHandled(ListenerContext context, Response response, MethodInfo method, Lazy<IDatabaseContext> database)
     {}
+    
+    /// <summary>
+    /// Called when the endpoint is looking for a custom parameter. You can provide one using this method.
+    /// </summary>
+    /// <param name="context">The context of the request.</param>
+    /// <param name="parameter">Information about the parameter being processed.</param>
+    /// <param name="database">The database.</param>
+    /// <returns>Null if this service has no suitable object for this parameter, otherwise the object to add.</returns>
+    [Obsolete($"Using {nameof(ParameterInfo)} is no longer supported. Please switch to using {nameof(BunkumParameterInfo)} (another overload of this method)")]
+    public virtual object? AddParameterToEndpoint(ListenerContext context, ParameterInfo parameter, Lazy<IDatabaseContext> database)
+    {
+        return this.AddParameterToEndpoint(context, new BunkumParameterInfo(parameter), database);
+    }
 
     /// <summary>
     /// Called when the endpoint is looking for a custom parameter. You can provide one using this method.
@@ -44,7 +57,7 @@ public abstract class Service
     /// <param name="parameter">Information about the parameter being processed.</param>
     /// <param name="database">The database.</param>
     /// <returns>Null if this service has no suitable object for this parameter, otherwise the object to add.</returns>
-    public virtual object? AddParameterToEndpoint(ListenerContext context, ParameterInfo parameter, Lazy<IDatabaseContext> database)
+    public virtual object? AddParameterToEndpoint(ListenerContext context, BunkumParameterInfo parameter, Lazy<IDatabaseContext> database)
     {
         return null;
     }
@@ -55,7 +68,7 @@ public abstract class Service
     /// <param name="paramInfo">The parameter in question.</param>
     /// <typeparam name="TExtendable">The type, usually an interface or abstract class.</typeparam>
     /// <returns>true if the parameter's type extends the other type; false if not.</returns>
-    protected static bool ParameterBasedFrom<TExtendable>(ParameterInfo paramInfo)
+    protected static bool ParameterBasedFrom<TExtendable>(BunkumParameterInfo paramInfo)
         => paramInfo.ParameterType.IsAssignableTo(typeof(TExtendable));
 
     /// <summary>
@@ -64,6 +77,6 @@ public abstract class Service
     /// <param name="paramInfo">The parameter in question.</param>
     /// <typeparam name="TOther">The type to check against.</typeparam>
     /// <returns>true if the parameter's type is equal to the other type; false if not.</returns>
-    protected static bool ParameterEqualTo<TOther>(ParameterInfo paramInfo)
+    protected static bool ParameterEqualTo<TOther>(BunkumParameterInfo paramInfo)
         => paramInfo.ParameterType == typeof(TOther);
 }

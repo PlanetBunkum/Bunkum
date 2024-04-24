@@ -1,4 +1,5 @@
 using System.Reflection;
+using Bunkum.Core;
 using Bunkum.Core.Database;
 using Bunkum.Core.Services;
 using Bunkum.Listener.Request;
@@ -20,7 +21,7 @@ public class AutoDiscoverService : Service
     }
 
     /// <inheritdoc/>
-    public override object? AddParameterToEndpoint(ListenerContext context, ParameterInfo parameter, Lazy<IDatabaseContext> database)
+    public override object? AddParameterToEndpoint(ListenerContext context, BunkumParameterInfo parameter, Lazy<IDatabaseContext> database)
     {
         if (parameter.ParameterType == typeof(AutoDiscoverConfig))
         {
