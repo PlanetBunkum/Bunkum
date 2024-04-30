@@ -124,16 +124,20 @@ internal class MainMiddleware : IMiddleware
                     {
                         context.ResponseHeaders.Add("Cache-Control", "max-age=" + cacheSeconds.Value);
                     }
-
-                    object? val = method.Invoke(group, invokeList.ToArray());
-                    Response returnedResponse = GenerateResponseFromEndpoint(val, attribute, method);
                     
-                    foreach (Service service in this._services)
+                    try
                     {
-                        service.AfterRequestHandled(context, returnedResponse, method, database);
+                        object? val = method.Invoke(group, invokeList.ToArray());
+                        Response returnedResponse = GenerateResponseFromEndpoint(val, attribute, method);
+                        return returnedResponse;
                     }
-
-                    return returnedResponse;
+                    finally
+                    {
+                        foreach (Service service in this._services)
+                        {
+                            service.AfterRequestHandled(context, null, method, database);
+                        }
+                    }
                 }
             }
         }

@@ -33,8 +33,9 @@ public abstract class Service
     
     /// <summary>
     /// Runs after the request has been handled by the main middleware.
+    /// May also be called when a response fails to generate due to an exception. A null response is passed in this case.
     /// </summary>
-    public virtual void AfterRequestHandled(ListenerContext context, Response response, MethodInfo method, Lazy<IDatabaseContext> database)
+    public virtual void AfterRequestHandled(ListenerContext context, Response? response, MethodInfo method, Lazy<IDatabaseContext> database)
     {}
     
     /// <summary>

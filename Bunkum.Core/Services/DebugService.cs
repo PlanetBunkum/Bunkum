@@ -37,11 +37,12 @@ public class DebugService : Service
     }
     
     /// <inheritdoc/>
-    public override void AfterRequestHandled(ListenerContext context, Response response, MethodInfo method, Lazy<IDatabaseContext> database)
+    public override void AfterRequestHandled(ListenerContext context, Response? response, MethodInfo method, Lazy<IDatabaseContext> database)
     {
         if (!method.HasCustomAttribute<DebugResponseBodyAttribute>()) return;
+        if (response == null) return;
         
-        string body = Encoding.UTF8.GetString(response.Data);
-        this.Logger.LogDebug(BunkumCategory.Request, "Response body for {0} ({1} bytes):\n{2}", context.Uri.AbsolutePath, response.Data.Length, body);
+        string body = Encoding.UTF8.GetString(response.Value.Data);
+        this.Logger.LogDebug(BunkumCategory.Request, "Response body for {0} ({1} bytes):\n{2}", context.Uri.AbsolutePath, response.Value.Data.Length, body);
     }
 }

@@ -73,7 +73,7 @@ public class AuthenticationService : Service
     }
 
     /// <inheritdoc />
-    public override void AfterRequestHandled(ListenerContext context, Response response, MethodInfo method, Lazy<IDatabaseContext> database)
+    public override void AfterRequestHandled(ListenerContext context, Response? response, MethodInfo method, Lazy<IDatabaseContext> database)
     {
         this._tokenCache.Value = null;
     }
