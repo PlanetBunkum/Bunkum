@@ -58,4 +58,20 @@ public class WeatherEndpoints : EndpointGroup
             Description = configuration.ExampleVariable,
         };
     }
+    
+    // You may have noticed the "ContentType.Json" parameter in the endpoint attribute.
+    // Bunkum allows for powerful control over serialization. You can create your own serializers via creating an IBunkumSerializer.
+    // Let's specify the XML content type, which by default uses Bunkum's own BunkumXmlSerializer.
+    // Similarly, specifying ContentType.Json would use BunkumJsonSerializer by default.
+    // You can remove the default ones and add your own through the BunkumServer.
+    [HttpEndpoint("/api/xml/weather", HttpMethods.Get, ContentType.Xml)]
+    public WeatherStatistic GetWeatherXml(RequestContext context)
+    {
+        return new WeatherStatistic
+        {
+            Time = DateTimeOffset.Now,
+            Temperature = 72,
+            Description = "It's hot today!",
+        };
+    }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Xml.Serialization;
 using Bunkum.Listener.Protocol;
 
@@ -14,6 +15,18 @@ public class BunkumXmlSerializer : IBunkumSerializer
     }
     
     private static readonly XmlSerializerNamespaces Namespaces = new();
+    private static readonly ConcurrentDictionary<Type, XmlSerializer> SerializerCache = new();
+    
+    private static XmlSerializer GetOrCreateSerializer(Type type)
+    {
+        if (SerializerCache.TryGetValue(type, out XmlSerializer? serializer))
+            return serializer;
+        
+        serializer = new XmlSerializer(type);
+        SerializerCache.TryAdd(type, serializer);
+        
+        return serializer;
+    }
     
     /// <inherit-doc/>
     public string[] ContentTypes { get; } =
@@ -27,7 +40,7 @@ public class BunkumXmlSerializer : IBunkumSerializer
         using MemoryStream stream = new();
         using BunkumXmlTextWriter writer = new(stream);
 
-        XmlSerializer serializer = new(data.GetType());
+        XmlSerializer serializer = GetOrCreateSerializer(data.GetType());
         serializer.Serialize(writer, data, Namespaces);
 
         return stream.ToArray();
