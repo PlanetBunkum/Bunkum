@@ -76,9 +76,7 @@ internal class MainMiddleware : IMiddleware
         {
             foreach (MethodInfo method in group.GetType().GetMethods())
             {
-                ImmutableArray<EndpointAttribute> attributes = method.GetCustomAttributes<EndpointAttribute>().ToImmutableArray();
-                if(attributes.Length == 0) continue;
-
+                IEnumerable<EndpointAttribute> attributes = method.GetCustomAttributes<EndpointAttribute>();
                 foreach (EndpointAttribute attribute in attributes)
                 {
                     if(attribute.Protocol.Name != context.Protocol.Name)
