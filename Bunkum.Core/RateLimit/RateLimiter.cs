@@ -83,7 +83,7 @@ public class RateLimiter : IRateLimiter
 
             lock (info)
             {
-                return this.ViolatesRateLimit(context, info, this._settings);
+                return this.ViolatesRateLimit(context, info, settings);
             }
         }
     }
