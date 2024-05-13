@@ -100,8 +100,6 @@ public abstract class ListenerContext
     /// </summary>
     public string? ResponseType;
 
-    private int _responseLength;
-
     // ReSharper disable once MemberCanBePrivate.Global
     
     /// <summary>
@@ -122,7 +120,6 @@ public abstract class ListenerContext
     public void Write(ReadOnlySpan<byte> buffer)
     {
         this.ResponseStream.Write(buffer);
-        this._responseLength += buffer.Length;
     }
 
     /// <summary>
@@ -133,10 +130,12 @@ public abstract class ListenerContext
         if (this.ResponseType != null)
             this.ResponseHeaders.Add("Content-Type", this.ResponseType);
         
-        if(this._responseLength != 0)
-            this.ResponseHeaders.Add("Content-Length", this._responseLength.ToString());
+        int responseLength = (int)this.ResponseStream.Length;
+        
+        if(responseLength != 0)
+            this.ResponseHeaders.Add("Content-Length", responseLength.ToString());
 
-        ArraySegment<byte> dataSlice = new(this.ResponseStream.GetBuffer(), 0, this._responseLength);
+        ArraySegment<byte> dataSlice = new(this.ResponseStream.GetBuffer(), 0, responseLength);
 
         await this.SendResponse(this.ResponseCode, dataSlice);
     }
