@@ -116,17 +116,24 @@ internal class MainMiddleware : IMiddleware
                         Response? response = this.InjectParametersIntoEndpointInvocation(context, method, attribute, body, parameters, database, invokeList);
                         if (response != null) return response;
                     }
-
-                    long? cacheSeconds;
-                    if ((cacheSeconds = method.GetCustomAttribute<ClientCacheResponseAttribute>()?.Seconds) != null)
+                    
+                    ClientCacheResponseAttribute? cacheAttribute = method.GetCustomAttribute<ClientCacheResponseAttribute>();
+                    if (cacheAttribute?.Seconds != null)
                     {
-                        context.ResponseHeaders.Add("Cache-Control", "max-age=" + cacheSeconds.Value);
+                        context.ResponseHeaders.Add("Cache-Control", "max-age=" + cacheAttribute.Seconds);
                     }
                     
                     try
                     {
                         object? val = method.Invoke(group, invokeList.ToArray());
-                        Response returnedResponse = GenerateResponseFromEndpoint(val, attribute, method);
+                        Response returnedResponse = this.GenerateResponseFromEndpoint(val, attribute, method);
+                        
+                        int statusCode = (int)returnedResponse.StatusCode;
+                        if (cacheAttribute is { OnlyCacheSuccess: true } && statusCode is < 200 or >= 299)
+                        {
+                            context.ResponseHeaders.Remove("Cache-Control");
+                        }
+                        
                         return returnedResponse;
                     }
                     finally
