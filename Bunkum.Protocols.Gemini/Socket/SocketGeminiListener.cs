@@ -93,7 +93,7 @@ public partial class SocketGeminiListener : BunkumGeminiListener
             EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
             ServerCertificate = this._cert,
             ClientCertificateRequired = true,
-            RemoteCertificateValidationCallback = (sender, certificate, chain, errors) => true,
+            RemoteCertificateValidationCallback = (_, _, _, _) => true,
         });
 
         Uri uri = new(GetPath(stream));

@@ -1,6 +1,10 @@
 using System.Diagnostics;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Web;
 using Bunkum.Listener;
@@ -16,14 +20,16 @@ public partial class SocketHttpListener : BunkumHttpListener
     private System.Net.Sockets.Socket? _socket;
     private readonly Uri _listenEndpoint;
     private readonly bool _useForwardedIp;
-    
+    private readonly X509Certificate2? _cert;
+
     [GeneratedRegex("^[a-zA-Z]+$")]
     private static partial Regex LettersRegex();
 
-    public SocketHttpListener(Uri listenEndpoint, bool useForwardedIp, Logger logger) : base(logger)
+    public SocketHttpListener(Uri listenEndpoint, bool useForwardedIp, Logger logger, X509Certificate2? certificate) : base(logger)
     {
         this._listenEndpoint = listenEndpoint;
         this._useForwardedIp = useForwardedIp;
+        this._cert = certificate;
         
         this.Logger.LogInfo(ListenerCategory.Startup, "Internal HTTP server is listening at URL " + listenEndpoint);
     }
@@ -75,8 +81,51 @@ public partial class SocketHttpListener : BunkumHttpListener
         }
     }
 
-    private ListenerContext ReadRequestIntoContext(System.Net.Sockets.Socket client, Stream stream)
+    private ListenerContext ReadRequestIntoContext(System.Net.Sockets.Socket client, Stream rawStream)
     {
+        Stream stream = rawStream;
+        SslStream? sslStream = null;
+        if (this._cert != null)
+        {
+            sslStream = new SslStream(rawStream);
+
+            SslServerAuthenticationOptions authOptions = new()
+            {
+                EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11,
+                ServerCertificate = this._cert,
+                ClientCertificateRequired = false,
+                RemoteCertificateValidationCallback = (_, _, _, _) => true,
+            };
+
+            // On Windows we cant set the cipher suites
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                authOptions.CipherSuitesPolicy = new CipherSuitesPolicy([
+                    // ps3
+                    TlsCipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256,
+                    TlsCipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256,
+                    TlsCipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
+                    TlsCipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+                    TlsCipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+                    TlsCipherSuite.TLS_RSA_WITH_RC4_128_SHA,
+                    TlsCipherSuite.TLS_RSA_WITH_RC4_128_MD5,
+                    // modern
+                    TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+                    TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                    TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+                    TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+                ]);
+            }
+            
+            sslStream.AuthenticateAsServer(authOptions);
+
+            stream = sslStream;
+        }
+        
         Span<char> method = stackalloc char[RequestLineMethodLimit];
         Span<char> path = stackalloc char[RequestLinePathLimit];
         Span<char> version = stackalloc char[RequestLineVersionLimit];
@@ -198,6 +247,12 @@ public partial class SocketHttpListener : BunkumHttpListener
             inputStream.Seek(0, SeekOrigin.Begin);
         }
         context.InputStream = inputStream;
+
+        // If this an SSL connection, set the remote certificate
+        if (sslStream != null)
+        {
+            context.RemoteCertificate = sslStream.RemoteCertificate;
+        }
 
         return context;
     }
