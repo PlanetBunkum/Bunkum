@@ -91,6 +91,7 @@ public partial class SocketHttpListener : BunkumHttpListener
 
             SslServerAuthenticationOptions authOptions = new()
             {
+                //TODO: move this into the config
                 EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11,
                 ServerCertificate = this._cert,
                 ClientCertificateRequired = false,
@@ -100,6 +101,7 @@ public partial class SocketHttpListener : BunkumHttpListener
             // On Windows we cant set the cipher suites
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                //TODO: move this into the config somehow
                 authOptions.CipherSuitesPolicy = new CipherSuitesPolicy([
                     // ps3
                     TlsCipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256,
