@@ -1,6 +1,6 @@
 using Bunkum.Core.Configuration;
 
-namespace Bunkum.Protocols.Http;
+namespace Bunkum.Protocols.Https;
 
 public class SslConfiguration : Config
 {
