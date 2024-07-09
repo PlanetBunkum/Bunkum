@@ -252,9 +252,7 @@ public partial class SocketHttpListener : BunkumHttpListener
 
         // If this an SSL connection, set the remote certificate
         if (sslStream != null)
-        {
             context.RemoteCertificate = sslStream.RemoteCertificate;
-        }
 
         return context;
     }
