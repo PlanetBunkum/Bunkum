@@ -10,7 +10,6 @@ public class SslConfiguration : Config
     protected override void Migrate(int oldVer, dynamic oldConfig)
     {}
 
-    public bool SslEnabled { get; set; } = false;
     public string SslCertificate { get; set; } = "cert.pfx";
     public string? CertificatePassword { get; set; } = "password here or null";
 }

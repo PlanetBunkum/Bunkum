@@ -17,9 +17,7 @@ public class BunkumHttpsServer : BunkumServer
         //If the SSL configuration is not specified, load the config from JSON
         sslConfiguration ??= Config.LoadFromJsonFile<SslConfiguration>("ssl.json", this.Logger);
         
-        this._cert = sslConfiguration.SslEnabled 
-            ? new X509Certificate2(File.ReadAllBytes(sslConfiguration.SslCertificate), sslConfiguration.CertificatePassword) 
-            : null;
+        this._cert = new X509Certificate2(File.ReadAllBytes(sslConfiguration.SslCertificate), sslConfiguration.CertificatePassword);
     }
 
     /// <inherit-doc/>
