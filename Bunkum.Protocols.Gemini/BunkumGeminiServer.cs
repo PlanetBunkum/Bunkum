@@ -3,6 +3,7 @@ using Bunkum.Core;
 using Bunkum.Core.Configuration;
 using Bunkum.Listener;
 using Bunkum.Protocols.Gemini.Socket;
+using Bunkum.Protocols.TlsSupport;
 using NotEnoughLogs;
 using NotEnoughLogs.Sinks;
 

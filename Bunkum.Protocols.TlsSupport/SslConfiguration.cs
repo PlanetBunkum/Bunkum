@@ -1,6 +1,6 @@
 using Bunkum.Core.Configuration;
 
-namespace Bunkum.Protocols.Gemini;
+namespace Bunkum.Protocols.TlsSupport;
 
 public class SslConfiguration : Config
 {
@@ -10,6 +10,12 @@ public class SslConfiguration : Config
     protected override void Migrate(int oldVer, dynamic oldConfig)
     {}
 
+    /// <summary>
+    /// The path to the certificate
+    /// </summary>
     public string SslCertificate { get; set; } = "cert.pfx";
-    public string? CertificatePassword { get; set; } = "password here or null";
+    /// <summary>
+    /// The password for the certificate, null if none
+    /// </summary>
+    public string? CertificatePassword { get; set; }
 }

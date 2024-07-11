@@ -7,8 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Bunkum.Protocols.Http\Bunkum.Protocols.Http.csproj" />
-      <ProjectReference Include="..\Bunkum.Protocols.TlsSupport\Bunkum.Protocols.TlsSupport.csproj" />
+      <ProjectReference Include="..\Bunkum.Core\Bunkum.Core.csproj" />
     </ItemGroup>
 
 </Project>
