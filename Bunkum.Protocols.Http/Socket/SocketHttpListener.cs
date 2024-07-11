@@ -1,6 +1,10 @@
 using System.Diagnostics;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Web;
 using Bunkum.Listener;
@@ -16,14 +20,27 @@ public partial class SocketHttpListener : BunkumHttpListener
     private System.Net.Sockets.Socket? _socket;
     private readonly Uri _listenEndpoint;
     private readonly bool _useForwardedIp;
-    
+    private readonly X509Certificate2? _cert;
+    private readonly SslProtocols _enabledSslProtocols;
+    private readonly TlsCipherSuite[]? _enabledCipherSuites;
+
     [GeneratedRegex("^[a-zA-Z]+$")]
     private static partial Regex LettersRegex();
 
-    public SocketHttpListener(Uri listenEndpoint, bool useForwardedIp, Logger logger) : base(logger)
+    public SocketHttpListener(
+        Uri listenEndpoint, 
+        bool useForwardedIp, 
+        Logger logger, 
+        X509Certificate2? certificate = null, 
+        SslProtocols enabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13, 
+        TlsCipherSuite[]? enabledCipherSuites = null) 
+        : base(logger)
     {
         this._listenEndpoint = listenEndpoint;
         this._useForwardedIp = useForwardedIp;
+        this._cert = certificate;
+        this._enabledCipherSuites = enabledCipherSuites;
+        this._enabledSslProtocols = enabledSslProtocols;
         
         this.Logger.LogInfo(ListenerCategory.Startup, "Internal HTTP server is listening at URL " + listenEndpoint);
     }
@@ -75,8 +92,31 @@ public partial class SocketHttpListener : BunkumHttpListener
         }
     }
 
-    private ListenerContext ReadRequestIntoContext(System.Net.Sockets.Socket client, Stream stream)
+    private ListenerContext ReadRequestIntoContext(System.Net.Sockets.Socket client, Stream rawStream)
     {
+        Stream stream = rawStream;
+        SslStream? sslStream = null;
+        if (this._cert != null)
+        {
+            sslStream = new SslStream(rawStream);
+
+            SslServerAuthenticationOptions authOptions = new()
+            {
+                EnabledSslProtocols = this._enabledSslProtocols,
+                ServerCertificate = this._cert,
+                ClientCertificateRequired = false,
+                RemoteCertificateValidationCallback = (_, _, _, _) => true,
+            };
+
+            // If the cipher suite set is enabled, and we are not on windows, enable the selected cipher suites
+            if (this._enabledCipherSuites != null && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                authOptions.CipherSuitesPolicy = new CipherSuitesPolicy(this._enabledCipherSuites);
+            
+            sslStream.AuthenticateAsServer(authOptions);
+
+            stream = sslStream;
+        }
+        
         Span<char> method = stackalloc char[RequestLineMethodLimit];
         Span<char> path = stackalloc char[RequestLinePathLimit];
         Span<char> version = stackalloc char[RequestLineVersionLimit];
@@ -198,6 +238,10 @@ public partial class SocketHttpListener : BunkumHttpListener
             inputStream.Seek(0, SeekOrigin.Begin);
         }
         context.InputStream = inputStream;
+
+        // If this an SSL connection, set the remote certificate
+        if (sslStream != null)
+            context.RemoteCertificate = sslStream.RemoteCertificate;
 
         return context;
     }

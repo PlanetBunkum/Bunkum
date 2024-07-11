@@ -2,7 +2,7 @@ using System.Collections.Specialized;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Security.Authentication;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -11,6 +11,7 @@ using Bunkum.Listener;
 using Bunkum.Listener.Extensions;
 using Bunkum.Listener.Protocol;
 using Bunkum.Listener.Request;
+using Bunkum.Protocols.TlsSupport;
 using NotEnoughLogs;
 
 namespace Bunkum.Protocols.Gemini.Socket;
@@ -20,14 +21,16 @@ public partial class SocketGeminiListener : BunkumGeminiListener
     private System.Net.Sockets.Socket? _socket;
     private readonly Uri _listenEndpoint;
     private readonly X509Certificate2 _cert;
+    private readonly SslConfiguration _sslConfiguration;
 
     [GeneratedRegex("^[a-zA-Z]+$")]
     private static partial Regex LettersRegex();
     
-    public SocketGeminiListener(X509Certificate2 cert, Uri listenEndpoint, Logger logger) : base(logger)
+    public SocketGeminiListener(X509Certificate2 cert, SslConfiguration sslConfiguration, Uri listenEndpoint, Logger logger) : base(logger)
     {
         this._listenEndpoint = listenEndpoint;
         this._cert = cert;
+        this._sslConfiguration = sslConfiguration;
    
         this.Logger.LogInfo(ListenerCategory.Startup, "Internal Gemini server is listening at URL {0}", listenEndpoint);
     }
@@ -88,13 +91,19 @@ public partial class SocketGeminiListener : BunkumGeminiListener
     {
         SslStream stream = new(rawStream);
 
-        await stream.AuthenticateAsServerAsync(new SslServerAuthenticationOptions
+        SslServerAuthenticationOptions authOptions = new()
         {
-            EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
+            EnabledSslProtocols = this._sslConfiguration.EnabledSslProtocols,
             ServerCertificate = this._cert,
             ClientCertificateRequired = true,
-            RemoteCertificateValidationCallback = (sender, certificate, chain, errors) => true,
-        });
+            RemoteCertificateValidationCallback = (_, _, _, _) => true,
+        };
+
+        // If the cipher suite set is enabled, and we are not on windows, enable the selected cipher suites
+        if (this._sslConfiguration.EnabledCipherSuites != null && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            authOptions.CipherSuitesPolicy = new CipherSuitesPolicy(this._sslConfiguration.EnabledCipherSuites);
+        
+        await stream.AuthenticateAsServerAsync(authOptions);
 
         Uri uri = new(GetPath(stream));
 

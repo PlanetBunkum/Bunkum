@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Bunkum.Protocols.Http\Bunkum.Protocols.Http.csproj" />
+      <ProjectReference Include="..\Bunkum.Protocols.TlsSupport\Bunkum.Protocols.TlsSupport.csproj" />
+    </ItemGroup>
+
+</Project>
