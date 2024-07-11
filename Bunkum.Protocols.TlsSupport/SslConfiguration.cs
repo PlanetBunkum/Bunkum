@@ -26,7 +26,7 @@ public class SslConfiguration : Config
     /// <summary>
     /// The SSL protocols which are enabled. If null, enables TLS1.3 and TLS1.2
     /// </summary>
-    [JsonProperty("enabledSslProtocols", ItemConverterType = typeof(StringEnumConverter))]
+    [JsonProperty("EnabledSslProtocols", ItemConverterType = typeof(StringEnumConverter))]
     private SslProtocols[]? _EnabledSslProtocols { get; set; }
     /// <summary>
     /// The cipher suites which are enabled. If null, lets the system decide
@@ -34,6 +34,7 @@ public class SslConfiguration : Config
     [JsonProperty(ItemConverterType = typeof(StringEnumConverter))]
     public TlsCipherSuite[]? EnabledCipherSuites { get; set; }
 
+    [JsonIgnore]
     public SslProtocols EnabledSslProtocols
     {
         get

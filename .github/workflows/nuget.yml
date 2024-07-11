@@ -57,6 +57,14 @@ jobs:
         run: dotnet nuget push Bunkum.Protocols.Http/bin/Release/Bunkum.Protocols.Http.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      - name: Upload Bunkum.Protocols.Https
+        run: dotnet nuget push Bunkum.Protocols.Https/bin/Release/Bunkum.Protocols.Https.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+        env:
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      - name: Upload Bunkum.Protocols.TlsSupport
+        run: dotnet nuget push Bunkum.Protocols.TlsSupport/bin/Release/Bunkum.Protocols.TlsSupport.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
+        env:
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
       - name: Upload Bunkum.Protocols.Gopher
         run: dotnet nuget push Bunkum.Protocols.Gopher/bin/Release/Bunkum.Protocols.Gopher.${VERSION}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${NUGET_TOKEN}
         env:
