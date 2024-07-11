@@ -21,15 +21,26 @@ public partial class SocketHttpListener : BunkumHttpListener
     private readonly Uri _listenEndpoint;
     private readonly bool _useForwardedIp;
     private readonly X509Certificate2? _cert;
+    private readonly SslProtocols _enabledSslProtocols;
+    private readonly TlsCipherSuite[]? _enabledCipherSuites;
 
     [GeneratedRegex("^[a-zA-Z]+$")]
     private static partial Regex LettersRegex();
 
-    public SocketHttpListener(Uri listenEndpoint, bool useForwardedIp, Logger logger, X509Certificate2? certificate) : base(logger)
+    public SocketHttpListener(
+        Uri listenEndpoint, 
+        bool useForwardedIp, 
+        Logger logger, 
+        X509Certificate2? certificate = null, 
+        SslProtocols enabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13, 
+        TlsCipherSuite[]? enabledCipherSuites = null) 
+        : base(logger)
     {
         this._listenEndpoint = listenEndpoint;
         this._useForwardedIp = useForwardedIp;
         this._cert = certificate;
+        this._enabledCipherSuites = enabledCipherSuites;
+        this._enabledSslProtocols = enabledSslProtocols;
         
         this.Logger.LogInfo(ListenerCategory.Startup, "Internal HTTP server is listening at URL " + listenEndpoint);
     }
@@ -91,37 +102,15 @@ public partial class SocketHttpListener : BunkumHttpListener
 
             SslServerAuthenticationOptions authOptions = new()
             {
-                //TODO: move this into the config
-                EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11,
+                EnabledSslProtocols = this._enabledSslProtocols,
                 ServerCertificate = this._cert,
                 ClientCertificateRequired = false,
                 RemoteCertificateValidationCallback = (_, _, _, _) => true,
             };
 
-            // On Windows we cant set the cipher suites
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                //TODO: move this into the config somehow
-                authOptions.CipherSuitesPolicy = new CipherSuitesPolicy([
-                    // ps3
-                    TlsCipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256,
-                    TlsCipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256,
-                    TlsCipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
-                    TlsCipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                    TlsCipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
-                    TlsCipherSuite.TLS_RSA_WITH_RC4_128_SHA,
-                    TlsCipherSuite.TLS_RSA_WITH_RC4_128_MD5,
-                    // modern
-                    TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-                    TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-                    TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
-                    TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
-                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
-                    TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-                ]);
-            }
+            // If the cipher suite set is enabled, and we are not on windows, enable the selected cipher suites
+            if (this._enabledCipherSuites != null && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                authOptions.CipherSuitesPolicy = new CipherSuitesPolicy(this._enabledCipherSuites);
             
             sslStream.AuthenticateAsServer(authOptions);
 

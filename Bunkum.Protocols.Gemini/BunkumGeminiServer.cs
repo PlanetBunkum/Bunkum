@@ -12,6 +12,7 @@ namespace Bunkum.Protocols.Gemini;
 public class BunkumGeminiServer : BunkumServer
 {
     private readonly X509Certificate2 _cert;
+    private readonly SslConfiguration _sslConfiguration;
     
     /// <summary>
     /// Create a new BunkumGeminiServer
@@ -22,14 +23,14 @@ public class BunkumGeminiServer : BunkumServer
     public BunkumGeminiServer(SslConfiguration? sslConfiguration = null, LoggerConfiguration? configuration = null, List<ILoggerSink>? sinks = null) : base(configuration, sinks)
     {
         //If the SSL configuration is not specified, load the config from JSON
-        sslConfiguration ??= Config.LoadFromJsonFile<SslConfiguration>("geminissl.json", this.Logger);
+        this._sslConfiguration = sslConfiguration ?? Config.LoadFromJsonFile<SslConfiguration>("geminissl.json", this.Logger);
 
-        this._cert = new X509Certificate2(File.ReadAllBytes(sslConfiguration.SslCertificate), sslConfiguration.CertificatePassword);
+        this._cert = new X509Certificate2(File.ReadAllBytes(sslConfiguration.SslCertificate), this._sslConfiguration.CertificatePassword);
     }
     
     protected override BunkumListener CreateDefaultListener(Uri listenEndpoint, bool useForwardedIp, Logger logger)
     {
-        return new SocketGeminiListener(this._cert, listenEndpoint, logger);
+        return new SocketGeminiListener(this._cert, this._sslConfiguration, listenEndpoint, logger);
     }
     protected override string ProtocolUriName => "gemini";
 }

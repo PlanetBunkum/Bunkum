@@ -19,7 +19,7 @@ public class BunkumHttpServer : BunkumServer
     /// <inherit-doc/>
     protected override BunkumListener CreateDefaultListener(Uri listenEndpoint, bool useForwardedIp, Logger logger)
     {
-        return new Socket.SocketHttpListener(listenEndpoint, useForwardedIp, logger, null);
+        return new Socket.SocketHttpListener(listenEndpoint, useForwardedIp, logger);
     }
 
     /// <inherit-doc/>
