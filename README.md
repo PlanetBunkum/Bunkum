@@ -12,7 +12,7 @@ But that's because not every client is compliant, either! ;)
 
 We support a few protocols out of the box:
 
-- HTTP
+- HTTP(s)
 - Gopher
 - Gemini
 
