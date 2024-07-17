@@ -3,31 +3,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bunkum.EntityFrameworkDatabase;
 
-public class EntityFrameworkDatabaseProvider<TDatabaseContext> : IDatabaseProvider<TDatabaseContext>
-    where TDatabaseContext : BunkumDbContext, IDatabaseContext
+public abstract class EntityFrameworkDatabaseProvider<TDatabaseContext> : IDatabaseProvider<TDatabaseContext>
+    where TDatabaseContext : DbContext, IDatabaseContext
 {
-    private readonly Action<DbContextOptionsBuilder> _configureAction;
-    
-    public EntityFrameworkDatabaseProvider(Action<DbContextOptionsBuilder> configureAction)
+    protected abstract EntityFrameworkInitializationStyle InitializationStyle { get; }
+
+    public virtual void Initialize()
     {
-        this._configureAction = configureAction;
-    }
-    
-    public void Initialize()
-    {
-        // TODO?
+        switch (this.InitializationStyle)
+        {
+            case EntityFrameworkInitializationStyle.Migrate:
+                this.GetContext().Database.Migrate();
+                break;
+            case EntityFrameworkInitializationStyle.EnsureCreated:
+                this.GetContext().Database.EnsureCreated();
+                break;
+            case EntityFrameworkInitializationStyle.None:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
-    public void Warmup()
-    {
-        // TODO
-    }
+    public virtual void Warmup()
+    {}
 
-    public TDatabaseContext GetContext()
-    {
-        TDatabaseContext context = (TDatabaseContext)Activator.CreateInstance(typeof(TDatabaseContext), this._configureAction)!;
-        return context;
-    }
+    public virtual TDatabaseContext GetContext() => Activator.CreateInstance<TDatabaseContext>();
     
     public void Dispose()
     {
