@@ -33,7 +33,7 @@
     </Target>
 
     <ItemGroup>
-      <PackageReference Include="Realm" Version="12.2.0" />
+      <PackageReference Include="Realm" Version="12.3.0" />
     </ItemGroup>
 
     <ItemGroup>
