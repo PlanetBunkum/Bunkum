@@ -95,4 +95,12 @@ public class AuthenticationService : Service
         this.Logger.LogTrace(nameof(AuthenticationService), "Did not find token in cache, calling authentication provider.");
         return this._authenticationProvider.AuthenticateToken(context, database);
     }
+
+    /// <summary>
+    /// Removes the token from the cache. Must be called when returning responses from a consumer of this service.
+    /// </summary>
+    public void RemoveTokenFromCache()
+    {
+        this._tokenCache.Value = null;
+    }
 }
