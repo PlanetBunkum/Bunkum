@@ -205,7 +205,7 @@ public partial class SocketGeminiListener : BunkumGeminiListener
         {
             EnabledSslProtocols = this._sslConfiguration.EnabledSslProtocols,
             ServerCertificate = this._cert,
-            ClientCertificateRequired = false,  
+            ClientCertificateRequired = true,  
             RemoteCertificateValidationCallback = (_, _, _, _) => true, 
         };
 
