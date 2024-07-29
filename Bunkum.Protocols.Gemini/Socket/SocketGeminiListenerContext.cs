@@ -1,5 +1,6 @@
 using System.Buffers.Text;
 using System.Net;
+using System.Net.Security;
 using Bunkum.Listener.Request;
 using Bunkum.Protocols.Gemini.Responses;
 
@@ -11,7 +12,7 @@ public class SocketGeminiListenerContext : SocketListenerContext
     {}
 
     /// <inheritdoc />
-    public override long ContentLength => 0;
+    public override long ContentLength => this.InputStream.Length;
    
     //This is stored statically to save on allocations
     private static readonly byte[] LineEnding = "\r\n"u8.ToArray();
@@ -43,5 +44,17 @@ public class SocketGeminiListenerContext : SocketListenerContext
         //Only send body data if its a success response
         if (statusCodeBytes[0] == (byte)'2' && data != null)
             await this.SendBufferSafe(data.Value);
+    }
+
+    protected override void CloseConnection()
+    {
+        if (this.SocketClosed) return;
+
+        SslStream stream = (SslStream)this.Stream;
+
+        // Make sure to safely shutdown the SSL connection
+        stream.ShutdownAsync().Wait();
+        
+        base.CloseConnection();
     }
 }

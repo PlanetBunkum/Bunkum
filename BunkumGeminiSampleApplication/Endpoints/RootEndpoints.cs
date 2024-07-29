@@ -1,5 +1,6 @@
 using System.Net;
 using Bunkum.Core;
+using Bunkum.Core.Configuration;
 using Bunkum.Core.Endpoints;
 using Bunkum.Core.Responses;
 using Bunkum.Listener.Protocol;
@@ -11,16 +12,25 @@ namespace BunkumGeminiSampleApplication.Endpoints;
 public class RootEndpoints : EndpointGroup
 {
     [GeminiEndpoint("/")]
-    public string ManuallyAddedRootEndpoint(RequestContext context) =>
-        @"# Weather test
+    public string ManuallyAddedRootEndpoint(RequestContext context, GeminiBunkumConfig config)
+    {
+        UriBuilder titanUri = new(config.ExternalUrl)
+        {
+            Scheme = "titan",
+            Path = "titan",
+        };
+        
+        return $@"# Weather test
 
 => /api/v1/weather V1 Weather API
 => /api/v2/weather V2 Weather API
 => /api/v3/weather V3 Weather API
 
 => /requires_cert Endpoint that requires a client cert
+=> {titanUri} Test titan file upload
 => /input Query input test
 ";
+    }
 
     [GeminiEndpoint("/requires_cert")]
     public Response RequiresAuthentication(RequestContext context)
@@ -31,6 +41,16 @@ public class RootEndpoints : EndpointGroup
         return new Response($@"# Hello {context.RemoteCertificate.Issuer}!
 
 We have authenticated you!", GeminiContentTypes.Gemtext);
+    }
+
+    [GeminiEndpoint("/titan")]
+    public Response TitanUpload(RequestContext context, byte[] body)
+    {
+        return new Response($@"# Titan upload test
+
+Token: {context.QueryString["token"]}
+Mime: {context.QueryString["mime"]}
+Body: {body.Length}", GeminiContentTypes.Gemtext);
     }
 
     [GeminiEndpoint("/input")]
