@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net;
+using System.Net.Security;
 using Bunkum.Listener.Request;
 
 namespace Bunkum.Protocols.Http.Socket;
@@ -31,5 +32,16 @@ public class SocketHttpListenerContext : SocketListenerContext
 
         await this.SendBufferSafe(string.Join("\r\n", response));
         if (data.HasValue) await this.SendBufferSafe(data.Value);
+    }
+
+    protected override void CloseConnection()
+    {
+        if (this.SocketClosed) return;
+        
+        // Make sure to safely shutdown the SSL connection, if we are using SSL
+        if (this.Stream is SslStream stream) 
+            stream.ShutdownAsync().Wait();
+        
+        base.CloseConnection();
     }
 }

@@ -35,7 +35,10 @@ public abstract partial class BunkumServer : IHotReloadable
     private readonly List<Service> _services = new();
     private readonly List<IBunkumSerializer> _serializers = new();
 
-    private readonly BunkumConfig _bunkumConfig;
+    /// <summary>
+    /// The BunkumConfig in use by this server
+    /// </summary>
+    protected readonly BunkumConfig BunkumConfig;
 
     [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor")]
     protected BunkumServer(LoggerConfiguration? configuration, List<ILoggerSink>? sinks)
@@ -55,17 +58,27 @@ public abstract partial class BunkumServer : IHotReloadable
             this.Logger.LogInfo(BunkumCategory.Startup, "You can override where data is stored using the BUNKUM_DATA_FOLDER environment variable.");
         }
         
-        string fileName = this.ProtocolUriName == "http" ? "bunkum.json" : $"bunkum-{this.ProtocolUriName}.json";
+        string filename = this.ProtocolUriName == "http" ? "bunkum.json" : $"bunkum-{this.ProtocolUriName}.json";
 
-        this._bunkumConfig = Config.LoadFromJsonFile<BunkumConfig>(fileName, this.Logger);
+        this.BunkumConfig = this.CreateConfig(filename);
         
         // leave one more than one we define since downstream applications adding a config is common
         this._configs = new List<Config>(2)
         {
-            this._bunkumConfig,
+            this.BunkumConfig,
         };
 
         HotReloadRegistry.RegisterReloadable(this);
+    }
+
+    /// <summary>
+    /// Creates a BunkumConfig
+    /// </summary>
+    /// <param name="filename">The filename to load</param>
+    /// <returns>The loaded config</returns>
+    protected virtual BunkumConfig CreateConfig(string filename)
+    {
+        return Config.LoadFromJsonFile<BunkumConfig>(filename, this.Logger);
     }
     
     protected abstract BunkumListener CreateDefaultListener(Uri listenEndpoint, bool useForwardedIp, Logger logger);
@@ -127,8 +140,8 @@ public abstract partial class BunkumServer : IHotReloadable
 
         if (this._listener == null)
         {
-            Uri listenEndpoint = new($"{this.ProtocolUriName}://{this._bunkumConfig.ListenHost}:{this._bunkumConfig.ListenPort}");
-            this._listener = this.CreateDefaultListener(listenEndpoint, this._bunkumConfig.UseForwardedIp, this.Logger);
+            Uri listenEndpoint = new($"{this.ProtocolUriName}://{this.BunkumConfig.ListenHost}:{this.BunkumConfig.ListenPort}");
+            this._listener = this.CreateDefaultListener(listenEndpoint, this.BunkumConfig.UseForwardedIp, this.Logger);
         }
         
         if (this._listener is IListenerWithCallback callbackListener)
