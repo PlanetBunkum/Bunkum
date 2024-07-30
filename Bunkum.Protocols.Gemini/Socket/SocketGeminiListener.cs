@@ -192,7 +192,8 @@ public partial class SocketGeminiListener : BunkumGeminiListener
             postParams.CopyTo(conglomerate.AsSpan()[preParams.Length..]);
 
             return new RequestData(Encoding.UTF8.GetString(conglomerate), titanData, titanToken, titanMime);
-        }
+        } else if(firstParamIndex != -1)
+            return new RequestData(Encoding.UTF8.GetString(uriBuffer[..firstParamIndex]), titanData, titanToken, titanMime);
 
         return new RequestData(Encoding.UTF8.GetString(uriBuffer), titanData, titanToken, titanMime);
     }
