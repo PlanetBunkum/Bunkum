@@ -123,12 +123,14 @@ internal class MainMiddleware : IMiddleware
                         context.ResponseHeaders.Add("Cache-Control", "max-age=" + cacheAttribute.Seconds);
                     }
                     
+                    Response? returnedResponse = null;
                     try
                     {
                         object? val = method.Invoke(group, invokeList.ToArray());
-                        Response returnedResponse = this.GenerateResponseFromEndpoint(val, attribute, method);
+                        returnedResponse = this.GenerateResponseFromEndpoint(val, attribute, method);
                         
-                        int statusCode = (int)returnedResponse.StatusCode;
+                        // ReSharper disable once ConstantConditionalAccessQualifier
+                        int statusCode = (int)returnedResponse?.StatusCode!;
                         if (cacheAttribute is { OnlyCacheSuccess: true } && statusCode is < 200 or >= 299)
                         {
                             context.ResponseHeaders.Remove("Cache-Control");
@@ -140,7 +142,7 @@ internal class MainMiddleware : IMiddleware
                     {
                         foreach (Service service in this._services)
                         {
-                            service.AfterRequestHandled(context, null, method, database);
+                            service.AfterRequestHandled(context, returnedResponse, method, database);
                         }
                     }
                 }
