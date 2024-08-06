@@ -13,11 +13,16 @@ namespace Bunkum.Core.Services;
 
 public class AuthenticationService : Service
 {
+    private readonly HttpStatusCode _failureStatusCode;
+    
     internal AuthenticationService(Logger logger,
-        IAuthenticationProvider<IToken<IUser>>? provider = null, bool assumeAuthenticationRequired = false) : base(logger)
+        IAuthenticationProvider<IToken<IUser>>? provider = null, 
+        bool assumeAuthenticationRequired = false,
+        HttpStatusCode failureStatusCode = HttpStatusCode.Forbidden) : base(logger)
     {
         this._authenticationProvider = provider ?? new DummyAuthenticationProvider();
         this._assumeAuthenticationRequired = assumeAuthenticationRequired;
+        this._failureStatusCode = failureStatusCode;
     }
     
     /// <summary>
@@ -52,7 +57,7 @@ public class AuthenticationService : Service
         this._tokenCache.Value = token;
             
         if (token == null)
-            return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.Forbidden);
+            return new Response([], ContentType.Plaintext, this._failureStatusCode);
 
         return null;
     }

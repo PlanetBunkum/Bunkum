@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Reflection;
 using Bunkum.Core.Authentication;
 using Bunkum.Core.Configuration;
@@ -117,9 +118,10 @@ public partial class BunkumServer // Services
     }
 
     public void AddAuthenticationService(IAuthenticationProvider<IToken<IUser>>? provider = null,
-        bool assumeAuthenticationRequired = false)
+        bool assumeAuthenticationRequired = false,
+        HttpStatusCode failureStatusCode = HttpStatusCode.Forbidden)
     {
-        this.AddService<AuthenticationService>(provider, assumeAuthenticationRequired);
+        this.AddService<AuthenticationService>(provider, assumeAuthenticationRequired, failureStatusCode);
     }
 
     public void AddStorageService(IDataStore dataStore)
