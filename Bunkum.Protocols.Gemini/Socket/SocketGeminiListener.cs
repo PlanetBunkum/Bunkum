@@ -240,8 +240,8 @@ public partial class SocketGeminiListener : BunkumGeminiListener
         {
             bool bad = false;
 
-            // If the incoming port is -1 and the external port is -1 or 1965, then only check the host
-            if (uri.Port == -1 && this._externalUri.Port is -1 or 1965 && !this._externalUri.Host.Equals(uri.Host, StringComparison.InvariantCultureIgnoreCase))
+            // If the incoming port is specified as 1965 and the external port is -1 or 1965, then only check the host
+            if (uri.Port == 1965 && this._externalUri.Port is -1 or 1965 && !this._externalUri.Host.Equals(uri.Host, StringComparison.InvariantCultureIgnoreCase))
                 bad = true;
             // If the port is -1, then we need to have special handling to make this
             else if (this._externalUri.Port == -1 && !this._externalUri.Host.Equals(uri.Host, StringComparison.InvariantCultureIgnoreCase))
