@@ -239,9 +239,12 @@ public partial class SocketGeminiListener : BunkumGeminiListener
         if (uri.HostNameType is not UriHostNameType.IPv4 and not UriHostNameType.IPv6 && !this._config.AllowProxyRequests)
         {
             bool bad = false;
-                            
+
+            // If the incoming port is -1 and the external port is -1 or 1965, then only check the host
+            if (uri.Port == -1 && this._externalUri.Port is -1 or 1965 && !this._externalUri.Host.Equals(uri.Host, StringComparison.InvariantCultureIgnoreCase))
+                bad = true;
             // If the port is -1, then we need to have special handling to make this
-            if (this._externalUri.Port == -1 && !this._externalUri.Host.Equals(uri.Host, StringComparison.InvariantCultureIgnoreCase))
+            else if (this._externalUri.Port == -1 && !this._externalUri.Host.Equals(uri.Host, StringComparison.InvariantCultureIgnoreCase))
                 bad = true;
             else if (!this._externalUri.Authority.Equals(uri.Authority, StringComparison.InvariantCultureIgnoreCase))
                 bad = true;
