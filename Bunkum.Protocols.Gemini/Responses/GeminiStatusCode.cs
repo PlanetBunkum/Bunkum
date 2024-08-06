@@ -123,7 +123,7 @@ internal static class HttpStatusCodeExtensions
             HttpStatusCode.RedirectKeepVerb => GeminiStatusCode.TemporaryRedirection,
             HttpStatusCode.PermanentRedirect => GeminiStatusCode.PermanentRedirection,
             HttpStatusCode.BadRequest => GeminiStatusCode.BadRequest,
-            HttpStatusCode.Unauthorized => GeminiStatusCode.CertificateNotAuthorized,
+            HttpStatusCode.Unauthorized => GeminiStatusCode.ClientCertificateRequired,
             HttpStatusCode.Forbidden => GeminiStatusCode.CertificateNotAuthorized,
             HttpStatusCode.NotFound => GeminiStatusCode.NotFound,
             HttpStatusCode.ProxyAuthenticationRequired => GeminiStatusCode.ProxyRequestRefused,
