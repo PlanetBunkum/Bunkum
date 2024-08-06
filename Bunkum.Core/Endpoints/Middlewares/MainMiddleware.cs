@@ -200,6 +200,9 @@ internal class MainMiddleware : IMiddleware
         {
             Type paramType = param.ParameterType;
 
+            // Ask all services to try to provide an argument for this parameter.
+            object? arg = null;
+            
             // Pass in the request body as a parameter
             if (param.Name == "body")
             {
@@ -209,87 +212,87 @@ internal class MainMiddleware : IMiddleware
                 if (!context.HasBody && !method.HasCustomAttribute<AllowEmptyBodyAttribute>())
                 {
                     this._logger.LogWarning(BunkumCategory.Request, "Rejecting request due to empty body");
-                    return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
+                    return new Response([], ContentType.Plaintext, HttpStatusCode.BadRequest);
                 }
 
-                if (!this.TryAddBodyToInvocation(attribute, paramType, body, invokeList))
+                if (!this.TryGetBodyParameter(attribute, paramType, body, out arg))
                 {
-                    return new Response(Array.Empty<byte>(), ContentType.Plaintext, HttpStatusCode.BadRequest);
+                    return new Response([], ContentType.Plaintext, HttpStatusCode.BadRequest);
                 }
             }
             else if(paramType.IsAssignableTo(typeof(IDatabaseContext)))
             {
                 // Pass in a database context if the endpoint needs one.
-                invokeList.Add(database.Value);
+                arg = database.Value;
             }
             else if (paramType.IsAssignableTo(typeof(Config)))
             {
                 Config? configToPass = this._configs.FirstOrDefault(config => paramType == config.GetType());
 
                 if (configToPass == null)
-                {
                     throw new ArgumentNullException(
                         $"Could not find a valid config for the {paramType.Name} parameter '{param.Name}'");
-                }
 
-                invokeList.Add(configToPass);
+                arg = configToPass;
             }
             else if (paramType == typeof(string))
             {
                 // Attempt to pass in a route parameter based on the method parameter's name
-                invokeList.Add(parameters!.GetValueOrDefault(param.Name));
+                arg = parameters!.GetValueOrDefault(param.Name);
             }
             else if (paramType == typeof(int) || paramType == typeof(int?))
             {
                 // Also try to pass in a route parameter for integers
                 string? strParam = parameters!.GetValueOrDefault(param.Name);
                 bool intParsed = int.TryParse(strParam, out int intParam);
-                invokeList.Add(intParsed ? intParam : null); // check result, intParam will be null
+                arg = intParsed ? intParam : null;
             }
-            else
+
+            if (arg != null)
             {
-                // Ask all services to try to provide an argument for this parameter.
-                object? arg = null;
-                            
-                List<Service>.Enumerator services = this._services.GetEnumerator();
-                while (arg == null)
-                {
-                    if (!services.MoveNext()) break;
-                    arg = services.Current.AddParameterToEndpoint(context, new BunkumParameterInfo(param), database);
-                }
-                            
-                services.Dispose();
-                            
-                // NullabilityInfoContext isn't thread-safe, so it cant be re-used
-                // https://stackoverflow.com/a/72586919
-                // TODO: do benchmarks of this call to see if we should optimize
-                bool isNullable = new NullabilityInfoContext().Create(param).WriteState == NullabilityState.Nullable;
-
-                // If our argument is still null, log a warning as a precaution.
-                // Don't consider nullable arguments for this warning
-                if (arg == null && !isNullable)
-                {
-                    this._logger.LogWarning(BunkumCategory.Request, 
-                        $"Could not find a valid argument for the {paramType.Name} parameter '{param.Name}'. " +
-                        $"Null will be used instead.");
-                }
-
-                // Add the arg even if null, as even if we don't know what this param is or what to do with it,
-                // it's probably better than not calling the endpoint and throwing an exception causing things to explode.
                 invokeList.Add(arg);
+                continue;
             }
+            
+            List<Service>.Enumerator services = this._services.GetEnumerator();
+            while (arg == null)
+            {
+                if (!services.MoveNext()) break;
+                arg = services.Current.AddParameterToEndpoint(context, new BunkumParameterInfo(param), database);
+            }
+            services.Dispose();
+
+            // NullabilityInfoContext isn't thread-safe, so it cant be re-used
+            // https://stackoverflow.com/a/72586919
+            // TODO: do benchmarks of this call to see if we should optimize
+            bool isNullable = new NullabilityInfoContext().Create(param).WriteState == NullabilityState.Nullable;
+
+            // If our argument is still null, log a warning as a precaution.
+            // Don't consider nullable arguments for this warning
+            if (arg == null && !isNullable)
+            {
+                this._logger.LogWarning(BunkumCategory.Request, 
+                    $"Could not find a valid argument for the {paramType.Name} parameter '{param.Name}'. " +
+                    $"Null will be used instead.");
+            }
+
+            // Add the arg even if null, as even if we don't know what this param is or what to do with it,
+            // it's probably better than not calling the endpoint and throwing an exception causing things to explode.
+            invokeList.Add(arg);
         }
 
         return null;
     }
 
-    private bool TryAddBodyToInvocation(EndpointAttribute attribute, Type paramType, MemoryStream bodyStream, ICollection<object?> invokeList)
+    private bool TryGetBodyParameter(EndpointAttribute attribute, Type paramType, MemoryStream bodyStream, out object? bodyParam)
     {
         byte[] body = bodyStream.ToArray();
+
+        bodyParam = null;
         
-        if (paramType == typeof(Stream)) invokeList.Add(new MemoryStream(body));
-        else if (paramType == typeof(string)) invokeList.Add(Encoding.UTF8.GetString(TrimToFirstNullByte(body)));
-        else if (paramType == typeof(byte[])) invokeList.Add(body);
+        if (paramType == typeof(Stream)) bodyParam = new MemoryStream(body);
+        else if (paramType == typeof(string)) bodyParam = Encoding.UTF8.GetString(TrimToFirstNullByte(body));
+        else if (paramType == typeof(byte[])) bodyParam = body;
         else if (attribute.ContentType == ContentType.Xml)
         {
             XmlSerializer serializer = new(paramType);
@@ -297,7 +300,7 @@ internal class MainMiddleware : IMiddleware
             {
                 object? obj = serializer.Deserialize(new StringReader(Encoding.UTF8.GetString(TrimToFirstNullByte(body))));
                 if (obj == null) throw new Exception();
-                invokeList.Add(obj);
+                bodyParam = obj;
             }
             catch (Exception e)
             {
@@ -313,7 +316,7 @@ internal class MainMiddleware : IMiddleware
                 using JsonReader reader = new JsonTextReader(new StringReader(Encoding.UTF8.GetString(TrimToFirstNullByte(body))));
                 object? obj = serializer.Deserialize(reader, paramType);
                 if (obj == null) throw new Exception();
-                invokeList.Add(obj);
+                bodyParam = obj;
             }
             catch (Exception e)
             {
