@@ -78,8 +78,16 @@ public partial class BunkumServer // Services
         if (!info.ParameterType.IsAssignableTo(typeof(TInjected))) return null;
         
         TInjected? injected = pool.FirstOrDefault(s => s!.GetType() == info.ParameterType);
-        if (injected == null) 
-            throw new Exception($"Could not find {info.ParameterType}, which {typeof(TObject).Name} depends on.");
+        if (injected == null)
+        {
+            // NullabilityInfoContext isn't thread-safe, so it cant be re-used
+            // https://stackoverflow.com/a/72586919
+            // TODO: do benchmarks of this call to see if we should optimize
+            bool isNullable = new NullabilityInfoContext().Create(info).WriteState == NullabilityState.Nullable;
+            
+            if(!isNullable)
+                throw new Exception($"Could not find {info.ParameterType}, which {typeof(TObject).Name} depends on.");
+        }
 
         return injected;
     }
