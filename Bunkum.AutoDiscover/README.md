@@ -1,7 +1,7 @@
 # Bunkum.AutoDiscover
 An implementation of AutoDiscover for Bunkum.
 
-See documentation here on this API here: https://littlebigrefresh.github.io/Docs/autodiscover-api
+See documentation here on this API here: https://docs.littlebigrefresh.com/autodiscover-api
 
 ## Usage
 
